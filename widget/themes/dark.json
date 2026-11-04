@@ -1,0 +1,108 @@
+{
+  "name": "dark",
+  "fontSize": 14,
+  "smallSize": 12,
+  "monoSize": 13,
+  "variables": {
+    "hero-top": "#1f0a13",
+    "hero-bottom": "#571a33"
+  },
+  "colors": {
+    "bg": "#1c1519",
+    "frame": "#140f12",
+    "panel": "#241b20",
+    "sunken": "#1c1519",
+    "alt": "#241b20",
+    "border": "#5f4d57",
+    "hover": "#35232a",
+    "selected": "#4a2234",
+    "chip": "#4a3a42",
+    "chip-text": "#f1e8eb",
+    "rule": "#76626c",
+    "text": "#f1e8eb",
+    "muted": "#bfaab2",
+    "accent": "#e88aa6",
+    "accent-line": "#e88aa6",
+    "accent-text": "#2a0d18",
+    "ok": "#5ed39a",
+    "error": "#ff6b5e",
+    "shadow": "#00000066",
+    "selection": "#8a4a66",
+    "find-match": "#4a3a1a",
+    "find-active": "#8a5d12",
+    "hero": "#3d0f22",
+    "hero-text": "#f8eff2",
+    "hero-muted": "#e3cbd4",
+    "border-soft": "#33262d",
+    "ok-soft": "#112a20",
+    "warn-soft": "#2c2214",
+    "error-soft": "#3a1714",
+    "accent-soft": "#3a1a27",
+    "track": "#2d2228",
+    "faint": "#85717a",
+    "warn": "#f0b05a",
+    "border-strong": "#47353e",
+    "info": "#6cb0f0",
+    "info-soft": "#12243a"
+  },
+  "controls": {
+    "button": {
+      "radius": 4,
+      "border": "border-strong"
+    },
+    "icon-button": {
+      "radius": 4,
+      "border": "border-strong"
+    },
+    "primary": {
+      "radius": 4,
+      "border": "accent-line"
+    },
+    "field": {
+      "radius": 4,
+      "border": "border-strong"
+    },
+    "table": {
+      "radius": 6,
+      "border": "border-soft"
+    },
+    "menu": {
+      "radius": 8,
+      "border": "border-strong"
+    },
+    "tooltip": {
+      "radius": 4,
+      "border": "border-strong"
+    },
+    "tabstrip": {},
+    "statusbar": {},
+    "hero": {
+      "gradient": [
+        "$hero-top",
+        "$hero-bottom"
+      ]
+    },
+    "pill": {
+      "radius": 999
+    },
+    "checkbox": {
+      "radius": 3
+    },
+    "slider": {
+      "radius": 4
+    },
+    "scrollbar": {
+      "radius": 5
+    },
+    "row": {
+      "radius": 4
+    },
+    "swatch": {
+      "radius": 3,
+      "border": "border-strong"
+    },
+    "match": {
+      "radius": 2
+    }
+  }
+}
