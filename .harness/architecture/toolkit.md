@@ -30,6 +30,30 @@ Invariants:
   bounds it was drawn in. Its `Offscreen` panics on use after `Release`, but still answers
   `Bounds` and `Ops` so a test can read what was drawn. It holds no pixels.
 
+## ebitenrender: the Ebitengine renderer
+
+`ebitenrender` implements `render` over Ebitengine (`vector`, `text/v2`). `core` does not draw
+through it yet. Of this module it imports only `render`
+(`TestEbitenRenderImportsOnlyRenderAndEbiten`, non-test files); its tests also use `core` and
+`theming` for reference pixels. Input stays in `core` (why: the package doc).
+
+- **Copied masks.** `mask.go` is a copy of core's corner and ring mask code and its shape helpers,
+  so a canvas draws core's pixels. Task 003 removes core's copy. A `Device` owns the mask cache
+  (64 entries, dropped whole when full).
+- **Parity.** `coreparity_test.go` draws each shape with `core.Ctx` and through a canvas in one
+  process and requires the same bytes; there are no golden files. As in core, a rounded shape with
+  a radius below one device pixel is square. The one known difference: core fills a square gradient
+  on a box between pixels aliased, a canvas anti-aliased.
+- **Run-loop `TestMain`.** Ebitengine reads pixels only inside its run loop, so `main_test.go` runs
+  the whole test binary inside the first `Update` (no `t.Parallel`), after it points `HOME` and the
+  `XDG_*` dirs at a temp dir.
+- **Skip-clear.** `Run` turns off the clearing of the screen before each frame, so a frame the host
+  does not draw (`Host.Draw` false) keeps the previous one. A program with its own `ebiten.Game`
+  uses `Device.NewCanvas` and handles this itself.
+- **Key tables.** `KeyFromEbiten` and `KeyToEbiten` read tables built once at start by matching the
+  `String()` names of `ebiten.Key` and `render.Key`, because users store shortcuts by name.
+  `TestKeyNamesRoundTripEveryEbitenKey` fails when either side gains a name the other lacks.
+
 ## core: the toolkit
 
 `core` holds the primitives (`rules.md`, Toolkit API rule 11). Everything except the drawing calls

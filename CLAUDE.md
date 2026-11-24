@@ -9,7 +9,7 @@ Go GUI toolkit: view tree with flex layout, widgets, templates (`markup`), JSON 
 - Tests and checks run with a temp `HOME` and `XDG_*` dirs, never the real ones.
 
 
-- Layers (this repo's root is the toolkit): `core` imports nothing from this module, `view` only `core`, `widget` only `core` and `view`, `theming` only `core`, `desktop` nothing of this module, `markup` only those and `widget`; `render` imports nothing of this module; `render/rendertest` only `render`; nothing here imports `internal/*` or `cmd/*`.
+- Layers (this repo's root is the toolkit): `core` imports nothing from this module, `view` only `core`, `widget` only `core` and `view`, `theming` only `core`, `desktop` nothing of this module, `markup` only those and `widget`; `render` imports nothing of this module; `render/rendertest` only `render`; `ebitenrender` imports only `render` of this module; nothing here imports `internal/*` or `cmd/*`.
 
 ## Toolkit API rules
 
