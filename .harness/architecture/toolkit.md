@@ -1,3 +1,35 @@
+## render: the renderer contract
+
+`render` says what the toolkit draws through and what a renderer runs: `Canvas`, `Image`,
+`Offscreen`, `Path` and `Stroke`, `FontSource` and `Face`, `Key`, `Cursor` and `Host`. No package
+draws through it yet.
+
+Invariants:
+
+- **Standard library only.** `render` imports no GPU library and nothing of this module;
+  `render/rendertest` imports only `render` besides. `TestRenderImportsOnlyStandardLibrary` checks
+  both.
+- **Sub clips without translating.** `Sub(clip)` is the same surface with bounds
+  `Bounds().Intersect(clip)` in the same coordinates, because widgets draw in absolute ones.
+- **Device pixels, no snapping.** A canvas draws the coordinates it gets; snapping is the caller's.
+  `Box` holds floats; `image.Rectangle` is for whole-pixel bounds and clips.
+- **Premultiplied color.** Every `color.RGBA`, and what `ReadPixels` returns, is
+  alpha-premultiplied.
+- **Own images only.** A renderer panics on an `Image` it did not make.
+- **Face is comparable.** It is `Source` and `Size`, written as a literal, and is a cache map key.
+  `FontSource` implementations are pointer types, and it has no method that makes a face.
+- **Offscreen is live, then released.** After `Release` no method may be called.
+- **Stroke.** The zero cap is butt and the zero join is miter; a zero `MiterLimit` makes every join
+  a bevel.
+- **Keys.** `KeyUnknown` is 0 and its name is "". Every other key up to `KeyMax` has a unique name,
+  its constant without `Key`, from one table (`keyNames`). Names are frozen because users store
+  them in shortcut settings; numbers are not. Aggregate modifiers (`KeyControl`...) and the left and
+  right ones both exist.
+- **Host.Draw false keeps the previous frame.**
+- **Fakes.** `rendertest.Canvas` and its Subs record one list of ops in paint order, each with the
+  bounds it was drawn in. Its `Offscreen` panics on use after `Release`, but still answers
+  `Bounds` and `Ops` so a test can read what was drawn. It holds no pixels.
+
 ## core: the toolkit
 
 `core` holds the primitives (`rules.md`, Toolkit API rule 11). Everything except the drawing calls
@@ -147,6 +179,12 @@ Each is also said in the doc comment of what breaks the rule; a new exception ad
   since its interface (`core.Focuser`, aliased by `view.Focuser`) uses no widget type.
 - Exported mutable tables are copies (`theming.CornerChoices` and the other choice lists);
   `engine.keyNames` is unexported, since nothing outside `engine` reads it.
+- Ports of at most about five methods (`common/architecture-style.md`): `render.Canvas` has 13.
+  Each is one thing a GPU backend draws in its own way and a caller needs all of them, so a split
+  would only make every caller ask for every part.
+- Rule 8 (one data shape, one type): `render.Corners` and `render.Cursor` duplicate `core.Corners`
+  and `core.Cursor` (which is an `int`) for now. Task 003 makes `core.Corners` an alias and removes
+  the duplicates.
 
 ## Toolkit: widgets and drawing
 
