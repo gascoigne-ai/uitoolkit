@@ -1,8 +1,15 @@
 # uitoolkit
 
-Loaded when you work under `uitoolkit/`. Adds to `.harness/rules.md`.
+Go GUI toolkit: view tree with flex layout, widgets, templates (`markup`), JSON themes, desktop helpers. Extracted from gascoigne-workshop. Draws with Ebitengine today; the roadmap in `.harness/tasks/` splits it into a renderer-agnostic toolkit and separate renderer modules (Ebitengine, wgpu without CGO).
 
-- Layers: `core` imports nothing from this module, `view` only `core`, `widget` only `core` and `view`, `theming` only `core`, `desktop` nothing of this module, `markup` only those and `widget`; nothing here imports `internal/*` or `cmd/*`.
+- The check command is `make check` (needs a display, or `xvfb-run -a make check`).
+- Start with `.harness/overview.md`. Detail per area is in `.harness/architecture/toolkit.md`; the look is in `.harness/style.md`. The why of a choice goes in the doc comment of the code it shapes.
+- Shared harness is the submodule `.harness/common` (`git submodule update --init` after a clone).
+- Task loop: `/task-loop` (skill in common; tasks in `.harness/tasks/`).
+- Tests and checks run with a temp `HOME` and `XDG_*` dirs, never the real ones.
+
+
+- Layers (this repo's root is the toolkit): `core` imports nothing from this module, `view` only `core`, `widget` only `core` and `view`, `theming` only `core`, `desktop` nothing of this module, `markup` only those and `widget`; nothing here imports `internal/*` or `cmd/*`.
 
 ## Toolkit API rules
 
@@ -20,3 +27,9 @@ Apply when adding or changing anything exported. They exist so that a guess is u
 10. **A new option or element comes with** a doc comment that starts with its name, a test of what it does, a line in the package doc index (`view` or `widget`), and its row in the template tables where rule 9 applies.
 11. **Packages.** `core` holds primitives: tokens, colors and color math, geometry, input, clipboard, fonts and the `Ctx` drawing calls, with no layout and no widget state; `view` is the framework: the element tree, layout, runtime, the generic options and the extension point (`Behavior`, `Custom`); `widget` is every component that has its own drawing, input or state (why: `doc.go`); `desktop` reaches the OS the window runs on (Dock icon, display scale, key repeat, file chooser) and knows nothing of widgets or `core`; `markup` builds both from templates; `engine`, `widget`, `markup` and `theming` depend downward only.
 
+
+@.harness/common/rules.md
+@.harness/common/commit-style.md
+@.harness/common/code-style.md
+@.harness/common/architecture-style.md
+@.harness/rules.md
