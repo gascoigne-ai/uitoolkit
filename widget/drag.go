@@ -1,6 +1,6 @@
 package widget
 
-import "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+import "github.com/gascoigne-ai/uitoolkit/core"
 
 // handleSlop is how many pixels each side of a divider still grab it.
 const handleSlop = 2

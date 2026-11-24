@@ -3,7 +3,7 @@
 // key-binding model. Nothing here knows about the workshop's screens.
 package engine
 
-import "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+import "github.com/gascoigne-ai/uitoolkit/core"
 
 // MinFPS is the fewest frames drawn per second, whatever happens: it keeps
 // the text caret blinking and the window content fresh, and costs little.

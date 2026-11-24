@@ -3,7 +3,7 @@ package markup
 import (
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/widget"
+	"github.com/gascoigne-ai/uitoolkit/widget"
 )
 
 // A param that cannot be read reports the attribute as it is written, with

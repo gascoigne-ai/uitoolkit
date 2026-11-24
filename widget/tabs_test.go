@@ -7,7 +7,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 // Regression: a tab in a monospace view (a raw body, a TextArea) was one

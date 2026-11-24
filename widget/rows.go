@@ -1,8 +1,8 @@
 package widget
 
 import (
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
 // ListRow is a row of a list: the selected one has the selection

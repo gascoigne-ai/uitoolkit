@@ -3,7 +3,7 @@ package widget
 import (
 	"strings"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 // tabWidth is the indent step: the number of spaces Tab inserts, to the

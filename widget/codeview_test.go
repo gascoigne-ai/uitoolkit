@@ -1,8 +1,8 @@
 package widget
 
 import (
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/theming"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/theming"
 	"reflect"
 	"strings"
 	"testing"

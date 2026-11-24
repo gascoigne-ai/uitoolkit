@@ -3,7 +3,7 @@ package widget
 import (
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 // What the window system delivers for dead keys (a dead accent then a

@@ -2,13 +2,13 @@ package markup
 
 import (
 	"fmt"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/theming"
+	"github.com/gascoigne-ai/uitoolkit/theming"
 	"strings"
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/widget"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/view"
+	"github.com/gascoigne-ai/uitoolkit/widget"
 )
 
 func build(t *testing.T, src string, sc Scope) view.Node {

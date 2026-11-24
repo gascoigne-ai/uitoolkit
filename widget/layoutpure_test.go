@@ -1,10 +1,10 @@
 package widget
 
 import (
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	. "github.com/gascoigne-ai/uitoolkit/view"
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 // Layout is rects in, rects out: it places the children for the state it

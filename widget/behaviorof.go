@@ -3,7 +3,7 @@ package widget
 import (
 	"fmt"
 
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
 // behaviorOf is the behavior of element as the kind T that option needs. An

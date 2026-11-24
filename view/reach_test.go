@@ -4,7 +4,7 @@ import (
 	"image"
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 func TestReaches(t *testing.T) {

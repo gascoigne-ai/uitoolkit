@@ -2,7 +2,7 @@ package theming
 
 import (
 	"bytes"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 	"image/color"
 	"log/slog"
 	"strings"

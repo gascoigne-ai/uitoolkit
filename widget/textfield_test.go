@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/theming"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/theming"
 )
 
 func TestTextFieldApply(t *testing.T) {

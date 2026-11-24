@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	"github.com/gascoigne-ai/uitoolkit/view"
 )
 
 // Characterization of the exact Parse and Build error texts that the table

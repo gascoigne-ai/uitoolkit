@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
 func readOnlySpec() TableSpec {

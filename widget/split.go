@@ -3,8 +3,8 @@ package widget
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
 // SplitState is the divider position of a Split. The app owns it so the

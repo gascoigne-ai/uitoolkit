@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/image/vector"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 // RasterizeSVG draws a small SVG picture into a size by size image without a

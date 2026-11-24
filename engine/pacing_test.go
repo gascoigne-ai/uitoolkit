@@ -3,7 +3,7 @@ package engine
 import (
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 func TestAFrameIsDrawnWhenSomethingChangedAndAtLeastMinFPSTimesASecond(t *testing.T) {

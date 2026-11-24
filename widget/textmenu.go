@@ -1,9 +1,9 @@
 package widget
 
 import (
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
 // TextMenu gives a Field or Area the right-click menu of a text field:

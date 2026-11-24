@@ -1,9 +1,9 @@
 package widget
 
 import (
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
 // dialogLook is what makes a panel a dialog: a floating, modal menu-style

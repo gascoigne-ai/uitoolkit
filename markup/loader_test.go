@@ -7,7 +7,7 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	"github.com/gascoigne-ai/uitoolkit/view"
 )
 
 const rowSource = `<row gap="4" pad="8"><text bold>{{title}}</text></row>`

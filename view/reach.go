@@ -4,7 +4,7 @@ import (
 	"image"
 	"math"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 // drawOverflow is how far, in logical pixels, an element may draw outside

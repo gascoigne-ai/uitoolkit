@@ -1,6 +1,6 @@
 package view
 
-import "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+import "github.com/gascoigne-ai/uitoolkit/core"
 
 // W fixes the width in pixels.
 func W(pixels int) Option { return func(element *El) { element.w, element.wOf = pixels, nil } }

@@ -1,7 +1,7 @@
 package view
 
 import (
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 // plain is a behavior with no content of its own; its name is what Dump

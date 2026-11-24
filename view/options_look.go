@@ -3,7 +3,7 @@ package view
 import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 // Bg fills the element with a theme color.

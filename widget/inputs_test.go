@@ -8,8 +8,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
 func TestCodeNodeForwardsInputToTheView(t *testing.T) {

@@ -1,7 +1,7 @@
 package view
 
 import (
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 // OnClick runs callback when the element is clicked. It sets the same

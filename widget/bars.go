@@ -3,7 +3,7 @@ package widget
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 // bars is the scrollbar layout of a view in r: the area left for content

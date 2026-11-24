@@ -9,11 +9,11 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/markup"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/theming"
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/widget"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/markup"
+	"github.com/gascoigne-ai/uitoolkit/theming"
+	. "github.com/gascoigne-ai/uitoolkit/view"
+	. "github.com/gascoigne-ai/uitoolkit/widget"
 )
 
 // hello is the state of the program; the view is a function of it.

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
 // A component option on an element of another kind used to ignore the

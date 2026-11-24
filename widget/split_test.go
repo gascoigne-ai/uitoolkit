@@ -3,8 +3,8 @@ package widget
 import (
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
 func splitRoot(t *testing.T, st *SplitState, width, height int, items ...Item) (*El, *El, *El, *core.Ctx) {

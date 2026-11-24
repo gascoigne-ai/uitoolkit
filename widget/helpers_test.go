@@ -6,9 +6,9 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/theming"
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/theming"
+	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
 func testCtx(t *testing.T) *core.Ctx {

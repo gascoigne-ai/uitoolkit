@@ -3,7 +3,7 @@ package markup
 import (
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	"github.com/gascoigne-ai/uitoolkit/view"
 )
 
 // withCountingAttribute adds an attribute "counted" that counts how often its

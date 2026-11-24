@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/markup"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/theming"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/widget"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/markup"
+	"github.com/gascoigne-ai/uitoolkit/theming"
+	"github.com/gascoigne-ai/uitoolkit/view"
+	"github.com/gascoigne-ai/uitoolkit/widget"
 )
 
 // A view is a function from state to a tree. Dump prints the tree, which

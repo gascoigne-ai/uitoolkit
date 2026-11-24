@@ -10,9 +10,9 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"golang.org/x/image/font/gofont/gomono"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/widget"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/view"
+	"github.com/gascoigne-ai/uitoolkit/widget"
 )
 
 // sameWidget fails unless the template and the Go view dump the same once

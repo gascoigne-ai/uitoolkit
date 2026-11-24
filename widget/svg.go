@@ -15,7 +15,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 // An icon is a small SVG file: the subset below, drawn by the toolkit in

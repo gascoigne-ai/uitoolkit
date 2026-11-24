@@ -87,7 +87,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	"github.com/gascoigne-ai/uitoolkit/view"
 )
 
 // Error is a problem in a template, with where it is.

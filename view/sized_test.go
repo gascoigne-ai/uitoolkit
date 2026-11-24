@@ -3,7 +3,7 @@ package view
 import (
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 // HOf, WOf and SeparatorOf are resolved at every Layout from the context's

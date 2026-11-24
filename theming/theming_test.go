@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
 func TestThemeFollowsPrefsAndFallsBack(t *testing.T) {

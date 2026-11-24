@@ -1,7 +1,7 @@
 package theming
 
 import (
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/core"
 	"image/color"
 	"math"
 	"testing"

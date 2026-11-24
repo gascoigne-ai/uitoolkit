@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/theming"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/theming"
+	"github.com/gascoigne-ai/uitoolkit/view"
 )
 
 // Each handler attribute is the Go option in kebab-case and takes a func of

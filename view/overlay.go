@@ -1,6 +1,6 @@
 package view
 
-import "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
+import "github.com/gascoigne-ai/uitoolkit/core"
 
 // floatMode is how a floating element is placed in its Stack.
 type floatMode uint8

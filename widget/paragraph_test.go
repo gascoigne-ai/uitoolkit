@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
+	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
 const paragraphText = "Words that are long enough to need several lines when the room is narrow, and one when it is wide."

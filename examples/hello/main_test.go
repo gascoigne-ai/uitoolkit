@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/core"
-	"github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/theming"
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/view"
-	. "github.com/gascoigne-ai/gascoigne-workshop/uitoolkit/widget"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/theming"
+	. "github.com/gascoigne-ai/uitoolkit/view"
+	. "github.com/gascoigne-ai/uitoolkit/widget"
 )
 
 // The example's view builds, lays out and reacts to its state.
