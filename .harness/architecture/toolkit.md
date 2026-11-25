@@ -2,8 +2,8 @@
 
 `render` says what the toolkit draws through and what a renderer runs: `Canvas`, `Image`,
 `Offscreen`, `Path` and `Stroke`, `FontSource` and `Face`, `Device`, `InputState`, `Key`, `Cursor`
-and `Host`. `core.Ctx` draws through it; `view` and `widget` still hand it ebiten images (see core,
-Bridge).
+and `Host`. `core.Ctx` draws through it; `widget` still hands it ebiten images, and `view` hands
+them only to behaviors (see core, Bridge, and view, Runtime rules).
 
 Invariants:
 
@@ -163,6 +163,14 @@ state: no diffing and no reactive system. Elements and options are indexed in th
 - **Modal owns the pointer.** While a `Modal` element is visible, nothing under it gets clicks,
   wheel or hover (`Ctx.HoverOff`), and a click outside runs `OnDismiss`, except for a dialog (`KeepOnOutsideClick`, set by `widget.Dialog`): it swallows the click and stays until its close button or Escape runs `Dismiss`, so a stray click on the window behind cannot throw away what the user is doing. Menus and pick lists keep closing on a click elsewhere. Toasts are not modal.
 - **A modal splits the root's children.** `view.ModalLayer(ctx, root)` is the index of the first visible direct child of the root that is a `Modal` (menus included: a context menu alone gives the layer under it), or -1 when the modal is deeper, the root draws after its children (`Border`, a control style border, an `OverDrawer`, an edge) or is itself modal. `view.DrawBelow` paints the root's own part and the children before that index, `view.DrawFrom` the children from it on, both with hover off and the root's clip; one after the other on one image they paint what `Draw` paints, element for element (`El.draw` is `drawSelf`, the children, `drawAfter`). An app keeps the first part in an image (`ui/window` `baseSnapshot`). `Ctx.CaretReads` counts `CaretVisible` calls, so a kept drawing knows it shows the blink phase.
+- **The runtime draws on a `render.Canvas`.** `Draw`, `DrawBelow` and `DrawFrom` take a
+  `core.Surface` and turn it into a canvas once (`Ctx.CanvasOf`); `drawSelf`, `drawAfter`, `kidsDst`
+  (`Ctx.ClipCanvas`) and `drawKids` work on it, and culling compares with `kidsDst.Bounds()`. A clip
+  off the canvas has empty bounds and `drawKids` draws nothing then (an empty box would otherwise
+  "reach" a child near the origin). `Behavior.Draw`, `OverDrawer.DrawOver` and the text behavior
+  keep the `*ebiten.Image` signature until task 005: they get `Ctx.EbitenImage(canvas)` and are
+  skipped on a canvas of another renderer, so text records nothing there yet. Only `custom.go` and
+  `leaf.go` import Ebitengine (`TestOnlyCustomAndLeafImportEbiten`).
 - **Layout writes no state** (`view.Layout` doc, `widget/layoutpure_test.go`); `Update` settles it.
 - **Drawing culls** off-image children (`view.Draw` doc, `BenchmarkLongList`), so a `Behavior`
   keeps no state that only its `Draw` writes.

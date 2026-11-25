@@ -11,6 +11,10 @@ import (
 // how it reacts to the frame's input and how it draws. Read the rect and
 // the children through element (Rect, Children); embed Base for the methods a
 // component does not need.
+//
+// Draw (and DrawOver of an OverDrawer) is called only when the tree is drawn
+// on an ebiten canvas; on a canvas of another renderer it is skipped, until
+// task 005 gives behaviors a render.Canvas.
 type Behavior interface {
 	// Measure is the size the element wants when at most maxW wide.
 	Measure(element *El, ctx *core.Ctx, maxW int) (w, h int)
@@ -86,6 +90,7 @@ type PreUpdater interface {
 }
 
 // OverDrawer is implemented by a Behavior that paints over its children.
+// DrawOver is called only on an ebiten canvas until task 005, as Behavior.Draw.
 type OverDrawer interface {
 	DrawOver(element *El, ctx *core.Ctx, dst *ebiten.Image)
 }

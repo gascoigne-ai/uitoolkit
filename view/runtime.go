@@ -3,9 +3,8 @@ package view
 import (
 	"slices"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 // Layout places the tree in a width by height window. Each element is
@@ -191,11 +190,12 @@ func cycleFocus(ctx *core.Ctx, root Node) {
 // whose rect, grown by its draw reach, misses the image it would draw into
 // (the active clip or the screen) is skipped with its subtree: no Draw, no
 // DrawOver, no hover flag or tooltip. A long scrolled list so costs only
-// the rows in view.
-func Draw(ctx *core.Ctx, root Node, dst *ebiten.Image) {
+// the rows in view. dst is a canvas, or an ebiten image until the callers
+// all hold canvases (see core.Surface).
+func Draw(ctx *core.Ctx, root Node, dst core.Surface) {
 	ctx.HoverOff = hasModal(root) // only the overlay's own elements react to the pointer
 	ctx.TipText = ""
-	root.draw(ctx, dst)
+	root.draw(ctx, ctx.CanvasOf(dst))
 	ctx.HoverOff = false
 }
 
@@ -283,7 +283,7 @@ func (e *El) update(ctx *core.Ctx) bool {
 	return false
 }
 
-func (e *El) draw(ctx *core.Ctx, dst *ebiten.Image) {
+func (e *El) draw(ctx *core.Ctx, canvas render.Canvas) {
 	if e.hidden {
 		return
 	}
@@ -291,15 +291,14 @@ func (e *El) draw(ctx *core.Ctx, dst *ebiten.Image) {
 		defer func(was bool) { ctx.HoverOff = was }(ctx.HoverOff)
 		ctx.HoverOff = false // hover works inside the overlay
 	}
-	e.drawSelf(ctx, dst)
-	kidsDst := e.kidsDst(ctx, dst)
-	e.drawKids(ctx, kidsDst, e.kids)
-	e.drawAfter(ctx, dst)
+	e.drawSelf(ctx, canvas)
+	e.drawKids(ctx, e.kidsDst(ctx, canvas), e.kids)
+	e.drawAfter(ctx, canvas)
 }
 
 // drawSelf paints what lies under the children: shadow, backgrounds, the
 // side borders and the behavior.
-func (e *El) drawSelf(ctx *core.Ctx, dst *ebiten.Image) {
+func (e *El) drawSelf(ctx *core.Ctx, canvas render.Canvas) {
 	if ctx.Stats != nil {
 		ctx.Stats.Elements++
 	}
@@ -307,7 +306,7 @@ func (e *El) drawSelf(ctx *core.Ctx, dst *ebiten.Image) {
 	style := ctx.Th.Style(e.control)
 	if e.shadow {
 		sh := ctx.Color(core.Shadow)
-		ctx.FillStyled(dst, core.Rect{X: r.X + core.ShadowOffset, Y: r.Y + core.ShadowOffset, W: r.W, H: r.H}, sh, sh, style.Radius)
+		ctx.FillStyled(canvas, core.Rect{X: r.X + core.ShadowOffset, Y: r.Y + core.ShadowOffset, W: r.W, H: r.H}, sh, sh, style.Radius)
 	}
 	over := ctx.Hovered(r)
 	e.hover = over
@@ -321,44 +320,50 @@ func (e *El) drawSelf(ctx *core.Ctx, dst *ebiten.Image) {
 		}
 		top, bottom := core.GradientFor(clr, style)
 		if e.roundCorners != 0 {
-			ctx.FillStyledCorners(dst, r, top, bottom, ctx.Radius(e.roundCtl), e.roundCorners)
+			ctx.FillStyledCorners(canvas, r, top, bottom, ctx.Radius(e.roundCtl), e.roundCorners)
 		} else {
-			ctx.FillStyled(dst, r, top, bottom, style.Radius)
+			ctx.FillStyled(canvas, r, top, bottom, style.Radius)
 		}
 	}
 	if e.hoverBg != "" && over {
 		hv := ctx.Color(e.hoverBg)
-		ctx.FillStyled(dst, r, hv, hv, style.Radius)
+		ctx.FillStyled(canvas, r, hv, hv, style.Radius)
 	}
 	if e.borderT != "" {
-		ctx.HLine(dst, r.X, r.Y, r.W, ctx.Color(e.borderT))
+		ctx.HLine(canvas, r.X, r.Y, r.W, ctx.Color(e.borderT))
 	}
 	if e.borderL != "" {
-		ctx.VLine(dst, r.X, r.Y+e.borderInset, r.H-2*e.borderInset, ctx.Color(e.borderL))
+		ctx.VLine(canvas, r.X, r.Y+e.borderInset, r.H-2*e.borderInset, ctx.Color(e.borderL))
 	}
 	if e.borderR != "" {
-		ctx.VLine(dst, r.X+r.W-1, r.Y+e.borderInset, r.H-2*e.borderInset, ctx.Color(e.borderR))
+		ctx.VLine(canvas, r.X+r.W-1, r.Y+e.borderInset, r.H-2*e.borderInset, ctx.Color(e.borderR))
 	}
 	if e.borderB != "" {
-		ctx.HLine(dst, r.X, r.Y+r.H-1, r.W, ctx.Color(e.borderB))
+		ctx.HLine(canvas, r.X, r.Y+r.H-1, r.W, ctx.Color(e.borderB))
 	}
 
-	e.b.Draw(e, ctx, dst)
+	if img, ok := ctx.EbitenImage(canvas); ok {
+		e.b.Draw(e, ctx, img)
+	}
 }
 
-// kidsDst is the image the children draw into: dst, or its clip.
-func (e *El) kidsDst(ctx *core.Ctx, dst *ebiten.Image) *ebiten.Image {
+// kidsDst is the canvas the children draw into: canvas, or its clip.
+func (e *El) kidsDst(ctx *core.Ctx, canvas render.Canvas) render.Canvas {
 	if e.clip {
-		return ctx.Clip(dst, e.rect)
+		return ctx.ClipCanvas(canvas, e.rect)
 	}
-	return dst
+	return canvas
 }
 
 // drawKids draws kids into kidsDst, skipping those it cannot reach.
-func (e *El) drawKids(ctx *core.Ctx, kidsDst *ebiten.Image, kids []*El) {
+func (e *El) drawKids(ctx *core.Ctx, kidsDst render.Canvas, kids []*El) {
+	bounds := kidsDst.Bounds()
+	if bounds.Empty() { // a clip off the canvas is empty, and an empty box "reaches" a child near the origin
+		return
+	}
 	reach := drawReach(ctx.Scale)
 	for _, k := range kids {
-		if reaches(kidsDst.Bounds(), k.rect, ctx.Scale, reach) {
+		if reaches(bounds, k.rect, ctx.Scale, reach) {
 			k.draw(ctx, kidsDst)
 		}
 	}
@@ -367,7 +372,7 @@ func (e *El) drawKids(ctx *core.Ctx, kidsDst *ebiten.Image, kids []*El) {
 // drawAfter paints what lies over the children: the style border, the
 // behavior's DrawOver and the tab edge. ModalLayer refuses a root that has
 // any of them, so a split of the root's children never changes paint order.
-func (e *El) drawAfter(ctx *core.Ctx, dst *ebiten.Image) {
+func (e *El) drawAfter(ctx *core.Ctx, canvas render.Canvas) {
 	r := e.rect
 	style := ctx.Th.Style(e.control)
 	border := e.border
@@ -375,25 +380,27 @@ func (e *El) drawAfter(ctx *core.Ctx, dst *ebiten.Image) {
 		border = style.Border
 	}
 	if border != "" { // after the children, so striped rows do not paint over it
-		ctx.OutlineStyled(dst, r, ctx.Color(border), style.Radius)
+		ctx.OutlineStyled(canvas, r, ctx.Color(border), style.Radius)
 	}
 	if o, ok := e.b.(OverDrawer); ok {
-		o.DrawOver(e, ctx, dst)
+		if img, ok := ctx.EbitenImage(canvas); ok {
+			o.DrawOver(e, ctx, img)
+		}
 	}
 
 	if e.edgeTok != "" { // the open tab's outline: top, left and right, bottom left open unless EdgeB asks
 		col := ctx.Color(e.edgeTok)
 		if e.edgeTop {
-			ctx.Fill(dst, core.Rect{X: r.X, Y: r.Y, W: r.W, H: core.EdgeW}, col)
+			ctx.Fill(canvas, core.Rect{X: r.X, Y: r.Y, W: r.W, H: core.EdgeW}, col)
 		}
 		if e.edgeLeft {
-			ctx.Fill(dst, core.Rect{X: r.X, Y: r.Y, W: core.EdgeW, H: r.H}, col)
+			ctx.Fill(canvas, core.Rect{X: r.X, Y: r.Y, W: core.EdgeW, H: r.H}, col)
 		}
 		if e.edgeRight {
-			ctx.Fill(dst, core.Rect{X: r.X + r.W - core.EdgeW, Y: r.Y, W: core.EdgeW, H: r.H}, col)
+			ctx.Fill(canvas, core.Rect{X: r.X + r.W - core.EdgeW, Y: r.Y, W: core.EdgeW, H: r.H}, col)
 		}
 		if e.edgeBottom {
-			ctx.Fill(dst, core.Rect{X: r.X, Y: r.Y + r.H - core.EdgeW, W: r.W, H: core.EdgeW}, col)
+			ctx.Fill(canvas, core.Rect{X: r.X, Y: r.Y + r.H - core.EdgeW, W: r.W, H: core.EdgeW}, col)
 		}
 	}
 }

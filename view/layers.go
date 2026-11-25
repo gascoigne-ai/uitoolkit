@@ -1,8 +1,6 @@
 package view
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
 )
 
@@ -42,20 +40,22 @@ func drawsAfterChildren(ctx *core.Ctx, e *El) bool {
 // DrawBelow paints the root's own part and its children before layer, as
 // Draw does, with hover feedback off: the part under a modal overlay never
 // reacts to the pointer. layer comes from ModalLayer.
-func DrawBelow(ctx *core.Ctx, root Node, layer int, dst *ebiten.Image) {
+func DrawBelow(ctx *core.Ctx, root Node, layer int, dst core.Surface) {
+	canvas := ctx.CanvasOf(dst)
 	ctx.HoverOff = true
 	ctx.TipText = ""
-	root.drawSelf(ctx, dst)
-	root.drawKids(ctx, root.kidsDst(ctx, dst), root.kids[:layer])
+	root.drawSelf(ctx, canvas)
+	root.drawKids(ctx, root.kidsDst(ctx, canvas), root.kids[:layer])
 	ctx.HoverOff = false
 }
 
 // DrawFrom paints the root's children from layer on, the overlays and what
 // lies over them, into the clip the root gives them. Hover feedback is off
 // for all but the overlay's own elements, as in Draw.
-func DrawFrom(ctx *core.Ctx, root Node, layer int, dst *ebiten.Image) {
+func DrawFrom(ctx *core.Ctx, root Node, layer int, dst core.Surface) {
+	canvas := ctx.CanvasOf(dst)
 	ctx.HoverOff = true
 	ctx.TipText = ""
-	root.drawKids(ctx, root.kidsDst(ctx, dst), root.kids[layer:])
+	root.drawKids(ctx, root.kidsDst(ctx, canvas), root.kids[layer:])
 	ctx.HoverOff = false
 }
