@@ -4,7 +4,7 @@ import (
 	"runtime/debug"
 	"testing"
 
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
+	"github.com/gascoigne-ai/uitoolkit/renderer/ebiten"
 )
 
 // The report names the renderer and the version of the library it was built

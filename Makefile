@@ -1,15 +1,29 @@
-.PHONY: check bench fuzz fmt-check vet test
+.PHONY: check bench fuzz fmt-check vet test deps-check
 
-check: fmt-check vet test
+check: fmt-check vet test deps-check
 
 fmt-check:
 	@test -z "$$(gofmt -l .)" || { gofmt -l .; exit 1; }
 
+# The root module is checked with GOWORK=off to prove it stands alone; go.work
+# is for local development only. `./...` in workspace mode would not reach the
+# nested modules, so they are named: the renderer and the examples.
 vet:
-	go vet ./...
+	GOWORK=off go vet ./...
+	go vet ./renderer/ebiten/... ./examples/...
 
 test:
-	go test -race ./...
+	GOWORK=off go test -race ./...
+	go test -race ./renderer/ebiten/... ./examples/...
+
+# The root module must not depend on a GPU library, tests included, must be
+# tidy and must build without cgo.
+deps-check:
+	@if GOWORK=off go list -deps -test ./... | grep -E 'hajimehoshi|wgpu'; then \
+		echo "root module depends on a GPU library" >&2; exit 1; \
+	fi
+	GOWORK=off go mod tidy -diff
+	CGO_ENABLED=0 GOWORK=off go build ./...
 
 # Frame-cost benchmarks (CPU side); not part of check. Compare two runs with
 # benchstat when installed.

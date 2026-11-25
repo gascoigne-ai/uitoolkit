@@ -4,7 +4,7 @@
 `Offscreen`, `Path` and `Stroke`, `FontSource` and `Face`, `Device`, `InputState`, `Key`, `Cursor`
 and `Host`. `core.Ctx`, `view` and `widget` draw through it and import no GPU library
 (`TestCoreImportsNoEbiten`, `TestViewImportsNoEbiten`, `TestWidgetImportsNoEbiten`, and the same for
-`engine`, `markup` and `desktop/systeminfo`). `render.Graphics` is the record a renderer fills for the
+`engine`, `markup` and `desktop/systeminfo`). Each guard also rejects any import under `renderer/`. `render.Graphics` is the record a renderer fills for the
 system report (name and version of the renderer, graphics library, GPU memory, monitor, window).
 
 Invariants:
@@ -54,15 +54,13 @@ go-text/typesetting and `x/image/math/fixed` (`TestRenderTextImports`). `render.
   against Ebitengine's STerm and ATerm tables (two characters newer than Go's Unicode tables are
   added by hand).
 - **Concurrency.** One mutex guards the shaper, segmenter and buffers.
-- **Conformance.** `TestMeasureAndMetricsMatchEbitenText` compares with `text.Measure` within
-  0.01 px over a corpus, three Go fonts and `testdata/LiberationSans-Regular.ttf`. The Go fonts have
-  no kerning, so the cut cases only show on Liberation Sans (SIL OFL 1.1, licence in
-  `testdata/LiberationSans-LICENSE.txt`); a guard fails the test if either side stops kerning "AV".
 
-## ebitenrender: the Ebitengine renderer
+## renderer/ebiten: the Ebitengine renderer (own module)
 
-`ebitenrender` implements `render` over Ebitengine (`vector`, `text/v2`). Of this module it imports
-only `render` (`TestEbitenRenderImportsOnlyRenderAndEbiten`, non-test files). `ReadInput` reports
+`renderer/ebiten` is the module `github.com/gascoigne-ai/uitoolkit/renderer/ebiten`; its package is named
+`ebitenrender` (a package named `ebiten` would clash with `hajimehoshi/ebiten/v2` in every caller). It
+implements `render` over Ebitengine (`vector`, `text/v2`). Of the toolkit it imports only `render`
+(`TestEbitenRenderImportsOnlyRenderAndEbiten`, non-test files). `ReadInput` reports
 the tick as a `render.InputState` and drops a key with no render name; what it means is `core`'s.
 
 - **Masks.** Rounded fills and outlines are quarters of cached anti-aliased corner masks, in one
@@ -84,6 +82,10 @@ the tick as a `render.InputState` and drops a key with no render name; what it m
 - **Skip-clear.** `Run` turns off the clearing of the screen before each frame, so a frame the host
   does not draw (`Host.Draw` false) keeps the previous one. A program with its own `ebiten.Game`
   uses `Device.NewCanvas` and handles this itself.
+- **Conformance.** `TestMeasureAndMetricsMatchEbitenText` (`textconformance_test.go`, it needs the run loop, so xvfb) compares `render/text` with `text.Measure` within
+  0.01 px over a corpus, three Go fonts and `renderer/ebiten/testdata/LiberationSans-Regular.ttf`. The Go fonts have
+  no kerning, so the cut cases only show on Liberation Sans (SIL OFL 1.1, licence in
+  `renderer/ebiten/testdata/LiberationSans-LICENSE.txt`); a guard fails the test if either side stops kerning "AV".
 - **Key tables.** `KeyFromEbiten` and `KeyToEbiten` read tables built once at start by matching the
   `String()` names of `ebiten.Key` and `render.Key`, because users store shortcuts by name.
   `TestKeyNamesRoundTripEveryEbitenKey` fails when either side gains a name the other lacks.
@@ -310,3 +312,24 @@ Each is also said in the doc comment of what breaks the rule; a new exception ad
   the next stop of `core.TabStop` columns along its line (`core.ColumnAfter`); the wrap layout keeps
   each row's start column, so drawing, the caret, selection, matches, clicks, wrapping and the
   horizontal extent all count it the same way. The text keeps the real tab (display only).
+
+## Modules and releases
+
+The repo holds three modules; `go.work` (committed, for development only: consumers ignore it) joins them.
+
+| Module | Path | Tag |
+|---|---|---|
+| toolkit (root) | `github.com/gascoigne-ai/uitoolkit` | `vX.Y.Z` |
+| Ebitengine renderer | `github.com/gascoigne-ai/uitoolkit/renderer/ebiten` | `renderer/ebiten/vX.Y.Z` |
+| examples | `github.com/gascoigne-ai/uitoolkit/examples` | none |
+
+- **Root stands alone.** It never requires a renderer or a GPU library; `make deps-check` and the CI job `deps`
+  run `go list -deps -test ./...` with `GOWORK=off` and fail on `hajimehoshi` or `wgpu`, check `go mod tidy -diff`
+  and build with `CGO_ENABLED=0`. Root checks run with `GOWORK=off`; the other modules run in the workspace.
+- **Release order.** Tag the root first, then bump the `require` of the root in `renderer/ebiten/go.mod` (and
+  in `examples/go.mod`) to that tag, then tag the renderer.
+- **Before the first tag.** The renderer and the examples require the toolkit (and the examples the renderer) at
+  `v0.0.0-00010101000000-000000000000`, and `go.work` replaces exactly that version with the local directory,
+  which Go needs even in workspace mode. So they build only inside the workspace, and `go mod tidy` for them
+  needs a temporary `replace`. Replacing those requires with real tags and dropping the `replace` lines of
+  `go.work` is part of the first release.

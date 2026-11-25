@@ -1,6 +1,6 @@
 // Command hello is the smallest program built on the toolkit: a window
 // with a text field, a button and a list, written once in Go and once as
-// a template. Run it with: go run ./uitoolkit/examples/hello
+// a template. Run it with: go run ./examples/hello
 package main
 
 import (
@@ -11,9 +11,9 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/markup"
 	"github.com/gascoigne-ai/uitoolkit/render"
+	"github.com/gascoigne-ai/uitoolkit/renderer/ebiten"
 	"github.com/gascoigne-ai/uitoolkit/theming"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 	. "github.com/gascoigne-ai/uitoolkit/widget"

@@ -1,0 +1,16 @@
+go 1.27.4
+
+use (
+	.
+	./examples
+	./renderer/ebiten
+)
+
+// The renderer and the examples require the toolkit and the renderer at the
+// zero pseudo-version until the first tag exists. Go loads the go.mod of a
+// required version of a workspace module even in workspace mode and fails when
+// that version is unknown, so each is replaced at exactly that version. Drop
+// both lines when the requires name real tags.
+replace github.com/gascoigne-ai/uitoolkit v0.0.0-00010101000000-000000000000 => .
+
+replace github.com/gascoigne-ai/uitoolkit/renderer/ebiten v0.0.0-00010101000000-000000000000 => ./renderer/ebiten

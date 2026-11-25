@@ -1,6 +1,26 @@
 name: check
 on: [push, pull_request]
 jobs:
+  deps:
+    name: root module has no GPU library
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: "**/go.sum"
+      - name: no hajimehoshi or wgpu in root deps (tests included)
+        env:
+          GOWORK: "off"
+        run: |
+          if go list -deps -test ./... | grep -E 'hajimehoshi|wgpu'; then
+            echo "root module depends on a GPU library" >&2; exit 1
+          fi
+          go mod tidy -diff
+          CGO_ENABLED=0 go build ./...
   check:
     runs-on: ubuntu-latest
     steps:
@@ -10,6 +30,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+          cache-dependency-path: "**/go.sum"
       - uses: ./.github/actions/ebitengine-deps
       - name: make check
         run: xvfb-run -a make check
@@ -26,5 +47,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+          cache-dependency-path: "**/go.sum"
       - name: build and vet
+        run: go build ./... && go vet ./...
+      - name: build and vet the renderer
+        working-directory: renderer/ebiten
         run: go build ./... && go vet ./...

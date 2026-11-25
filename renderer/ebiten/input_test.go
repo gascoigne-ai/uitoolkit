@@ -3,7 +3,7 @@ package ebitenrender_test
 import (
 	"testing"
 
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
+	"github.com/gascoigne-ai/uitoolkit/renderer/ebiten"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 

@@ -6,9 +6,9 @@ import (
 	"image/color"
 	"testing"
 
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/render"
 	"github.com/gascoigne-ai/uitoolkit/render/rendertest"
+	"github.com/gascoigne-ai/uitoolkit/renderer/ebiten"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"

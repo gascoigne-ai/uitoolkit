@@ -33,7 +33,7 @@ func TestViewImportsNoEbiten(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if strings.Contains(path, "hajimehoshi") || strings.HasSuffix(path, "/ebitenrender") {
+			if strings.Contains(path, "hajimehoshi") || strings.HasPrefix(path, "github.com/gascoigne-ai/uitoolkit/renderer/") {
 				t.Errorf("%s imports %s", name, path)
 			}
 		}

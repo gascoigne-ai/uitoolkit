@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/render"
+	"github.com/gascoigne-ai/uitoolkit/renderer/ebiten"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"golang.org/x/image/font/gofont/goregular"
 )
