@@ -6,8 +6,6 @@ import (
 	"testing"
 
 	"github.com/gascoigne-ai/uitoolkit/render"
-
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 )
 
 // ellipsizeByDropping is the first Ellipsize: it drops one rune per step.
@@ -27,7 +25,7 @@ func ellipsizeByDropping(c *Ctx, face render.Face, content string, maxW int) str
 }
 
 func TestEllipsizeShortensToFit(t *testing.T) {
-	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
+	ctx, err := NewCtx(testTheme(), testDevice{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +54,7 @@ func TestEllipsizeShortensToFit(t *testing.T) {
 }
 
 func TestEllipsizeAgreesWithDroppingOneRuneAtATime(t *testing.T) {
-	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
+	ctx, err := NewCtx(testTheme(), testDevice{})
 	if err != nil {
 		t.Fatal(err)
 	}

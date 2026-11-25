@@ -2,6 +2,7 @@ package theming
 
 import (
 	"bytes"
+	"image"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -10,8 +11,26 @@ import (
 	"testing"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
+	"github.com/gascoigne-ai/uitoolkit/render"
+	"github.com/gascoigne-ai/uitoolkit/render/rendertest"
+	"github.com/gascoigne-ai/uitoolkit/render/text"
 )
+
+// testDevice is a device with no GPU: faces measured by render/text, and
+// offscreens and images that only record.
+type testDevice struct{}
+
+func (testDevice) NewFontSource(data []byte) (render.FontSource, error) {
+	return text.NewFontSource(data)
+}
+
+func (testDevice) NewOffscreen(width, height int) render.Offscreen {
+	return rendertest.NewOffscreen(width, height)
+}
+
+func (testDevice) NewImage(source image.Image) render.Image {
+	return &rendertest.Image{Rect: source.Bounds()}
+}
 
 func TestThemeFollowsPrefsAndFallsBack(t *testing.T) {
 	c := NewCatalog(Builtins())
@@ -178,7 +197,7 @@ func TestChoiceTablesAreCopies(t *testing.T) {
 // the bases (and every height built on them) must move with it.
 func TestBaseLineIsTheDefaultFaceLineHeight(t *testing.T) {
 	th := NewCatalog(Builtins()).Theme(Prefs{})
-	ctx, err := core.NewCtx(th, ebitenrender.NewDevice())
+	ctx, err := core.NewCtx(th, testDevice{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,7 +214,7 @@ func TestEveryFontSizeGivesSaneSizes(t *testing.T) {
 	for font := MinFontSize; font <= MaxFontSize; font++ {
 		t.Run(strconv.Itoa(font), func(t *testing.T) {
 			th := NewCatalog(Builtins()).For("dark", FontSizes{UI: font, Small: MaxSmallSize, Code: MaxCodeSize})
-			ctx, err := core.NewCtx(th, ebitenrender.NewDevice())
+			ctx, err := core.NewCtx(th, testDevice{})
 			if err != nil {
 				t.Fatal(err)
 			}

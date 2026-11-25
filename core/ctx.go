@@ -101,8 +101,6 @@ type Ctx struct {
 	Device render.Device
 	// sources are the loaded fonts behind F.
 	sources fontSources
-	// bridge turns the ebiten images drawn on into canvases (ebitenbridge.go).
-	bridge ebitenBridge
 	// Sizes follow the line heights of F: set by NewCtx, SetTheme and
 	// SetFonts, never by SetScale, since the scale multiplies at draw time.
 	Sizes Sizes
@@ -329,29 +327,29 @@ func (c *Ctx) snap(pixels int) float32 { return float32(math.Round(float64(pixel
 func (c *Ctx) LineWidth() float32 { return float32(max(1, math.Round(c.Scale))) }
 
 // Fill paints r with clr, its edges on device pixels.
-func (c *Ctx) Fill(dst Surface, rect Rect, clr color.RGBA) {
-	c.CanvasOf(dst).FillRect(c.snapBox(rect), clr)
+func (c *Ctx) Fill(dst render.Canvas, rect Rect, clr color.RGBA) {
+	dst.FillRect(c.snapBox(rect), clr)
 }
 
 // Outline strokes a one-pixel border just inside r.
-func (c *Ctx) Outline(dst Surface, rect Rect, clr color.RGBA) {
-	c.CanvasOf(dst).StrokeRect(c.snapBox(rect), c.LineWidth(), clr)
+func (c *Ctx) Outline(dst render.Canvas, rect Rect, clr color.RGBA) {
+	dst.StrokeRect(c.snapBox(rect), c.LineWidth(), clr)
 }
 
 // HLine draws a one-pixel horizontal line.
-func (c *Ctx) HLine(dst Surface, posX, posY, width int, clr color.RGBA) {
+func (c *Ctx) HLine(dst render.Canvas, posX, posY, width int, clr color.RGBA) {
 	top := c.snap(posY)
-	c.CanvasOf(dst).FillRect(render.Box{X0: c.snap(posX), Y0: top, X1: c.snap(posX + width), Y1: top + c.LineWidth()}, clr)
+	dst.FillRect(render.Box{X0: c.snap(posX), Y0: top, X1: c.snap(posX + width), Y1: top + c.LineWidth()}, clr)
 }
 
 // VLine draws a one-pixel vertical line.
-func (c *Ctx) VLine(dst Surface, posX, posY, height int, clr color.RGBA) {
+func (c *Ctx) VLine(dst render.Canvas, posX, posY, height int, clr color.RGBA) {
 	left := c.snap(posX)
-	c.CanvasOf(dst).FillRect(render.Box{X0: left, Y0: c.snap(posY), X1: left + c.LineWidth(), Y1: c.snap(posY + height)}, clr)
+	dst.FillRect(render.Box{X0: left, Y0: c.snap(posY), X1: left + c.LineWidth(), Y1: c.snap(posY + height)}, clr)
 }
 
-// ClipCanvas returns canvas limited to r, so drawing outside r is discarded.
-func (c *Ctx) ClipCanvas(canvas render.Canvas, rect Rect) render.Canvas {
+// Clip returns canvas limited to r, so drawing outside r is discarded.
+func (c *Ctx) Clip(canvas render.Canvas, rect Rect) render.Canvas {
 	left, top, right, bottom := c.devRect(rect)
 	least := image.Pt(int(left), int(top))
 	most := image.Pt(max(int(right+0.5), least.X), max(int(bottom+0.5), least.Y))
@@ -453,12 +451,11 @@ func textPasses(strength float32) []float32 { return []float32{1, strength} }
 // than a coverage shader or a wider outline: the pass changes only partial
 // pixels, never the outline or the advances, so Width, Advance and LineH
 // measure exactly what is drawn (style.md, Typography).
-func (c *Ctx) Text(dst Surface, face render.Face, content string, posX, posY int, clr color.RGBA) {
-	canvas := c.CanvasOf(dst)
+func (c *Ctx) Text(dst render.Canvas, face render.Face, content string, posX, posY int, clr color.RGBA) {
 	content = tabsAsGaps(content)
 	left, top := float64(posX)*c.Scale, float64(posY)*c.Scale
 	for _, alpha := range textPasses(StemBoost) {
-		canvas.DrawText(face, content, left, top, fade(clr, alpha))
+		dst.DrawText(face, content, left, top, fade(clr, alpha))
 	}
 }
 
@@ -470,12 +467,12 @@ func fade(clr color.RGBA, alpha float32) color.RGBA {
 }
 
 // TextMid draws s starting at x, vertically centered in r.
-func (c *Ctx) TextMid(dst Surface, face render.Face, content string, posX int, rect Rect, clr color.RGBA) {
+func (c *Ctx) TextMid(dst render.Canvas, face render.Face, content string, posX int, rect Rect, clr color.RGBA) {
 	c.Text(dst, face, content, posX, rect.Y+(rect.H-c.LineH(face))/2, clr)
 }
 
 // TextCenter draws s centered in r.
-func (c *Ctx) TextCenter(dst Surface, face render.Face, content string, rect Rect, clr color.RGBA) {
+func (c *Ctx) TextCenter(dst render.Canvas, face render.Face, content string, rect Rect, clr color.RGBA) {
 	c.TextMid(dst, face, content, rect.X+(rect.W-c.Width(face, content))/2, rect, clr)
 }
 
@@ -534,8 +531,8 @@ func abs(count int) int {
 }
 
 // Line draws an antialiased segment between logical points.
-func (c *Ctx) Line(dst Surface, x0, y0, x1, y1, width float32, clr color.RGBA) {
-	c.CanvasOf(dst).StrokeLine(c.dev(x0), c.dev(y0), c.dev(x1), c.dev(y1), c.dev(width), clr)
+func (c *Ctx) Line(dst render.Canvas, x0, y0, x1, y1, width float32, clr color.RGBA) {
+	dst.StrokeLine(c.dev(x0), c.dev(y0), c.dev(x1), c.dev(y1), c.dev(width), clr)
 }
 
 // Radius is the corner radius of the named control in this theme, after
@@ -546,7 +543,7 @@ func (c *Ctx) Radius(control string) float64 { return c.Th.Style(control).Radius
 // gradient fill from top to bottom, with rounded corners when the style
 // has a radius. Square flat fills stay on the crisp rectangle path; a square
 // gradient is not snapped to device pixels.
-func (c *Ctx) FillStyled(dst Surface, rect Rect, top, bottom color.RGBA, radius float64) {
+func (c *Ctx) FillStyled(dst render.Canvas, rect Rect, top, bottom color.RGBA, radius float64) {
 	if radius*c.Scale >= 1 {
 		c.fillRounded(dst, rect, top, bottom, radius, CornersAll)
 		return
@@ -556,16 +553,16 @@ func (c *Ctx) FillStyled(dst Surface, rect Rect, top, bottom color.RGBA, radius 
 		return
 	}
 	left, upper, right, lower := c.devRect(rect)
-	c.CanvasOf(dst).FillRectGradient(render.Box{X0: left, Y0: upper, X1: right, Y1: lower}, top, bottom)
+	dst.FillRectGradient(render.Box{X0: left, Y0: upper, X1: right, Y1: lower}, top, bottom)
 }
 
 // fillRounded paints rect with the corners in the set rounded, its edges
 // snapped to device pixels as Fill's are.
-func (c *Ctx) fillRounded(dst Surface, rect Rect, top, bottom color.RGBA, radius float64, corners Corners) {
+func (c *Ctx) fillRounded(dst render.Canvas, rect Rect, top, bottom color.RGBA, radius float64, corners Corners) {
 	if c.Stats != nil {
 		c.Stats.MaskFills++
 	}
-	c.CanvasOf(dst).FillRoundRect(c.snapBox(rect), c.dev(float32(radius)), corners, top, bottom)
+	dst.FillRoundRect(c.snapBox(rect), c.dev(float32(radius)), corners, top, bottom)
 }
 
 // DrawStats counts what one frame asks the renderer for, to pin and measure
@@ -598,7 +595,7 @@ const (
 // a bar or a column that sits in the corner of a rounded panel: its corner
 // follows the panel's, with anti-aliased (alpha) edges, instead of poking
 // out past it.
-func (c *Ctx) FillStyledCorners(dst Surface, rect Rect, top, bottom color.RGBA, radius float64, corners Corners) {
+func (c *Ctx) FillStyledCorners(dst render.Canvas, rect Rect, top, bottom color.RGBA, radius float64, corners Corners) {
 	if radius*c.Scale < 1 || corners == 0 {
 		c.FillStyled(dst, rect, top, bottom, 0)
 		return
@@ -610,7 +607,7 @@ func (c *Ctx) FillStyledCorners(dst Surface, rect Rect, top, bottom color.RGBA, 
 // rounded corners when radius is set. The edges snap to device pixels as
 // Outline's do. The width is LineWidth (the unrounded scale a stroke used to
 // take would blur on a fractional scale and not match Outline's lines).
-func (c *Ctx) OutlineStyled(dst Surface, rect Rect, clr color.RGBA, radius float64) {
+func (c *Ctx) OutlineStyled(dst render.Canvas, rect Rect, clr color.RGBA, radius float64) {
 	if radius*c.Scale < 1 {
 		c.Outline(dst, rect, clr)
 		return
@@ -618,5 +615,5 @@ func (c *Ctx) OutlineStyled(dst Surface, rect Rect, clr color.RGBA, radius float
 	if c.Stats != nil {
 		c.Stats.RingFills++
 	}
-	c.CanvasOf(dst).StrokeRoundRect(c.snapBox(rect), c.dev(float32(radius)), c.LineWidth(), clr)
+	dst.StrokeRoundRect(c.snapBox(rect), c.dev(float32(radius)), c.LineWidth(), clr)
 }

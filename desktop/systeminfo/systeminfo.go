@@ -1,28 +1,19 @@
 // Package systeminfo builds the system report from the Go runtime, the build
-// information and the graphics side of Ebitengine. The graphics side is a
-// function you give, so tests and tools need no display; Ebiten is the
-// real one and works only while the game runs.
+// information and the graphics side of the renderer. The graphics side is a
+// function you give, so tests and tools need no display; a renderer offers
+// one (ebitenrender.ReadGraphics) that works only while its window runs.
 package systeminfo
 
 import (
 	"fmt"
 	"runtime"
-	"runtime/debug"
+	"strings"
+
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 // Graphics is what the running window system and GPU tell.
-type Graphics struct {
-	Library       string // "Metal", "OpenGL", "DirectX"
-	GPUImageBytes int64  // memory taken by images on the GPU
-	Vsync         bool
-	FPS, TPS      float64 // actual frames and ticks per second
-	Monitor       string
-	MonitorW      int
-	MonitorH      int
-	DeviceScale   float64
-	WindowW       int
-	WindowH       int
-}
+type Graphics = render.Graphics
 
 // Info makes the report. The zero value works but reports no graphics.
 type Info struct {
@@ -38,7 +29,6 @@ func (i Info) Read() Report {
 		{Label: "OS", Value: runtime.GOOS + "/" + runtime.GOARCH},
 		{Label: "CPUs", Value: fmt.Sprint(runtime.NumCPU())},
 		{Label: "Go", Value: runtime.Version()},
-		{Label: "Ebitengine", Value: moduleVersion("github.com/hajimehoshi/ebiten/v2")},
 		{Label: "Memory in use", Value: megabytes(int64(m.Alloc))},
 	}}
 	if i.Version != "" {
@@ -49,6 +39,7 @@ func (i Info) Read() Report {
 	}
 	g := i.Graphics()
 	rendering := Section{Title: "Rendering", Rows: []Row{
+		{Label: "Renderer", Value: rendererName(g)},
 		{Label: "Graphics library", Value: orUnknown(g.Library)},
 		{Label: "GPU image memory", Value: megabytes(g.GPUImageBytes)},
 		{Label: "Vsync", Value: onOff(g.Vsync)},
@@ -64,18 +55,9 @@ func (i Info) Read() Report {
 	return Report{Sections: []Section{rendering, display, system}}
 }
 
-// moduleVersion is the version of a module the program was built with.
-func moduleVersion(path string) string {
-	info, ok := debug.ReadBuildInfo()
-	if !ok {
-		return "unknown"
-	}
-	for _, dep := range info.Deps {
-		if dep.Path == path {
-			return dep.Version
-		}
-	}
-	return "unknown"
+// rendererName is the renderer and its version as one text.
+func rendererName(g Graphics) string {
+	return strings.TrimSpace(orUnknown(g.Renderer) + " " + g.RendererVersion)
 }
 
 func megabytes(size int64) string { return fmt.Sprintf("%.1f MB", float64(size)/(1<<20)) }

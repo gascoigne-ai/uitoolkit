@@ -8,6 +8,6 @@
 // Ebitengine does not offer.
 //
 // It lives in the toolkit because every program with a window needs the same
-// things; a copy per app would drift. It imports nothing of the toolkit or the
-// app.
+// things; a copy per app would drift. It imports nothing of the toolkit but
+// `render`, in `systeminfo`, and nothing of the app.
 package desktop

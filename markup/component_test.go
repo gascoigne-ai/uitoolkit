@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/view"
 	"github.com/gascoigne-ai/uitoolkit/widget"
 )
@@ -27,7 +26,7 @@ func build(t *testing.T, src string, sc Scope) view.Node {
 
 // The same view written in Go and as a template dumps identically, laid out.
 func TestTemplateMatchesTheGoDSL(t *testing.T) {
-	c, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
+	c, err := core.NewCtx(theming.Dark(), testDevice{})
 	if err != nil {
 		t.Fatal(err)
 	}

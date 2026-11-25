@@ -270,7 +270,7 @@ func (a *TextArea) Draw(ctx *core.Ctx, dst render.Canvas, rect core.Rect) {
 	b := layoutBars(rect, g.contentW(rect), g.contentH())
 	view := core.Rect{X: rect.X, Y: rect.Y, W: b.viewW, H: b.viewH}
 	body := core.Rect{X: g.textX - 4, Y: rect.Y, W: b.viewW - (g.textX - 4 - rect.X), H: b.viewH}
-	area, text := ctx.ClipCanvas(dst, view), ctx.ClipCanvas(dst, body)
+	area, text := ctx.Clip(dst, view), ctx.Clip(dst, body)
 	curLine, _ := a.LineCol(a.Cursor)
 	lo, hi, hasSel := a.Selection()
 

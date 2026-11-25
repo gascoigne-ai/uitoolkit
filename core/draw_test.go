@@ -34,35 +34,35 @@ func TestDrawCallsAskTheCanvasForDevicePixels(t *testing.T) {
 		lineWidth := ctx.LineWidth()
 		tests := []struct {
 			name string
-			draw func(dst Surface)
+			draw func(dst render.Canvas)
 			want rendertest.Op
 		}{
-			{"fill", func(dst Surface) { ctx.Fill(dst, rect, red) },
+			{"fill", func(dst render.Canvas) { ctx.Fill(dst, rect, red) },
 				rendertest.FillRect{Clip: clip, Box: snapped(rect), Color: red}},
-			{"horizontal line", func(dst Surface) { ctx.HLine(dst, 3, 5, 17, red) },
+			{"horizontal line", func(dst render.Canvas) { ctx.HLine(dst, 3, 5, 17, red) },
 				rendertest.FillRect{Clip: clip, Box: render.Box{X0: snap(3), Y0: snap(5), X1: snap(20), Y1: snap(5) + lineWidth}, Color: red}},
-			{"vertical line", func(dst Surface) { ctx.VLine(dst, 3, 5, 17, red) },
+			{"vertical line", func(dst render.Canvas) { ctx.VLine(dst, 3, 5, 17, red) },
 				rendertest.FillRect{Clip: clip, Box: render.Box{X0: snap(3), Y0: snap(5), X1: snap(3) + lineWidth, Y1: snap(22)}, Color: red}},
-			{"outline", func(dst Surface) { ctx.Outline(dst, rect, glass) },
+			{"outline", func(dst render.Canvas) { ctx.Outline(dst, rect, glass) },
 				rendertest.StrokeRect{Clip: clip, Box: snapped(rect), Width: lineWidth, Color: glass}},
-			{"line", func(dst Surface) { ctx.Line(dst, 2.5, 3, 27, 19.5, 1.5, glass) },
+			{"line", func(dst render.Canvas) { ctx.Line(dst, 2.5, 3, 27, 19.5, 1.5, glass) },
 				rendertest.StrokeLine{Clip: clip, X0: scaled(2.5), Y0: scaled(3), X1: scaled(27), Y1: scaled(19.5), Width: scaled(1.5), Color: glass}},
-			{"square flat style", func(dst Surface) { ctx.FillStyled(dst, rect, glass, glass, 0) },
+			{"square flat style", func(dst render.Canvas) { ctx.FillStyled(dst, rect, glass, glass, 0) },
 				rendertest.FillRect{Clip: clip, Box: snapped(rect), Color: glass}},
-			{"square gradient is not snapped", func(dst Surface) { ctx.FillStyled(dst, rect, red, glass, 0.5) },
+			{"square gradient is not snapped", func(dst render.Canvas) { ctx.FillStyled(dst, rect, red, glass, 0.5) },
 				rendertest.FillRectGradient{Clip: clip, Box: unsnapped, Top: red, Bottom: glass}},
-			{"rounded style", func(dst Surface) { ctx.FillStyled(dst, rect, red, glass, 5) },
+			{"rounded style", func(dst render.Canvas) { ctx.FillStyled(dst, rect, red, glass, 5) },
 				rendertest.FillRoundRect{Clip: clip, Box: snapped(rect), Radius: scaled(5), Corners: CornersAll, Top: red, Bottom: glass}},
-			{"rounded corners", func(dst Surface) { ctx.FillStyledCorners(dst, rect, red, glass, 6, CornersTop) },
+			{"rounded corners", func(dst render.Canvas) { ctx.FillStyledCorners(dst, rect, red, glass, 6, CornersTop) },
 				rendertest.FillRoundRect{Clip: clip, Box: snapped(rect), Radius: scaled(6), Corners: CornersTop, Top: red, Bottom: glass}},
-			{"no corners is square", func(dst Surface) { ctx.FillStyledCorners(dst, rect, glass, glass, 6, 0) },
+			{"no corners is square", func(dst render.Canvas) { ctx.FillStyledCorners(dst, rect, glass, glass, 6, 0) },
 				rendertest.FillRect{Clip: clip, Box: snapped(rect), Color: glass}},
-			{"corners with a radius below a pixel are square", func(dst Surface) { ctx.FillStyledCorners(dst, rect, glass, glass, 0.5, CornersAll) },
+			{"corners with a radius below a pixel are square", func(dst render.Canvas) { ctx.FillStyledCorners(dst, rect, glass, glass, 0.5, CornersAll) },
 				rendertest.FillRect{Clip: clip, Box: snapped(rect), Color: glass}},
 			// A box too thin to round is the canvas's to square off.
-			{"a thin rounded fill is still asked for rounded", func(dst Surface) { ctx.FillStyled(dst, thin, glass, glass, 4) },
+			{"a thin rounded fill is still asked for rounded", func(dst render.Canvas) { ctx.FillStyled(dst, thin, glass, glass, 4) },
 				rendertest.FillRoundRect{Clip: clip, Box: snapped(thin), Radius: scaled(4), Corners: CornersAll, Top: glass, Bottom: glass}},
-			{"rounded outline", func(dst Surface) { ctx.OutlineStyled(dst, rect, glass, 5) },
+			{"rounded outline", func(dst render.Canvas) { ctx.OutlineStyled(dst, rect, glass, 5) },
 				rendertest.StrokeRoundRect{Clip: clip, Box: snapped(rect), Radius: scaled(5), Width: lineWidth, Color: glass}},
 		}
 		for _, test := range tests {

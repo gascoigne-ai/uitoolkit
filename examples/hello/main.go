@@ -6,12 +6,14 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
 	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/markup"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	"github.com/gascoigne-ai/uitoolkit/theming"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 	. "github.com/gascoigne-ai/uitoolkit/widget"
@@ -63,21 +65,31 @@ func (g *hello) greet() {
 	}
 }
 
-func (g *hello) Layout(width, height int) (int, int) { g.w, g.h = width, height; return width, height }
+func (g *hello) Layout(width, height int, scale float64) (int, int) {
+	g.w, g.h = width, height
+	if err := g.ctx.SetScale(scale); err != nil {
+		log.Fatal(err)
+	}
+	return int(math.Ceil(float64(width) * scale)), int(math.Ceil(float64(height) * scale))
+}
 
 func (g *hello) Update() error {
-	g.ctx.In = g.sampler.Read()
+	// The pointer comes in canvas pixels; the view works in logical ones.
+	g.ctx.In = g.sampler.Sample(ebitenrender.ReadInput()).Scaled(g.ctx.Scale)
 	root := g.view()
 	Layout(g.ctx, root, g.w, g.h)
 	Update(g.ctx, root)
 	return nil
 }
 
-func (g *hello) Draw(screen *ebiten.Image) {
+func (g *hello) Draw(screen render.Canvas) bool {
 	root := g.view()
 	Layout(g.ctx, root, g.w, g.h)
 	Draw(g.ctx, root, screen)
+	return true
 }
+
+func (g *hello) Cursor() render.Cursor { return g.ctx.Cursor }
 
 func main() {
 	ctx, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
@@ -87,7 +99,7 @@ func main() {
 	g := &hello{ctx: ctx, name: NewTextField("")}
 	ebiten.SetWindowSize(480, 320)
 	ebiten.SetWindowTitle("Hello, toolkit")
-	if err := ebiten.RunGame(g); err != nil {
+	if err := ebitenrender.Run(g, nil); err != nil {
 		log.Fatal(err)
 	}
 }

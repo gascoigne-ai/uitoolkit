@@ -190,12 +190,11 @@ func cycleFocus(ctx *core.Ctx, root Node) {
 // whose rect, grown by its draw reach, misses the image it would draw into
 // (the active clip or the screen) is skipped with its subtree: no Draw, no
 // DrawOver, no hover flag or tooltip. A long scrolled list so costs only
-// the rows in view. dst is a canvas, or an ebiten image until task 006
-// (see core.Surface).
-func Draw(ctx *core.Ctx, root Node, dst core.Surface) {
+// the rows in view. dst is the canvas drawn on.
+func Draw(ctx *core.Ctx, root Node, dst render.Canvas) {
 	ctx.HoverOff = hasModal(root) // only the overlay's own elements react to the pointer
 	ctx.TipText = ""
-	root.draw(ctx, ctx.CanvasOf(dst))
+	root.draw(ctx, dst)
 	ctx.HoverOff = false
 }
 
@@ -348,7 +347,7 @@ func (e *El) drawSelf(ctx *core.Ctx, canvas render.Canvas) {
 // kidsDst is the canvas the children draw into: canvas, or its clip.
 func (e *El) kidsDst(ctx *core.Ctx, canvas render.Canvas) render.Canvas {
 	if e.clip {
-		return ctx.ClipCanvas(canvas, e.rect)
+		return ctx.Clip(canvas, e.rect)
 	}
 	return canvas
 }

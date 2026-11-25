@@ -35,26 +35,12 @@ func (o *Offscreen) ReadPixels() *image.RGBA {
 	return &image.RGBA{Pix: pixels, Stride: 4 * bounds.Dx(), Rect: bounds}
 }
 
-// ImageOf is the ebiten image canvas draws on, for a caller that still draws
-// with ebiten itself. It reports false for a canvas of another renderer. It is
-// part of the bridge that lasts while the toolkit moves onto render.Canvas.
-func ImageOf(canvas render.Canvas) (*ebiten.Image, bool) {
-	switch surface := canvas.(type) {
-	case *Canvas:
-		return surface.dst, true
-	case *Offscreen:
-		return surface.dst, true
-	}
-	return nil, false
-}
-
 // pictureOf is the ebiten image behind img. A canvas that is not an offscreen,
-// such as a Sub, is no image of this renderer although it has Bounds. A bare
-// *ebiten.Image is one while the toolkit still passes them around (the bridge).
+// such as a Sub, is no image of this renderer although it has Bounds, and
+// neither is a bare *ebiten.Image, which satisfies render.Image by its Bounds
+// but would draw as if it were one.
 func pictureOf(img render.Image) *ebiten.Image {
 	switch picture := img.(type) {
-	case *ebiten.Image:
-		return picture
 	case *Image:
 		return picture.img
 	case *Offscreen:

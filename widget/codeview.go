@@ -517,8 +517,8 @@ func (v *CodeView) Draw(ctx *core.Ctx, dst render.Canvas, rect core.Rect) {
 	muted := ctx.Color(core.Muted)
 	gutter := core.Rect{X: rect.X, Y: rect.Y, W: g.textX - rect.X - 4, H: b.viewH}
 	body := core.Rect{X: gutter.X + gutter.W, Y: rect.Y, W: b.viewW - gutter.W, H: b.viewH}
-	area := ctx.ClipCanvas(dst, core.Rect{X: rect.X, Y: rect.Y, W: b.viewW, H: b.viewH})
-	text := ctx.ClipCanvas(dst, body)
+	area := ctx.Clip(dst, core.Rect{X: rect.X, Y: rect.Y, W: b.viewW, H: b.viewH})
+	text := ctx.Clip(dst, body)
 
 	for rowIdx := v.ScrollY / g.lineH; rowIdx < len(rows); rowIdx++ {
 		y := rect.Y + rowIdx*g.lineH - v.ScrollY

@@ -2,12 +2,10 @@ package core
 
 import (
 	"testing"
-
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 )
 
 func TestAdvanceIsMeasuredOncePerFont(t *testing.T) {
-	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
+	ctx, err := NewCtx(testTheme(), testDevice{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,7 +38,7 @@ func TestAdvanceIsMeasuredAgainAfterScaleThemeOrFontsChange(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
+			ctx, err := NewCtx(testTheme(), testDevice{})
 			if err != nil {
 				t.Fatal(err)
 			}

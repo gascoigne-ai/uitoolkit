@@ -40,3 +40,34 @@ func TestWithoutAWindowOnlyTheSystemIsReported(t *testing.T) {
 		t.Fatalf("report %+v", report)
 	}
 }
+
+func TestTheRendererRowComesFromTheGraphics(t *testing.T) {
+	tests := []struct {
+		name     string
+		graphics Graphics
+		want     string
+	}{
+		{"name and version", Graphics{Renderer: "Ebitengine", RendererVersion: "v2.10.5"}, "Ebitengine v2.10.5"},
+		{"name alone", Graphics{Renderer: "wgpu"}, "wgpu"},
+		{"no name", Graphics{}, "unknown"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			report := Info{Graphics: func() Graphics { return tt.graphics }}.Read()
+			rows := report.Sections[0].Rows
+			if report.Sections[0].Title != "Rendering" || rows[0].Label != "Renderer" || rows[0].Value != tt.want {
+				t.Fatalf("first row of %s = %+v, want Renderer %q", report.Sections[0].Title, rows[0], tt.want)
+			}
+		})
+	}
+}
+
+func TestWithoutAWindowThereIsNoRendererRow(t *testing.T) {
+	report := Info{}.Read()
+	if got := report.Value("Renderer"); got != "" {
+		t.Errorf("Renderer = %q, want no row", got)
+	}
+	if got := report.Value("Ebitengine"); got != "" {
+		t.Errorf("Ebitengine = %q, want the hard-coded row gone", got)
+	}
+}

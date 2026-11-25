@@ -84,7 +84,7 @@ func (b *fieldB) Update(element *El, ctx *core.Ctx) {
 
 func (b *fieldB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	f, r := b.field, element.Rect()
-	dst = ctx.ClipCanvas(dst, r)
+	dst = ctx.Clip(dst, r)
 	x := r.X + b.textInset() - f.ScrollX
 	if lo, hi, ok := f.Selection(); ok {
 		runes := []rune(f.Display())

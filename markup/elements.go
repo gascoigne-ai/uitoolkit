@@ -6,9 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	"github.com/gascoigne-ai/uitoolkit/view"
 	"github.com/gascoigne-ai/uitoolkit/widget"
 )
@@ -332,7 +331,7 @@ var elements = map[string]elementSpec{
 	"check-row": {build: itemArgs1(widget.CheckRow), params: []param{boolParam("on")}},
 	"code": {build: args1(widget.Code), holds: holdsNothing, options: wrapOptions,
 		params: []param{scopedState[widget.CodeView]("state")}},
-	"image": {build: args1(widget.Image), holds: holdsNothing, params: []param{scoped[*ebiten.Image]("img")}},
+	"image": {build: args1(widget.Image), holds: holdsNothing, params: []param{scoped[render.Image]("img")}},
 	"slider": {build: args5(widget.Slider), holds: holdsNothing, options: sliderOptions, handlers: sliderHandlers,
 		params: []param{scopedState[widget.SliderState]("state"), wholeParam("min"), wholeParam("max"), wholeParam("step"), wholeParam("value")}},
 }

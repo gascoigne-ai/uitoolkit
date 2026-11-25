@@ -4,42 +4,40 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
-// keyNames spells keys whose ebiten name is not what users read. It has no
+// keyNames spells keys whose render name is not what users read. It has no
 // reader outside this package, so it is not exported.
-var keyNames = map[ebiten.Key]string{
-	ebiten.KeyComma:     ",",
-	ebiten.KeyArrowUp:   "Up",
-	ebiten.KeyArrowDown: "Down",
+var keyNames = map[render.Key]string{
+	render.KeyComma:     ",",
+	render.KeyArrowUp:   "Up",
+	render.KeyArrowDown: "Down",
 }
 
 // Binding is a key with modifiers; an unbound action has none.
 type Binding struct {
-	Key              ebiten.Key
+	Key              render.Key
 	Ctrl, Shift, Alt bool
 	Bound            bool
 }
 
 // IsModifierKey reports whether k is a modifier key itself.
-func IsModifierKey(key ebiten.Key) bool {
+func IsModifierKey(key render.Key) bool {
 	switch key {
-	case ebiten.KeyAlt, ebiten.KeyAltLeft, ebiten.KeyAltRight,
-		ebiten.KeyControl, ebiten.KeyControlLeft, ebiten.KeyControlRight,
-		ebiten.KeyShift, ebiten.KeyShiftLeft, ebiten.KeyShiftRight,
-		ebiten.KeyMeta, ebiten.KeyMetaLeft, ebiten.KeyMetaRight:
+	case render.KeyAlt, render.KeyAltLeft, render.KeyAltRight,
+		render.KeyControl, render.KeyControlLeft, render.KeyControlRight,
+		render.KeyShift, render.KeyShiftLeft, render.KeyShiftRight,
+		render.KeyMeta, render.KeyMetaLeft, render.KeyMetaRight:
 		return true
 	}
 	return false
 }
 
 // keyLabel is how a key is written in key strings: the friendly name
-// from keyNames, else Ebitengine's.
-func keyLabel(key ebiten.Key) string {
+// from keyNames, else the render name.
+func keyLabel(key render.Key) string {
 	if name, ok := keyNames[key]; ok {
 		return name
 	}
@@ -47,11 +45,11 @@ func keyLabel(key ebiten.Key) string {
 }
 
 // keyByName finds a bindable key by its lower-case name, friendly or
-// Ebitengine's.
-var keyByName = func() map[string]ebiten.Key {
-	m := map[string]ebiten.Key{}
-	for k := ebiten.Key(0); k <= ebiten.KeyMax; k++ {
-		if IsModifierKey(k) || strings.HasPrefix(k.String(), "Key(") {
+// the render name.
+var keyByName = func() map[string]render.Key {
+	m := map[string]render.Key{}
+	for k := render.KeyUnknown + 1; k <= render.KeyMax; k++ {
+		if IsModifierKey(k) {
 			continue
 		}
 		m[strings.ToLower(k.String())] = k
@@ -106,7 +104,7 @@ func (b Binding) String() string {
 // Matches reports whether key, pressed this frame under the modifiers in
 // input, triggers the Binding. Modifiers must match exactly, so Ctrl+Tab
 // does not fire on Ctrl+Shift+Tab.
-func (b Binding) Matches(input core.Input, key ebiten.Key) bool {
+func (b Binding) Matches(input core.Input, key render.Key) bool {
 	return b.Bound && b.Key == key && b.Ctrl == input.Ctrl && b.Shift == input.Shift && b.Alt == input.Alt
 }
 
@@ -115,24 +113,23 @@ func (b Binding) Matches(input core.Input, key ebiten.Key) bool {
 // held; modifier keys alone are waited out (ok is false).
 func BindingFrom(input core.Input) (binding Binding, ok bool) {
 	if input.Escape && !input.Ctrl && !input.Alt {
-		return Binding{Key: ebiten.KeyEscape, Bound: true}, true
+		return Binding{Key: render.KeyEscape, Bound: true}, true
 	}
 	for _, pressed := range input.Keys {
-		key, ok := ebitenrender.KeyToEbiten(pressed)
-		if !ok || IsModifierKey(key) {
+		if pressed == render.KeyUnknown || IsModifierKey(pressed) {
 			continue
 		}
-		return Binding{Key: key, Ctrl: input.Ctrl, Shift: input.Shift, Alt: input.Alt, Bound: true}, true
+		return Binding{Key: pressed, Ctrl: input.Ctrl, Shift: input.Shift, Alt: input.Alt, Bound: true}, true
 	}
 	return Binding{}, false
 }
 
 // IsFunctionKey reports whether k is one of F1 to F12.
-func IsFunctionKey(key ebiten.Key) bool { return key >= ebiten.KeyF1 && key <= ebiten.KeyF12 }
+func IsFunctionKey(key render.Key) bool { return key >= render.KeyF1 && key <= render.KeyF12 }
 
 // TypesText reports whether the Binding is a key the user also types
 // with: no Ctrl or Alt, not a function key, not Delete. Such a binding
 // should fire only while no text field has focus.
 func (b Binding) TypesText() bool {
-	return !b.Ctrl && !b.Alt && !IsFunctionKey(b.Key) && b.Key != ebiten.KeyDelete
+	return !b.Ctrl && !b.Alt && !IsFunctionKey(b.Key) && b.Key != render.KeyDelete
 }

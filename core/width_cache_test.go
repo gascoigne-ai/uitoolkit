@@ -2,12 +2,10 @@ package core
 
 import (
 	"testing"
-
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 )
 
 func TestWidthMeasuresAStringOncePerFace(t *testing.T) {
-	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
+	ctx, err := NewCtx(testTheme(), testDevice{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,7 +29,7 @@ func TestWidthMeasuresAStringOncePerFace(t *testing.T) {
 // A face is a new pointer whenever an element picks its own font, so the
 // cache must key on what the face is made of, not on the pointer.
 func TestWidthCacheHitsForAnEqualFaceAtAnotherAddress(t *testing.T) {
-	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
+	ctx, err := NewCtx(testTheme(), testDevice{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +44,7 @@ func TestWidthCacheHitsForAnEqualFaceAtAnotherAddress(t *testing.T) {
 
 // A width is divided by the scale, so one kept from another scale is wrong.
 func TestWidthCacheIsClearedWhenTheScaleChanges(t *testing.T) {
-	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
+	ctx, err := NewCtx(testTheme(), testDevice{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +60,7 @@ func TestWidthCacheIsClearedWhenTheScaleChanges(t *testing.T) {
 }
 
 func TestWidthCacheStaysBounded(t *testing.T) {
-	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
+	ctx, err := NewCtx(testTheme(), testDevice{})
 	if err != nil {
 		t.Fatal(err)
 	}

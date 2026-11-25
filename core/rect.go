@@ -1,8 +1,7 @@
 // Package core is the base of the UI toolkit: theme tokens, a drawing context
 // that works in logical pixels and draws through a render.Canvas, input and
 // the clipboard. It knows nothing about the application; package view builds
-// declarative views on top of it. While callers still hold ebiten images, one
-// file, ebitenbridge.go, turns them into canvases.
+// declarative views on top of it.
 package core
 
 // Rect is an axis-aligned pixel rectangle.

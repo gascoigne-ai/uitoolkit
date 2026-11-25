@@ -2,15 +2,16 @@ package markup
 
 import (
 	"fmt"
+	"image"
 	"strings"
 	"testing"
 
-	"github.com/hajimehoshi/ebiten/v2"
 	"golang.org/x/image/font/gofont/gomono"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/render"
+	"github.com/gascoigne-ai/uitoolkit/render/rendertest"
+	"github.com/gascoigne-ai/uitoolkit/render/text"
 	"github.com/gascoigne-ai/uitoolkit/view"
 	"github.com/gascoigne-ai/uitoolkit/widget"
 )
@@ -317,14 +318,14 @@ func TestCodeStateMustBeACodeView(t *testing.T) {
 }
 
 func TestImageElementMatchesTheGoImage(t *testing.T) {
-	picture := ebiten.NewImage(80, 40)
+	picture := &rendertest.Image{Rect: image.Rect(0, 0, 80, 40)}
 	template := build(t, `<row><image img="picture" grow="1" bg="sunken" tooltip="The image"/></row>`, Scope{"picture": picture})
 	goView := view.Row(widget.Image(picture, view.Grow(1), view.Bg(core.Sunken), view.Tooltip("The image")))
 	sameWidget(t, template, goView, 400, 100)
 }
 
 func TestImageElementMeasuresThePictureOfTheScope(t *testing.T) {
-	template := build(t, `<row align-items="center"><image img="picture"/></row>`, Scope{"picture": ebiten.NewImage(80, 40)})
+	template := build(t, `<row align-items="center"><image img="picture"/></row>`, Scope{"picture": &rendertest.Image{Rect: image.Rect(0, 0, 80, 40)}})
 	view.Layout(testCtx(t), template, 200, 100)
 	if size := template.Children()[0].Rect(); size.W != 80 || size.H != 40 {
 		t.Fatalf("the image is %dx%d, want the 80x40 of the scope's picture", size.W, size.H)
@@ -332,14 +333,21 @@ func TestImageElementMeasuresThePictureOfTheScope(t *testing.T) {
 }
 
 // widget.Image draws nothing for a nil picture (one not decoded yet), so a
-// nil *ebiten.Image is not the mistake a nil state is.
+// nil *rendertest.Image is not the mistake a nil state is.
+func TestImageElementTakesARenderImage(t *testing.T) {
+	picture := &rendertest.Image{Rect: image.Rect(0, 0, 8, 8)}
+	if err := buildError(t, `<image img="picture"/>`, Scope{"picture": picture}); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestImageElementTakesANilPicture(t *testing.T) {
-	if err := buildError(t, `<image img="picture"/>`, Scope{"picture": (*ebiten.Image)(nil)}); err != nil {
+	if err := buildError(t, `<image img="picture"/>`, Scope{"picture": (*rendertest.Image)(nil)}); err != nil {
 		t.Fatal(err)
 	}
 	err := buildError(t, `<image img="picture"/>`, Scope{"picture": "cat.png"})
-	if err == nil || !strings.Contains(err.Error(), "*ebiten.Image") {
-		t.Errorf("error = %v, want it to say picture is not a *ebiten.Image", err)
+	if err == nil || !strings.Contains(err.Error(), "render.Image") {
+		t.Errorf("error = %v, want it to say picture is not a render.Image", err)
 	}
 }
 
@@ -393,7 +401,7 @@ func TestSliderOptionsAreOnlyForSlider(t *testing.T) {
 
 func monoFace(t *testing.T) render.FontSource {
 	t.Helper()
-	face, err := ebitenrender.NewDevice().NewFontSource(gomono.TTF)
+	face, err := text.NewFontSource(gomono.TTF)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -420,7 +428,7 @@ func TestFontSourceAttributeMeasuresInTheFaceOfTheScope(t *testing.T) {
 // A font list keeps a nil face for a file it could not read, and Go draws
 // that text in the interface font.
 func TestFontSourceAttributeTakesANilFace(t *testing.T) {
-	if err := buildError(t, `<text font-source="face">x</text>`, Scope{"face": (*ebitenrender.FontSource)(nil)}); err != nil {
+	if err := buildError(t, `<text font-source="face">x</text>`, Scope{"face": (*text.FontSource)(nil)}); err != nil {
 		t.Fatal(err)
 	}
 	err := buildError(t, `<text font-source="face">x</text>`, Scope{"face": "Go Mono"})

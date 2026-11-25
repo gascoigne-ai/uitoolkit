@@ -3,8 +3,9 @@
 `render` says what the toolkit draws through and what a renderer runs: `Canvas`, `Image`,
 `Offscreen`, `Path` and `Stroke`, `FontSource` and `Face`, `Device`, `InputState`, `Key`, `Cursor`
 and `Host`. `core.Ctx`, `view` and `widget` draw through it and import no GPU library
-(`TestViewImportsNoEbiten`, `TestWidgetImportsNoEbiten`); only the bridge of `core` still takes
-ebiten images, until task 006.
+(`TestCoreImportsNoEbiten`, `TestViewImportsNoEbiten`, `TestWidgetImportsNoEbiten`, and the same for
+`engine`, `markup` and `desktop/systeminfo`). `render.Graphics` is the record a renderer fills for the
+system report (name and version of the renderer, graphics library, GPU memory, monitor, window).
 
 Invariants:
 
@@ -71,8 +72,12 @@ the tick as a `render.InputState` and drops a key with no render name; what it m
   measuring and drawing text allocate no face a call (`alloc_test.go`).
 - **Shapes.** A rounded shape with a radius below one device pixel is square. A box whose edges are
   between pixels is anti-aliased.
-- **Bridge.** While the toolkit still passes ebiten images around, `ImageOf` gives the image behind
-  a canvas and `DrawImage` and `DrawMask` take a bare `*ebiten.Image`.
+- **Foreign images.** A bare `*ebiten.Image` satisfies `render.Image` by its `Bounds`, so it compiles
+  where an image is wanted, but `DrawImage` and `DrawMask` panic with `render: image from another
+  renderer`; `Device.NewImage` makes the image.
+- **Graphics.** `ReadGraphics` fills a `render.Graphics` (renderer "Ebitengine", its module
+  version from the build info, graphics library, GPU memory, FPS, monitor, window) and works only
+  while the run loop runs. An app passes it as `systeminfo.Info{Graphics: ebitenrender.ReadGraphics}`.
 - **Run-loop `TestMain`.** Ebitengine reads pixels only inside its run loop, so `main_test.go` runs
   the whole test binary inside the first `Update` (no `t.Parallel`), after it points `HOME` and the
   `XDG_*` dirs at a temp dir.
@@ -96,14 +101,13 @@ the draw calls are checked against `rendertest.Canvas`.
   turn logical rects into device pixels and call a `render.Canvas`. `Text` is two `DrawText`
   passes, the second in the color scaled by `StemBoost`. A square gradient is not snapped, so on a
   box between pixels its edges are anti-aliased.
-- **Bridge** (until task 006). The draw calls take a `core.Surface`: a canvas, or an
-  `*ebiten.Image` that `CanvasOf` wraps with the device, which must be `ebitenrender`'s. It keeps
-  the canvas of the last image, since a frame draws many times on one. `ebitenbridge.go` also holds
-  the old `Clip` (beside `ClipCanvas`), `EbitenImage` and `Sampler.Read`; it is the only file of
-  `core` that imports Ebitengine or `ebitenrender` (`TestOnlyTheBridgeImportsEbiten`).
+- **No GPU library.** The `Ctx` draw calls take a `render.Canvas`; `Clip` returns a canvas limited
+  to a logical rect (device pixels, cut to the canvas). No file of `core`, a test included, imports
+  Ebitengine or `ebitenrender` (`TestCoreImportsNoEbiten`); its tests use a `testDevice` built on
+  `render/text` and `rendertest`.
 - **Theme and tokens**: the look, the tokens and the theme pipeline are in `style.md`.
 - **Input.** `Sampler.Sample` turns a `render.InputState` into the frame's `Input` and counts
-  clicks (`Sampler.Read` is `Sample` of `ebitenrender.ReadInput`). The pure `inputFrom` derives
+  clicks (a renderer's input, `ebitenrender.ReadInput`, goes in as the `render.InputState`). The pure `inputFrom` derives
   presses, shortcuts and edit keys with their repeat; `modifiedEdit` is the per-platform table that
   turns modifiers into word and line edits. `Input.Keys` holds `render.Key`.
 - **Clipboard.** `SystemClipboard` runs the platform's clipboard tools: Ebitengine has no clipboard
@@ -118,7 +122,7 @@ the draw calls are checked against `rendertest.Canvas`.
 `desktop` holds what a window needs from the OS and Ebitengine does not give: the Dock
 icon (`SetDockIcon`), the display scale (`displayscale`), the key repeat timing (`keyrepeat`) and the
 system file chooser (`filedialog`) and the system report the settings show (`systeminfo`) and the installed fonts (`fonts`). Each is split per OS (build tags or a table keyed by OS) and its
-parsing is pure and tested without a display. It imports nothing of the toolkit or the app.
+parsing is pure and tested without a display. It imports nothing of the toolkit or the app, except `systeminfo`, which imports `render` for `render.Graphics` (`systeminfo.Graphics` is an alias of it) and shows the renderer in the first row of the Rendering section.
 
 - **Why in the toolkit.** Every program with a window needs the same few things, and they are about the
   window and the desktop, not about requests. An `internal/platform` layer once held them
@@ -165,8 +169,8 @@ state: no diffing and no reactive system. Elements and options are indexed in th
   wheel or hover (`Ctx.HoverOff`), and a click outside runs `OnDismiss`, except for a dialog (`KeepOnOutsideClick`, set by `widget.Dialog`): it swallows the click and stays until its close button or Escape runs `Dismiss`, so a stray click on the window behind cannot throw away what the user is doing. Menus and pick lists keep closing on a click elsewhere. Toasts are not modal.
 - **A modal splits the root's children.** `view.ModalLayer(ctx, root)` is the index of the first visible direct child of the root that is a `Modal` (menus included: a context menu alone gives the layer under it), or -1 when the modal is deeper, the root draws after its children (`Border`, a control style border, an `OverDrawer`, an edge) or is itself modal. `view.DrawBelow` paints the root's own part and the children before that index, `view.DrawFrom` the children from it on, both with hover off and the root's clip; one after the other on one image they paint what `Draw` paints, element for element (`El.draw` is `drawSelf`, the children, `drawAfter`). An app keeps the first part in an image (`ui/window` `baseSnapshot`). `Ctx.CaretReads` counts `CaretVisible` calls, so a kept drawing knows it shows the blink phase.
 - **The runtime draws on a `render.Canvas`.** `Draw`, `DrawBelow` and `DrawFrom` take a
-  `core.Surface` and turn it into a canvas once (`Ctx.CanvasOf`); `drawSelf`, `drawAfter`, `kidsDst`
-  (`Ctx.ClipCanvas`) and `drawKids` work on it, and culling compares with `kidsDst.Bounds()`. A clip
+  `render.Canvas`; `drawSelf`, `drawAfter`, `kidsDst`
+  (`Ctx.Clip`) and `drawKids` work on it, and culling compares with `kidsDst.Bounds()`. A clip
   off the canvas has empty bounds and `drawKids` draws nothing then (an empty box would otherwise
   "reach" a child near the origin). `Behavior.Draw`, `OverDrawer.DrawOver` and the text behavior
   take the same (clipped) canvas, so a behavior draws on a canvas of any renderer and text records
@@ -272,8 +276,8 @@ Each is also said in the doc comment of what breaks the rule; a new exception ad
   released when full, and on `SetScale` and `SetTheme`) and tinted with `DrawMask`; icons with token
   paints are drawn as `render.Path`s every frame. The package keeps no GPU cache.
 - **Images.** `widget.Image` takes a `render.Image` and draws it scaled to fit with
-  `render.FilterLinear`; a nil picture, also a nil pointer in the interface, measures 0x0. Markup may
-  still pass an `*ebiten.Image` until task 006.
+  `render.FilterLinear`; a nil picture, also a nil pointer in the interface, measures 0x0. The
+  `<image img>` attribute takes a `render.Image` from the scope.
 - **Sharp edges.** `Ctx.Fill`, `Outline`, `HLine` and `VLine` snap each logical edge to device
   pixels (`Ctx.snap`), so neighbours share an edge, and draw lines `Ctx.LineWidth()` thick. Rounded
   fills and outlines (`FillStyled`, `OutlineStyled`) snap the same way and are one canvas call,
