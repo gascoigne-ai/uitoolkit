@@ -34,6 +34,29 @@ Invariants:
   bounds it was drawn in. Its `Offscreen` panics on use after `Release`, but still answers
   `Bounds` and `Ops` so a test can read what was drawn. It holds no pixels.
 
+## render/text: measuring without a GPU
+
+`render/text` implements `render.FontSource` over go-text/typesetting, so layout (wrap, ellipsis,
+caret) gets the same widths on every renderer and in tests. Non-test code imports only `render`,
+go-text/typesetting and `x/image/math/fixed` (`TestRenderTextImports`). `render.Face` stays
+`{Source, Size}`: `text.FontSource` is just another pointer source.
+
+- **Source.** `NewFontSource(data)` parses one font file; a collection or corrupt data is an error,
+  never a panic (`FuzzNewFontSource`). Ascent and descent come from the horizontal extents.
+- **Measure.** The widest line, lines split at `\n \v \f \r`, NEL, LS and PS (CRLF is one break).
+  Widths are summed in 26.6 fixed point at a size truncated to 1/64 px, as Ebitengine's `text/v2`
+  does, and bidi runs are not reordered, which cannot change a width.
+- **Chunks.** A line is shaped in chunks, cut after a sentence terminator cluster (and its marks),
+  at bidi level changes, and after 4 KiB at a space or tab, because that is where Ebitengine cuts and
+  a cut drops kerning across it. `chunks.go` is our own code for the same rule; it is checked
+  against Ebitengine's STerm and ATerm tables (two characters newer than Go's Unicode tables are
+  added by hand).
+- **Concurrency.** One mutex guards the shaper, segmenter and buffers.
+- **Conformance.** `TestMeasureAndMetricsMatchEbitenText` compares with `text.Measure` within
+  0.01 px over a corpus, three Go fonts and `testdata/LiberationSans-Regular.ttf`. The Go fonts have
+  no kerning, so the cut cases only show on Liberation Sans (SIL OFL 1.1, licence in
+  `testdata/LiberationSans-LICENSE.txt`); a guard fails the test if either side stops kerning "AV".
+
 ## ebitenrender: the Ebitengine renderer
 
 `ebitenrender` implements `render` over Ebitengine (`vector`, `text/v2`). Of this module it imports

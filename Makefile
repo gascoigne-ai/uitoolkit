@@ -33,7 +33,8 @@ FUZZ_TARGETS = \
 	./desktop/keyrepeat:FuzzParseGSettings \
 	./desktop/keyrepeat:FuzzParseXset \
 	./desktop/keyrepeat:FuzzParseMac \
-	./desktop/keyrepeat:FuzzParseWindows
+	./desktop/keyrepeat:FuzzParseWindows \
+	./render/text:FuzzNewFontSource
 fuzz:
 	@for target in $(FUZZ_TARGETS); do \
 		package=$${target%%:*}; name=$${target##*:}; \

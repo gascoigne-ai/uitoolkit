@@ -9,7 +9,7 @@ Go GUI toolkit: view tree with flex layout, widgets, templates (`markup`), JSON 
 - Tests and checks run with a temp `HOME` and `XDG_*` dirs, never the real ones.
 
 
-- Layers (this repo's root is the toolkit): `core` imports only `render` of this module (and `ebitenrender` in `core/ebitenbridge.go` alone, until task 006 removes the bridge; until then `engine` imports it too, to convert keys, and tests may use it for its device), `view` only `core` and `render`, `widget` only `core`, `view` and `render`, `theming` only `core`, `desktop` nothing of this module, `markup` only those and `widget`; `render` imports nothing of this module; `render/rendertest` only `render`; `ebitenrender` imports only `render` of this module; nothing here imports `internal/*` or `cmd/*`.
+- Layers (this repo's root is the toolkit): `core` imports only `render` of this module (and `ebitenrender` in `core/ebitenbridge.go` alone, until task 006 removes the bridge; until then `engine` imports it too, to convert keys, and tests may use it for its device), `view` only `core` and `render`, `widget` only `core`, `view` and `render`, `theming` only `core`, `desktop` nothing of this module, `markup` only those and `widget`; `render` imports nothing of this module; `render/rendertest` only `render`; `render/text` only `render`, go-text/typesetting and `x/image/math/fixed`; `ebitenrender` imports only `render` of this module; nothing here imports `internal/*` or `cmd/*`.
 
 ## Toolkit API rules
 
