@@ -4,23 +4,23 @@ import (
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 // text draws one line.
 type textB struct{ Base }
 
-func (e *El) face(ctx *core.Ctx) *text.GoTextFace {
+func (e *El) face(ctx *core.Ctx) render.Face {
 	face := e.chosenFace(ctx)
 	if e.fontSource == nil {
 		return face
 	}
-	return &text.GoTextFace{Source: e.fontSource, Size: face.Size}
+	return render.Face{Source: e.fontSource, Size: face.Size}
 }
 
-func (e *El) chosenFace(ctx *core.Ctx) *text.GoTextFace {
+func (e *El) chosenFace(ctx *core.Ctx) render.Face {
 	switch {
 	case e.mono:
 		return ctx.F.Mono

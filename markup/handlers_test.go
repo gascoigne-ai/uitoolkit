@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/theming"
 	"github.com/gascoigne-ai/uitoolkit/view"
 )
@@ -42,7 +43,7 @@ func TestHandlerAttributesMatchTheGoOptions(t *testing.T) {
 func TestHandlerAttributeCallsTheScopeFunction(t *testing.T) {
 	var gotX, gotY int
 	node := build(t, `<row on-right-click="menu"/>`, Scope{"menu": func(posX, posY int) { gotX, gotY = posX, posY }})
-	c, err := core.NewCtx(theming.Dark())
+	c, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}

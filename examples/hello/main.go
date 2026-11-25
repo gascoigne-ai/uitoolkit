@@ -10,6 +10,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/markup"
 	"github.com/gascoigne-ai/uitoolkit/theming"
 	. "github.com/gascoigne-ai/uitoolkit/view"
@@ -79,7 +80,7 @@ func (g *hello) Draw(screen *ebiten.Image) {
 }
 
 func main() {
-	ctx, err := core.NewCtx(theming.Dark())
+	ctx, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
 	if err != nil {
 		log.Fatal(err)
 	}

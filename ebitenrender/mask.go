@@ -1,6 +1,5 @@
-// The corner masks and the shapes drawn from them are a copy of
-// core/cornermask.go and of the helpers in core/ctx.go, so that a canvas draws
-// the pixels core draws today. Task 003 removes core's copy.
+// The corner masks of rounded fills and outlines, and the shapes drawn from
+// them.
 
 package ebitenrender
 

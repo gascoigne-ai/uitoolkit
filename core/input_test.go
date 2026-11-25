@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 func TestSamplerCountsClicksByItsOwnClock(t *testing.T) {
@@ -20,16 +20,16 @@ func TestInputConsumeRemovesTheKeysFromEveryForm(t *testing.T) {
 	in := Input{
 		Enter: true, Escape: true, Tab: true,
 		Edits: []Edit{EditUp, EditDown, EditLeft},
-		Keys:  []ebiten.Key{ebiten.KeyEnter, ebiten.KeyArrowUp, ebiten.KeyArrowDown, ebiten.KeyEscape, ebiten.KeyTab, ebiten.KeyA},
+		Keys:  []render.Key{render.KeyEnter, render.KeyArrowUp, render.KeyArrowDown, render.KeyEscape, render.KeyTab, render.KeyA},
 	}
-	in.Consume(ebiten.KeyEnter, ebiten.KeyArrowUp, ebiten.KeyArrowDown, ebiten.KeyEscape, ebiten.KeyTab)
+	in.Consume(render.KeyEnter, render.KeyArrowUp, render.KeyArrowDown, render.KeyEscape, render.KeyTab)
 	if in.Enter || in.Escape || in.Tab {
 		t.Errorf("flags left: enter %v escape %v tab %v", in.Enter, in.Escape, in.Tab)
 	}
 	if len(in.Edits) != 1 || in.Edits[0] != EditLeft {
 		t.Errorf("edits = %v, want only EditLeft", in.Edits)
 	}
-	if len(in.Keys) != 1 || in.Keys[0] != ebiten.KeyA {
+	if len(in.Keys) != 1 || in.Keys[0] != render.KeyA {
 		t.Errorf("keys = %v, want only A", in.Keys)
 	}
 }
@@ -39,9 +39,9 @@ func TestInputConsumeRemovesTheKeysFromEveryForm(t *testing.T) {
 func TestInputConsumeRemovesEveryEditingKeysEdit(t *testing.T) {
 	in := Input{
 		Edits: []Edit{EditBackspace, EditDelete, EditHome, EditPageDown, EditLeft},
-		Keys:  []ebiten.Key{ebiten.KeyBackspace},
+		Keys:  []render.Key{render.KeyBackspace},
 	}
-	in.Consume(ebiten.KeyBackspace, ebiten.KeyDelete, ebiten.KeyHome, ebiten.KeyPageDown)
+	in.Consume(render.KeyBackspace, render.KeyDelete, render.KeyHome, render.KeyPageDown)
 	if len(in.Edits) != 1 || in.Edits[0] != EditLeft {
 		t.Errorf("edits = %v, want only EditLeft", in.Edits)
 	}
@@ -51,16 +51,16 @@ func TestInputConsumeRemovesEveryEditingKeysEdit(t *testing.T) {
 }
 
 func TestInputConsumeLeavesOtherKeys(t *testing.T) {
-	in := Input{Enter: true, Escape: true, Edits: []Edit{EditUp}, Keys: []ebiten.Key{ebiten.KeyEnter}}
-	in.Consume(ebiten.KeyEscape)
+	in := Input{Enter: true, Escape: true, Edits: []Edit{EditUp}, Keys: []render.Key{render.KeyEnter}}
+	in.Consume(render.KeyEscape)
 	if !in.Enter || in.Escape || len(in.Edits) != 1 || len(in.Keys) != 1 {
 		t.Fatalf("Consume(Escape) changed more than Escape: %+v", in)
 	}
 }
 
 func TestInputPressed(t *testing.T) {
-	in := Input{Keys: []ebiten.Key{ebiten.KeyArrowDown}}
-	if !in.Pressed(ebiten.KeyArrowDown) || in.Pressed(ebiten.KeyArrowUp) {
+	in := Input{Keys: []render.Key{render.KeyArrowDown}}
+	if !in.Pressed(render.KeyArrowDown) || in.Pressed(render.KeyArrowUp) {
 		t.Fatal("Pressed must report only keys that went down")
 	}
 }
@@ -72,7 +72,7 @@ func TestInputRestartsCaret(t *testing.T) {
 		want  bool
 	}{
 		{"typing", Input{Typed: []rune("a")}, true},
-		{"key down", Input{Keys: []ebiten.Key{ebiten.KeyA}}, true},
+		{"key down", Input{Keys: []render.Key{render.KeyA}}, true},
 		{"editing key", Input{Edits: []Edit{EditLeft}}, true},
 		{"click", Input{Click: true}, true},
 		{"enter", Input{Enter: true}, true},

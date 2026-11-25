@@ -3,9 +3,8 @@ package widget
 import (
 	"strings"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -71,13 +70,13 @@ func NextSelectable(items []MenuItem, from, dir int) int {
 // Keys moves the highlight with Up and Down and returns the highlighted
 // row when Enter went down this frame, else -1.
 func (menu *MenuState) Keys(input core.Input) int {
-	if input.Pressed(ebiten.KeyArrowDown) {
+	if input.Pressed(render.KeyArrowDown) {
 		menu.Hot = NextSelectable(menu.Items, menu.Hot, 1)
 	}
-	if input.Pressed(ebiten.KeyArrowUp) {
+	if input.Pressed(render.KeyArrowUp) {
 		menu.Hot = NextSelectable(menu.Items, menu.Hot, -1)
 	}
-	if (input.Enter || input.Pressed(ebiten.KeyEnter)) && menu.Hot >= 0 {
+	if (input.Enter || input.Pressed(render.KeyEnter)) && menu.Hot >= 0 {
 		return menu.Hot
 	}
 	return -1

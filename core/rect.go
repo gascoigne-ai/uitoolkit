@@ -1,7 +1,8 @@
-// Package core is a small GPU-drawn UI toolkit on Ebitengine: theme
-// tokens, a drawing context that works in logical pixels, input
-// sampling and the clipboard. It knows nothing about the application;
-// package view builds declarative views on top of it.
+// Package core is the base of the UI toolkit: theme tokens, a drawing context
+// that works in logical pixels and draws through a render.Canvas, input and
+// the clipboard. It knows nothing about the application; package view builds
+// declarative views on top of it. While callers still hold ebiten images, one
+// file, ebitenbridge.go, turns them into canvases.
 package core
 
 // Rect is an axis-aligned pixel rectangle.

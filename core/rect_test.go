@@ -4,6 +4,8 @@ import (
 	"image/color"
 	"testing"
 	"time"
+
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 )
 
 func TestRectContainsItsTopLeftAndNotItsFarEdges(t *testing.T) {
@@ -39,7 +41,7 @@ func TestInputScaledDividesThePointerByTheScale(t *testing.T) {
 
 // Text measures in logical pixels, so layouts do not shift with the scale.
 func TestMeasureIsScaleStable(t *testing.T) {
-	c, err := NewCtx(testTheme())
+	c, err := NewCtx(testTheme(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -157,7 +159,7 @@ func TestClickCountingNeedsSpeedAndPlace(t *testing.T) {
 // Edges land on device pixels and neighbours share them at every scale.
 func TestSnapSharesEdgesAndLinesAreWholePixels(t *testing.T) {
 	for _, scale := range []float64{1, 1.25, 1.5, 1.75, 2, 2.5, 3} {
-		c, err := NewCtx(testTheme())
+		c, err := NewCtx(testTheme(), ebitenrender.NewDevice())
 		if err != nil {
 			t.Fatal(err)
 		}

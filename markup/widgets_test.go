@@ -1,16 +1,16 @@
 package markup
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"golang.org/x/image/font/gofont/gomono"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	"github.com/gascoigne-ai/uitoolkit/view"
 	"github.com/gascoigne-ai/uitoolkit/widget"
 )
@@ -391,9 +391,9 @@ func TestSliderOptionsAreOnlyForSlider(t *testing.T) {
 	}
 }
 
-func monoFace(t *testing.T) *text.GoTextFaceSource {
+func monoFace(t *testing.T) render.FontSource {
 	t.Helper()
-	face, err := text.NewGoTextFaceSource(bytes.NewReader(gomono.TTF))
+	face, err := ebitenrender.NewDevice().NewFontSource(gomono.TTF)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -420,12 +420,12 @@ func TestFontSourceAttributeMeasuresInTheFaceOfTheScope(t *testing.T) {
 // A font list keeps a nil face for a file it could not read, and Go draws
 // that text in the interface font.
 func TestFontSourceAttributeTakesANilFace(t *testing.T) {
-	if err := buildError(t, `<text font-source="face">x</text>`, Scope{"face": (*text.GoTextFaceSource)(nil)}); err != nil {
+	if err := buildError(t, `<text font-source="face">x</text>`, Scope{"face": (*ebitenrender.FontSource)(nil)}); err != nil {
 		t.Fatal(err)
 	}
 	err := buildError(t, `<text font-source="face">x</text>`, Scope{"face": "Go Mono"})
-	if err == nil || !strings.Contains(err.Error(), "*text.GoTextFaceSource") {
-		t.Errorf("error = %v, want it to say face is not a *text.GoTextFaceSource", err)
+	if err == nil || !strings.Contains(err.Error(), "render.FontSource") {
+		t.Errorf("error = %v, want it to say face is not a render.FontSource", err)
 	}
 }
 

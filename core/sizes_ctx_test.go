@@ -6,6 +6,8 @@ import (
 
 	"golang.org/x/image/font/gofont/gomono"
 	"golang.org/x/image/font/gofont/gomonobold"
+
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 )
 
 // A 24 px font has a line height near 27: the largest text size must not be
@@ -76,7 +78,7 @@ func TestSizesScopeNames(t *testing.T) {
 }
 
 func TestCtxStartsWithSizesOfItsFaces(t *testing.T) {
-	ctx, err := NewCtx(testTheme())
+	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -86,7 +88,7 @@ func TestCtxStartsWithSizesOfItsFaces(t *testing.T) {
 }
 
 func TestCtxSetThemeUpdatesSizes(t *testing.T) {
-	ctx, _ := NewCtx(testTheme())
+	ctx, _ := NewCtx(testTheme(), ebitenrender.NewDevice())
 	large := testTheme()
 	large.FontSize, large.SmallSize = 20, 16
 	if err := ctx.SetTheme(large); err != nil {
@@ -105,7 +107,7 @@ func TestCtxSetThemeUpdatesSizes(t *testing.T) {
 // height; the theme sizes are changed behind SetFonts' back instead, and the
 // call must measure the faces again.
 func TestCtxSetFontsUpdatesSizes(t *testing.T) {
-	ctx, _ := NewCtx(testTheme())
+	ctx, _ := NewCtx(testTheme(), ebitenrender.NewDevice())
 	ctx.Th.FontSize, ctx.Th.SmallSize = 20, 16
 	if err := ctx.SetFonts(FontData{Regular: gomono.TTF, Bold: gomonobold.TTF}, FontData{}); err != nil {
 		t.Fatal(err)
@@ -125,7 +127,7 @@ func TestCtxSetFontsUpdatesSizes(t *testing.T) {
 
 func TestCtxSetScaleKeepsSizes(t *testing.T) {
 	for _, scale := range []float64{1.1, 1.5, 2} {
-		ctx, _ := NewCtx(testTheme())
+		ctx, _ := NewCtx(testTheme(), ebitenrender.NewDevice())
 		before := ctx.Sizes
 		if err := ctx.SetScale(scale); err != nil {
 			t.Fatal(err)

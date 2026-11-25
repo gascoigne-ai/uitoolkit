@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/theming"
 	"github.com/gascoigne-ai/uitoolkit/view"
 	"github.com/gascoigne-ai/uitoolkit/widget"
@@ -98,7 +99,7 @@ func TestForHandlersKeepTheirOwnItem(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctx, err := core.NewCtx(theming.Dark())
+	ctx, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -3,20 +3,22 @@ package core
 import (
 	"testing"
 
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	"golang.org/x/image/font/gofont/gomono"
 	"golang.org/x/image/font/gofont/gomonobold"
 	"golang.org/x/image/font/gofont/goregular"
+
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 )
 
 // proportional reports whether the face gives "i" and "W" different
 // widths, which a monospace font never does.
-func proportional(ctx *Ctx, face *text.GoTextFace) bool {
+func proportional(ctx *Ctx, face render.Face) bool {
 	return ctx.Width(face, "iiiiii") != ctx.Width(face, "WWWWWW")
 }
 
 func TestSetFontsReplacesTheInterfaceAndCodeFaces(t *testing.T) {
-	ctx, err := NewCtx(testTheme())
+	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,7 +37,7 @@ func TestSetFontsReplacesTheInterfaceAndCodeFaces(t *testing.T) {
 }
 
 func TestSetFontsWithEmptyDataGoesBackToTheBuiltInFonts(t *testing.T) {
-	ctx, _ := NewCtx(testTheme())
+	ctx, _ := NewCtx(testTheme(), ebitenrender.NewDevice())
 	if err := ctx.SetFonts(FontData{Regular: gomono.TTF, Bold: gomonobold.TTF}, FontData{Regular: goregular.TTF}); err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +50,7 @@ func TestSetFontsWithEmptyDataGoesBackToTheBuiltInFonts(t *testing.T) {
 }
 
 func TestSetFontsKeepsTheOldFacesWhenTheDataIsNotAFont(t *testing.T) {
-	ctx, _ := NewCtx(testTheme())
+	ctx, _ := NewCtx(testTheme(), ebitenrender.NewDevice())
 	before := ctx.F
 	if err := ctx.SetFonts(FontData{Regular: []byte("nope")}, FontData{}); err == nil {
 		t.Fatal("garbage was accepted as a font")
@@ -59,7 +61,7 @@ func TestSetFontsKeepsTheOldFacesWhenTheDataIsNotAFont(t *testing.T) {
 }
 
 func TestTheChosenFontsSurviveAThemeOrScaleChange(t *testing.T) {
-	ctx, _ := NewCtx(testTheme())
+	ctx, _ := NewCtx(testTheme(), ebitenrender.NewDevice())
 	if err := ctx.SetFonts(FontData{Regular: gomono.TTF, Bold: gomonobold.TTF}, FontData{}); err != nil {
 		t.Fatal(err)
 	}

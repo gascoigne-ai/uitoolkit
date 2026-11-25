@@ -46,9 +46,8 @@
 package view
 
 import (
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 // Node is an element of the view tree. Constructors return *El so
@@ -76,8 +75,8 @@ type El struct {
 	bg, border, borderT, borderB, borderL, borderR core.Token
 	borderInset                                    int // BorderL and BorderR stop this far from the top and bottom
 	hoverBg                                        core.Token
-	fontSource                                     *text.GoTextFaceSource // draws a text in this font instead of the interface one
-	hoverColor                                     core.Token             // an icon's color under the pointer
+	fontSource                                     render.FontSource // draws a text in this font instead of the interface one
+	hoverColor                                     core.Token        // an icon's color under the pointer
 	shadow, clip, lighten                          bool
 
 	text                             string

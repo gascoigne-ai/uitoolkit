@@ -3,6 +3,7 @@ package markup
 import (
 	"fmt"
 	"maps"
+	"reflect"
 	"slices"
 	"strings"
 
@@ -71,7 +72,7 @@ type handlerAttr struct {
 }
 
 func handler[F any](option func(F) view.Option) handlerAttr {
-	want := fmt.Sprintf("%T", *new(F))
+	want := reflect.TypeFor[F]().String()
 	return handlerAttr{
 		bind: func(value any) (view.Option, error) {
 			f, ok := value.(F)
@@ -105,7 +106,7 @@ func stateHandler[T any](option func(*T) view.Option) handlerAttr {
 
 // handlers are the generic attributes whose value names a scope entry,
 // each the Go option in kebab-case: the events, and font-source, a
-// *text.GoTextFaceSource that may be nil (the interface font).
+// render.FontSource that may be a nil pointer (the interface font).
 var handlers = map[string]handlerAttr{
 	"font-source":       handler(view.FontSource),
 	"on-click":          handler(view.OnClick),

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/theming"
 )
 
@@ -385,7 +386,7 @@ func TestMaskedFieldHidesItsTextAndNeverCopiesIt(t *testing.T) {
 		t.Fatalf("an unmasked field displays its text, got %q", plain.Display())
 	}
 
-	c, err := core.NewCtx(theming.Dark())
+	c, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}

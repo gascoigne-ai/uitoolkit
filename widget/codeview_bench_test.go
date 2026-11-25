@@ -7,6 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/theming"
 )
 
@@ -18,7 +19,7 @@ const benchLines = 40000
 
 func benchCodeView(b *testing.B, wrap bool) (*CodeView, *core.Ctx, core.Rect) {
 	b.Helper()
-	ctx, err := core.NewCtx(theming.Dark())
+	ctx, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
 	if err != nil {
 		b.Fatal(err)
 	}

@@ -3,13 +3,15 @@ package core
 import (
 	"strings"
 	"testing"
+
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 )
 
 // Regression: the fonts have no glyph for a tab, so text with one was drawn
 // with the missing-glyph box in its place, one narrow cell wide, in labels
 // and fields as much as in code.
 func TestATabInProportionalTextIsAGapOfFourSpaces(t *testing.T) {
-	ctx, err := NewCtx(testTheme())
+	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}

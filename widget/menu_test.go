@@ -6,9 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -48,11 +47,11 @@ func TestMenuKeysMoveTheHighlightAndEnterPicks(t *testing.T) {
 		wantHot int
 		want    int // the picked row, -1 for none
 	}{
-		{"down", core.Input{Keys: []ebiten.Key{ebiten.KeyArrowDown}}, 1, -1},
-		{"up goes back", core.Input{Keys: []ebiten.Key{ebiten.KeyArrowUp}}, 0, -1},
-		{"up from the first wraps to the last", core.Input{Keys: []ebiten.Key{ebiten.KeyArrowUp}}, 2, -1},
+		{"down", core.Input{Keys: []render.Key{render.KeyArrowDown}}, 1, -1},
+		{"up goes back", core.Input{Keys: []render.Key{render.KeyArrowUp}}, 0, -1},
+		{"up from the first wraps to the last", core.Input{Keys: []render.Key{render.KeyArrowUp}}, 2, -1},
 		{"enter picks the highlighted row", core.Input{Enter: true}, 2, 2},
-		{"enter as a key", core.Input{Keys: []ebiten.Key{ebiten.KeyEnter}}, 2, 2},
+		{"enter as a key", core.Input{Keys: []render.Key{render.KeyEnter}}, 2, 2},
 		{"nothing pressed", core.Input{}, 2, -1},
 	}
 	for _, tt := range tests {
@@ -153,7 +152,7 @@ func TestPopupMenuKeysMoveAndEnterRuns(t *testing.T) {
 	c := testCtx(t)
 	ran := ""
 	OpenMenu(c, 0, 0, []MenuItem{{Label: "a", Run: func() { ran = "a" }}, {Label: "b", Run: func() { ran = "b" }}})
-	PopupMenuKeys(c, core.Input{Keys: []ebiten.Key{ebiten.KeyArrowDown}})
+	PopupMenuKeys(c, core.Input{Keys: []render.Key{render.KeyArrowDown}})
 	if PopupMenu(c).Hot != 1 || ran != "" {
 		t.Fatalf("Down moves only the highlight: hot %d, ran %q", PopupMenu(c).Hot, ran)
 	}
@@ -301,7 +300,7 @@ func TestOpenMenuKeepsItsOwnCopyOfTheState(t *testing.T) {
 	c := testCtx(t)
 	state := NewMenu(3, 4, []MenuItem{{Label: "a"}, {Label: "b"}})
 	OpenMenu(c, state.X, state.Y, state.Items)
-	PopupMenu(c).Keys(core.Input{Keys: []ebiten.Key{ebiten.KeyArrowDown}})
+	PopupMenu(c).Keys(core.Input{Keys: []render.Key{render.KeyArrowDown}})
 	if PopupMenu(c).Hot != 1 || state.Hot != 0 {
 		t.Fatalf("open menu hot %d, constructed value hot %d, want 1 and 0", PopupMenu(c).Hot, state.Hot)
 	}

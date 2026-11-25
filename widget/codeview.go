@@ -10,6 +10,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 // Line is one row of a CodeView. Foldable lines open a block that is
@@ -494,13 +495,13 @@ func (v *CodeView) updateKeys(ctx *core.Ctx, geometry codeGeometry, sizes bars, 
 	}
 	for _, k := range in.Keys {
 		switch k {
-		case ebiten.KeyPageDown:
+		case render.KeyPageDown:
 			v.ScrollY = clampScroll(v.ScrollY+sizes.viewH-geometry.lineH, contentH, sizes.viewH)
-		case ebiten.KeyPageUp:
+		case render.KeyPageUp:
 			v.ScrollY = clampScroll(v.ScrollY-sizes.viewH+geometry.lineH, contentH, sizes.viewH)
-		case ebiten.KeyHome:
+		case render.KeyHome:
 			v.ScrollY = 0
-		case ebiten.KeyEnd:
+		case render.KeyEnd:
 			v.ScrollY = clampScroll(contentH, contentH, sizes.viewH)
 		}
 	}

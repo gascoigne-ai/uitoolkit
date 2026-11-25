@@ -1,13 +1,14 @@
 package widget
 
 import (
-	"github.com/gascoigne-ai/uitoolkit/core"
-	"github.com/gascoigne-ai/uitoolkit/theming"
 	"reflect"
 	"strings"
 	"testing"
 
-	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
+	"github.com/gascoigne-ai/uitoolkit/render"
+	"github.com/gascoigne-ai/uitoolkit/theming"
 )
 
 func TestCodeViewVisibleFolds(t *testing.T) {
@@ -247,7 +248,7 @@ func TestCodeViewWheelScrollsOnlyWhenOver(t *testing.T) {
 
 func TestCodeViewEmptyContentIsHarmless(t *testing.T) {
 	var v CodeView
-	c, err := core.NewCtx(theming.Dark())
+	c, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -259,7 +260,7 @@ func TestCodeViewEmptyContentIsHarmless(t *testing.T) {
 }
 
 func TestCtxSetThemeSwitchesColorsAndFontSizes(t *testing.T) {
-	c, err := core.NewCtx(theming.Dark())
+	c, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -326,27 +327,27 @@ func TestCodeViewPagingKeysWhenFocused(t *testing.T) {
 	r := core.Rect{W: 600, H: 100}
 	v.Focused = true
 	g := v.geometry(c, r)
-	pressed := func(key ebiten.Key) {
-		c.In = core.Input{X: 5000, Y: 5000, Keys: []ebiten.Key{key}}
+	pressed := func(key render.Key) {
+		c.In = core.Input{X: 5000, Y: 5000, Keys: []render.Key{key}}
 		v.Update(c, r)
 	}
 
-	pressed(ebiten.KeyPageDown)
+	pressed(render.KeyPageDown)
 	if v.ScrollY != r.H-g.lineH {
 		t.Fatalf("PageDown moves one page less a line, ScrollY = %d", v.ScrollY)
 	}
-	pressed(ebiten.KeyEnd)
+	pressed(render.KeyEnd)
 	if want := 100*g.lineH - r.H; v.ScrollY != want {
 		t.Fatalf("End = %d, want %d", v.ScrollY, want)
 	}
-	pressed(ebiten.KeyPageUp)
-	pressed(ebiten.KeyHome)
+	pressed(render.KeyPageUp)
+	pressed(render.KeyHome)
 	if v.ScrollY != 0 {
 		t.Fatalf("Home = %d", v.ScrollY)
 	}
 
 	v.Focused = false
-	pressed(ebiten.KeyPageDown)
+	pressed(render.KeyPageDown)
 	if v.ScrollY != 0 {
 		t.Fatal("an unfocused view must ignore paging keys")
 	}
@@ -542,7 +543,7 @@ func TestCodeViewFollowStaysAtTheEndUntilTheUserScrollsUp(t *testing.T) {
 	}
 
 	v.Focused = true
-	c.In = core.Input{X: 5000, Y: 5000, Keys: []ebiten.Key{ebiten.KeyEnd}}
+	c.In = core.Input{X: 5000, Y: 5000, Keys: []render.Key{render.KeyEnd}}
 	v.Update(c, r)
 	if !v.Follow {
 		t.Fatal("scrolling back to the end must resume following")

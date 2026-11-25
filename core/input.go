@@ -6,8 +6,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 // Input is one frame of user input.
@@ -33,7 +32,7 @@ type Input struct {
 	Clicks                      int // 1, 2 or 3 for single, double, triple click (with Click)
 
 	// Keys went down this frame, for application shortcuts.
-	Keys []ebiten.Key
+	Keys []render.Key
 }
 
 // Scaled converts the pointer position from device to logical pixels.
@@ -47,21 +46,21 @@ func (in Input) Scaled(scale float64) Input {
 }
 
 // Pressed reports whether key went down this frame.
-func (in Input) Pressed(key ebiten.Key) bool { return slices.Contains(in.Keys, key) }
+func (in Input) Pressed(key render.Key) bool { return slices.Contains(in.Keys, key) }
 
 // Consume removes keys from this frame's input in every form they take
 // (the Enter, Escape and Tab flags, the edit of an editing key such as Up
 // or Backspace, the Keys list), so a widget under an overlay that used them
 // does not act on them too: Enter that accepts a menu item must not type a
 // line break.
-func (in *Input) Consume(keys ...ebiten.Key) {
+func (in *Input) Consume(keys ...render.Key) {
 	for _, key := range keys {
 		switch key {
-		case ebiten.KeyEnter:
+		case render.KeyEnter:
 			in.Enter = false
-		case ebiten.KeyEscape:
+		case render.KeyEscape:
 			in.Escape = false
-		case ebiten.KeyTab:
+		case render.KeyTab:
 			in.Tab = false
 		}
 		for _, editKey := range editKeys {
@@ -70,7 +69,7 @@ func (in *Input) Consume(keys ...ebiten.Key) {
 			}
 		}
 	}
-	remaining := make([]ebiten.Key, 0, len(in.Keys))
+	remaining := make([]render.Key, 0, len(in.Keys))
 	for _, down := range in.Keys {
 		if !slices.Contains(keys, down) {
 			remaining = append(remaining, down)
@@ -104,19 +103,19 @@ func (in Input) Hit(rect Rect) bool { return in.Click && rect.Contains(in.X, in.
 func (in Input) Over(rect Rect) bool { return rect.Contains(in.X, in.Y) }
 
 var editKeys = []struct {
-	key  ebiten.Key
+	key  render.Key
 	edit Edit
 }{
-	{ebiten.KeyBackspace, EditBackspace},
-	{ebiten.KeyDelete, EditDelete},
-	{ebiten.KeyArrowLeft, EditLeft},
-	{ebiten.KeyArrowRight, EditRight},
-	{ebiten.KeyHome, EditHome},
-	{ebiten.KeyEnd, EditEnd},
-	{ebiten.KeyArrowUp, EditUp},
-	{ebiten.KeyArrowDown, EditDown},
-	{ebiten.KeyPageUp, EditPageUp},
-	{ebiten.KeyPageDown, EditPageDown},
+	{render.KeyBackspace, EditBackspace},
+	{render.KeyDelete, EditDelete},
+	{render.KeyArrowLeft, EditLeft},
+	{render.KeyArrowRight, EditRight},
+	{render.KeyHome, EditHome},
+	{render.KeyEnd, EditEnd},
+	{render.KeyArrowUp, EditUp},
+	{render.KeyArrowDown, EditDown},
+	{render.KeyPageUp, EditPageUp},
+	{render.KeyPageDown, EditPageDown},
 }
 
 // KeyRepeat is how a held key repeats: it fires once when pressed, again
@@ -147,48 +146,57 @@ func ticks(duration time.Duration, tps int) int {
 	return int((duration*time.Duration(tps) + time.Second/2) / time.Second)
 }
 
-func pressed(key ebiten.Key, repeat KeyRepeat) bool {
-	return repeat.Fires(inpututil.KeyPressDuration(key), ebiten.TPS())
-}
-
-// readInput samples the devices for this frame.
-func readInput(goos string, repeat KeyRepeat) Input {
-	x, y := ebiten.CursorPosition()
-	wheelX, wheel := ebiten.Wheel()
+// inputFrom is what a window's report of one tick means on the platform goos
+// with the key repeat timing repeat. A key went down this tick when it has been
+// down for one; an aggregate (KeyShift...) never has, so Keys names physical
+// keys only. Clicks are counted by the Sampler.
+func inputFrom(state render.InputState, goos string, repeat KeyRepeat) Input {
+	held := make(map[render.Key]int, len(state.Down))
+	var keys []render.Key
+	for _, down := range state.Down {
+		held[down.Key] = down.Ticks
+		if down.Ticks == 1 {
+			keys = append(keys, down.Key)
+		}
+	}
+	isDown := func(key render.Key) bool {
+		_, ok := held[key]
+		return ok
+	}
+	wentDown := func(key render.Key) bool { return held[key] == 1 }
 	in := Input{
-		X: x, Y: y,
-		Click:       inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft),
-		Wheel:       wheel,
-		WheelX:      wheelX,
-		Typed:       ebiten.AppendInputChars(nil),
-		Enter:       inpututil.IsKeyJustPressed(ebiten.KeyEnter),
-		Escape:      inpututil.IsKeyJustPressed(ebiten.KeyEscape),
-		Tab:         inpututil.IsKeyJustPressed(ebiten.KeyTab),
-		Held:        ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft),
-		MiddleClick: inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonMiddle),
-		MiddleHeld:  ebiten.IsMouseButtonPressed(ebiten.MouseButtonMiddle),
-		RightClick:  inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight),
-		Keys:        inpututil.AppendJustPressedKeys(nil),
-		Shift:       ebiten.IsKeyPressed(ebiten.KeyShift),
-		Alt:         ebiten.IsKeyPressed(ebiten.KeyAlt),
-		Ctrl:        PrimaryDown(goos, ebiten.IsKeyPressed(ebiten.KeyControl), ebiten.IsKeyPressed(ebiten.KeyMeta)),
+		X: state.X, Y: state.Y,
+		Click:       state.ButtonsPressed&render.MouseLeft != 0,
+		Wheel:       state.WheelY,
+		WheelX:      state.WheelX,
+		Typed:       state.Typed,
+		Enter:       wentDown(render.KeyEnter),
+		Escape:      wentDown(render.KeyEscape),
+		Tab:         wentDown(render.KeyTab),
+		Held:        state.Buttons&render.MouseLeft != 0,
+		MiddleClick: state.ButtonsPressed&render.MouseMiddle != 0,
+		MiddleHeld:  state.Buttons&render.MouseMiddle != 0,
+		RightClick:  state.ButtonsPressed&render.MouseRight != 0,
+		Keys:        keys,
+		Shift:       isDown(render.KeyShift),
+		Alt:         isDown(render.KeyAlt),
+		Ctrl:        PrimaryDown(goos, isDown(render.KeyControl), isDown(render.KeyMeta)),
 	}
 	if in.Ctrl {
-		in.SelectAll = inpututil.IsKeyJustPressed(ebiten.KeyA)
-		in.Copy = inpututil.IsKeyJustPressed(ebiten.KeyC)
-		in.Cut = inpututil.IsKeyJustPressed(ebiten.KeyX)
-		in.Paste = inpututil.IsKeyJustPressed(ebiten.KeyV)
+		in.SelectAll = wentDown(render.KeyA)
+		in.Copy = wentDown(render.KeyC)
+		in.Cut = wentDown(render.KeyX)
+		in.Paste = wentDown(render.KeyV)
+		undoKey := wentDown(render.KeyZ)
+		in.Undo = undoKey && !in.Shift
+		in.Redo = wentDown(render.KeyY) || (undoKey && in.Shift)
 	}
-	if in.Ctrl {
-		z := inpututil.IsKeyJustPressed(ebiten.KeyZ)
-		in.Undo = z && !in.Shift
-		in.Redo = inpututil.IsKeyJustPressed(ebiten.KeyY) || (z && in.Shift)
-	}
-	for _, k := range editKeys {
-		if !pressed(k.key, repeat) {
+	for _, editKey := range editKeys {
+		// A key that is not down has no ticks, and Fires refuses zero.
+		if !repeat.Fires(held[editKey.key], state.TPS) {
 			continue
 		}
-		in.Edits = append(in.Edits, modifiedEdit(goos, k.edit, in.Ctrl, in.Alt))
+		in.Edits = append(in.Edits, modifiedEdit(goos, editKey.edit, in.Ctrl, in.Alt))
 	}
 	return in
 }
@@ -293,9 +301,10 @@ func (s *Sampler) now() time.Time {
 	return time.Now()
 }
 
-// Read samples the devices for this frame, including the click count.
-func (s *Sampler) Read() Input {
-	in := readInput(s.hostOS(), s.Repeat)
+// Sample is the input of the tick a window reported in state, including the
+// click count. Call it once a tick, from Update.
+func (s *Sampler) Sample(state render.InputState) Input {
+	in := inputFrom(state, s.hostOS(), s.Repeat)
 	if in.Click {
 		in.Clicks = s.Click(s.now(), in.X, in.Y)
 	}

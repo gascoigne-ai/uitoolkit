@@ -1,8 +1,9 @@
 ## render: the renderer contract
 
 `render` says what the toolkit draws through and what a renderer runs: `Canvas`, `Image`,
-`Offscreen`, `Path` and `Stroke`, `FontSource` and `Face`, `Key`, `Cursor` and `Host`. No package
-draws through it yet.
+`Offscreen`, `Path` and `Stroke`, `FontSource` and `Face`, `Device`, `InputState`, `Key`, `Cursor`
+and `Host`. `core.Ctx` draws through it; `view` and `widget` still hand it ebiten images (see core,
+Bridge).
 
 Invariants:
 
@@ -26,24 +27,28 @@ Invariants:
   them in shortcut settings; numbers are not. Aggregate modifiers (`KeyControl`...) and the left and
   right ones both exist.
 - **Host.Draw false keeps the previous frame.**
+- **Input is states and durations.** `InputState.Down` lists the keys that are down with how many
+  ticks each has been; 1 is the tick it goes down, a tap within one tick included, so "just
+  pressed" is derived and not reported twice. An aggregate has 0 ticks: it is held, never pressed.
 - **Fakes.** `rendertest.Canvas` and its Subs record one list of ops in paint order, each with the
   bounds it was drawn in. Its `Offscreen` panics on use after `Release`, but still answers
   `Bounds` and `Ops` so a test can read what was drawn. It holds no pixels.
 
 ## ebitenrender: the Ebitengine renderer
 
-`ebitenrender` implements `render` over Ebitengine (`vector`, `text/v2`). `core` does not draw
-through it yet. Of this module it imports only `render`
-(`TestEbitenRenderImportsOnlyRenderAndEbiten`, non-test files); its tests also use `core` and
-`theming` for reference pixels. Input stays in `core` (why: the package doc).
+`ebitenrender` implements `render` over Ebitengine (`vector`, `text/v2`). Of this module it imports
+only `render` (`TestEbitenRenderImportsOnlyRenderAndEbiten`, non-test files). `ReadInput` reports
+the tick as a `render.InputState` and drops a key with no render name; what it means is `core`'s.
 
-- **Copied masks.** `mask.go` is a copy of core's corner and ring mask code and its shape helpers,
-  so a canvas draws core's pixels. Task 003 removes core's copy. A `Device` owns the mask cache
-  (64 entries, dropped whole when full).
-- **Parity.** `coreparity_test.go` draws each shape with `core.Ctx` and through a canvas in one
-  process and requires the same bytes; there are no golden files. As in core, a rounded shape with
-  a radius below one device pixel is square. The one known difference: core fills a square gradient
-  on a box between pixels aliased, a canvas anti-aliased.
+- **Masks.** Rounded fills and outlines are quarters of cached anti-aliased corner masks, in one
+  `DrawTriangles`. A `Device` owns the cache (64 entries, dropped whole when full). It is keyed in
+  device pixels, so a change of scale or theme leaves it valid and drops nothing.
+- **Faces.** A `FontSource` keeps the `text/v2` face of each size (16, then dropped whole), so
+  measuring and drawing text allocate no face a call (`alloc_test.go`).
+- **Shapes.** A rounded shape with a radius below one device pixel is square. A box whose edges are
+  between pixels is anti-aliased.
+- **Bridge.** While the toolkit still passes ebiten images around, `ImageOf` gives the image behind
+  a canvas and `DrawImage` and `DrawMask` take a bare `*ebiten.Image`.
 - **Run-loop `TestMain`.** Ebitengine reads pixels only inside its run loop, so `main_test.go` runs
   the whole test binary inside the first `Update` (no `t.Parallel`), after it points `HOME` and the
   `XDG_*` dirs at a temp dir.
@@ -56,15 +61,27 @@ through it yet. Of this module it imports only `render`
 
 ## core: the toolkit
 
-`core` holds the primitives (`rules.md`, Toolkit API rule 11). Everything except the drawing calls
-is tested without a GPU.
+`core` holds the primitives (`rules.md`, Toolkit API rule 11). It is tested without reading pixels:
+the draw calls are checked against `rendertest.Canvas`.
 
 - **Logical pixels.** Widgets, layout and hit tests work in logical pixels. `Ctx` drawing calls
   multiply by `Scale`, text measures divide by it, and `Input.Scaled` maps the pointer back.
-  `SetScale` and `SetTheme` rebuild the fonts and drop cached masks. This keeps HiDPI sharp.
+  This keeps HiDPI sharp.
+- **Drawing.** `NewCtx` takes a `render.Device`, which loads the fonts; a `Face` is a loaded font
+  and a size, so `SetScale` and `SetTheme` only resize and `SetFonts` alone loads. `Ctx` draw calls
+  turn logical rects into device pixels and call a `render.Canvas`. `Text` is two `DrawText`
+  passes, the second in the color scaled by `StemBoost`. A square gradient is not snapped, so on a
+  box between pixels its edges are anti-aliased.
+- **Bridge** (until task 006). The draw calls take a `core.Surface`: a canvas, or an
+  `*ebiten.Image` that `CanvasOf` wraps with the device, which must be `ebitenrender`'s. It keeps
+  the canvas of the last image, since a frame draws many times on one. `ebitenbridge.go` also holds
+  the old `Clip` (beside `ClipCanvas`), `EbitenImage` and `Sampler.Read`; it is the only file of
+  `core` that imports Ebitengine or `ebitenrender` (`TestOnlyTheBridgeImportsEbiten`).
 - **Theme and tokens**: the look, the tokens and the theme pipeline are in `style.md`.
-- **Input.** `Sampler.Read` samples the frame's pointer, wheel, runes and edit keys and counts
-  clicks. `modifiedEdit` is the per-platform table that turns modifiers into word and line edits.
+- **Input.** `Sampler.Sample` turns a `render.InputState` into the frame's `Input` and counts
+  clicks (`Sampler.Read` is `Sample` of `ebitenrender.ReadInput`). The pure `inputFrom` derives
+  presses, shortcuts and edit keys with their repeat; `modifiedEdit` is the per-platform table that
+  turns modifiers into word and line edits. `Input.Keys` holds `render.Key`.
 - **Clipboard.** `SystemClipboard` runs the platform's clipboard tools: Ebitengine has no clipboard
   API, and no dependency is added for it.
 - **Text editors live in `widget`** (`doc.go`): `TextField` (one line, undo), `TextArea` (a
@@ -206,9 +223,6 @@ Each is also said in the doc comment of what breaks the rule; a new exception ad
 - Ports of at most about five methods (`common/architecture-style.md`): `render.Canvas` has 13.
   Each is one thing a GPU backend draws in its own way and a caller needs all of them, so a split
   would only make every caller ask for every part.
-- Rule 8 (one data shape, one type): `render.Corners` and `render.Cursor` duplicate `core.Corners`
-  and `core.Cursor` (which is an `int`) for now. Task 003 makes `core.Corners` an alias and removes
-  the duplicates.
 
 ## Toolkit: widgets and drawing
 
@@ -226,13 +240,14 @@ Each is also said in the doc comment of what breaks the rule; a new exception ad
   (`iconMask`).
 - **Sharp edges.** `Ctx.Fill`, `Outline`, `HLine` and `VLine` snap each logical edge to device
   pixels (`Ctx.snap`), so neighbours share an edge, and draw lines `Ctx.LineWidth()` thick. Rounded
-  fills and outlines (`FillStyled`, `OutlineStyled`) snap the same way and draw from cached corner
-  masks in one `DrawTriangles` (`core/cornermask.go`). `Ctx.Stats` counts mask builds and `Width`
-  calls; `BenchmarkDrawStats` in `internal/ui/window` reports them.
+  fills and outlines (`FillStyled`, `OutlineStyled`) snap the same way and are one canvas call,
+  which `ebitenrender` draws from cached corner masks. `Ctx.Stats` counts those calls
+  (`MaskFills`, `RingFills`) and the real measurements; `BenchmarkDrawStats` in
+  `internal/ui/window` reports them.
 - **Caret blink** follows the clock (`Ctx.CaretVisible`), not ticks, so its rate holds when the idle
   app drops from 60 to 30 updates. `engine.MinFPS` (10) draws at least every 100 ms, so a phase
   change shows.
-- **Width cache.** `Ctx.Width` remembers a measured string by font source, size and text (up to
+- **Width cache.** `Ctx.Width` remembers a measured string by face (font source and size) and text (up to
   4096 entries, then the map is dropped); `SetScale`, `SetTheme` and `SetFonts` clear it. An
   element's own font makes a new face value each call, so the key is what the face is made of,
   not its address. `DrawStats.Widths` counts real measurements only. `Ctx.Advance` (the exact advance

@@ -11,7 +11,7 @@ import (
 	"golang.org/x/image/font/gofont/goregular"
 )
 
-func newFont(t *testing.T) *ebitenrender.FontSource {
+func newFont(t *testing.T) render.FontSource {
 	t.Helper()
 	source, err := ebitenrender.NewDevice().NewFontSource(goregular.TTF)
 	if err != nil {

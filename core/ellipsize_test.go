@@ -5,12 +5,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/gascoigne-ai/uitoolkit/render"
+
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 )
 
 // ellipsizeByDropping is the first Ellipsize: it drops one rune per step.
 // It stays here as the oracle the faster search must agree with.
-func ellipsizeByDropping(c *Ctx, face *text.GoTextFace, content string, maxW int) string {
+func ellipsizeByDropping(c *Ctx, face render.Face, content string, maxW int) string {
 	if c.Width(face, content) <= maxW {
 		return content
 	}
@@ -25,7 +27,7 @@ func ellipsizeByDropping(c *Ctx, face *text.GoTextFace, content string, maxW int
 }
 
 func TestEllipsizeShortensToFit(t *testing.T) {
-	ctx, err := NewCtx(testTheme())
+	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +56,7 @@ func TestEllipsizeShortensToFit(t *testing.T) {
 }
 
 func TestEllipsizeAgreesWithDroppingOneRuneAtATime(t *testing.T) {
-	ctx, err := NewCtx(testTheme())
+	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}

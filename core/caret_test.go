@@ -4,10 +4,12 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 )
 
 func TestTheCaretBlinksOnAWallClockAndRestartsOnActivity(t *testing.T) {
-	ctx, err := NewCtx(testTheme())
+	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,7 +41,7 @@ func TestTheCaretBlinksOnAWallClockAndRestartsOnActivity(t *testing.T) {
 func TestTheBlinkRateDoesNotDependOnTheUpdateRate(t *testing.T) {
 	// the phase is a function of time only: the same instant gives the same
 	// answer however many ticks have passed
-	ctx, _ := NewCtx(testTheme())
+	ctx, _ := NewCtx(testTheme(), ebitenrender.NewDevice())
 	start := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
 	ctx.Now = func() time.Time { return start.Add(600 * time.Millisecond) }
 	ctx.CaretSince = start
@@ -55,7 +57,7 @@ func TestTheBlinkRateDoesNotDependOnTheUpdateRate(t *testing.T) {
 // a long single line took time quadratic in its length: minutes for a
 // paste of a few hundred KB.
 func TestCursorAtOnALongLineIsFastAndStillExact(t *testing.T) {
-	ctx, err := NewCtx(testTheme())
+	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -86,7 +88,7 @@ func TestCursorAtOnALongLineIsFastAndStillExact(t *testing.T) {
 // A drawing kept across frames needs to know whether it shows the blink
 // phase; CaretReads counts the reads, whatever they answer.
 func TestCaretVisibleCountsReads(t *testing.T) {
-	ctx, err := NewCtx(testTheme())
+	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}

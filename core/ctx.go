@@ -1,7 +1,6 @@
 package core
 
 import (
-	"bytes"
 	"fmt"
 	"image"
 	"image/color"
@@ -10,16 +9,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	"golang.org/x/image/font/gofont/gobold"
 	"golang.org/x/image/font/gofont/gomono"
 	"golang.org/x/image/font/gofont/goregular"
 )
 
 // Fonts are the faces the toolkit draws with: UI and Small text, Mono for code, and bold forms of UI and Small.
-type Fonts struct{ UI, Small, Mono, Bold, SmallBold *text.GoTextFace }
+type Fonts struct{ UI, Small, Mono, Bold, SmallBold render.Face }
 
 // FontData is the content of a regular and a bold font file. The zero
 // value means the embedded Go font.
@@ -36,40 +33,48 @@ func (d FontData) withDefault(regular, bold []byte) FontData {
 	return d
 }
 
-// newFonts builds the faces from the chosen fonts (the embedded Go fonts
-// where none was chosen), sized for a display with the given device scale
-// factor.
-func newFonts(th Theme, scale float64, chosen FontChoice) (Fonts, Sizes, error) {
+// fontSources are the fonts a Ctx draws with, as its device loaded them. A
+// face is one of them at a size, so a change of scale or theme loads nothing.
+type fontSources struct{ regular, bold, mono render.FontSource }
+
+// loadFonts loads the chosen fonts (the embedded Go fonts where none was
+// chosen) through device.
+func loadFonts(device render.Device, chosen FontChoice) (fontSources, error) {
 	ui := chosen.UI.withDefault(goregular.TTF, gobold.TTF)
 	code := chosen.Code.withDefault(gomono.TTF, gobold.TTF)
-	regular, err := text.NewGoTextFaceSource(bytes.NewReader(ui.Regular))
+	regular, err := device.NewFontSource(ui.Regular)
 	if err != nil {
-		return Fonts{}, Sizes{}, fmt.Errorf("load regular font: %w", err)
+		return fontSources{}, fmt.Errorf("load regular font: %w", err)
 	}
-	bold, err := text.NewGoTextFaceSource(bytes.NewReader(ui.Bold))
+	bold, err := device.NewFontSource(ui.Bold)
 	if err != nil {
-		return Fonts{}, Sizes{}, fmt.Errorf("load bold font: %w", err)
+		return fontSources{}, fmt.Errorf("load bold font: %w", err)
 	}
-	mono, err := text.NewGoTextFaceSource(bytes.NewReader(code.Regular))
+	mono, err := device.NewFontSource(code.Regular)
 	if err != nil {
-		return Fonts{}, Sizes{}, fmt.Errorf("load mono font: %w", err)
+		return fontSources{}, fmt.Errorf("load mono font: %w", err)
 	}
-	fonts := Fonts{
-		UI:        &text.GoTextFace{Source: regular, Size: th.FontSize * scale},
-		Small:     &text.GoTextFace{Source: regular, Size: th.SmallSize * scale},
-		Mono:      &text.GoTextFace{Source: mono, Size: th.MonoSize * scale},
-		Bold:      &text.GoTextFace{Source: bold, Size: th.FontSize * scale},
-		SmallBold: &text.GoTextFace{Source: bold, Size: th.SmallSize * scale},
+	return fontSources{regular: regular, bold: bold, mono: mono}, nil
+}
+
+// facesOf are the faces of sources at the sizes of the theme, for a display
+// with the given device scale factor.
+func facesOf(th Theme, sources fontSources, scale float64) Fonts {
+	return Fonts{
+		UI:        render.Face{Source: sources.regular, Size: th.FontSize * scale},
+		Small:     render.Face{Source: sources.regular, Size: th.SmallSize * scale},
+		Mono:      render.Face{Source: sources.mono, Size: th.MonoSize * scale},
+		Bold:      render.Face{Source: sources.bold, Size: th.FontSize * scale},
+		SmallBold: render.Face{Source: sources.bold, Size: th.SmallSize * scale},
 	}
-	return fonts, sizesOf(th, regular), nil
 }
 
 // sizesOf measures the line heights of the theme's UI and small faces at
 // scale 1, as LineH does, so the sizes never depend on the device scale.
-func sizesOf(th Theme, regular *text.GoTextFaceSource) Sizes {
+func sizesOf(th Theme, regular render.FontSource) Sizes {
 	line := func(size float64) int {
-		metrics := (&text.GoTextFace{Source: regular, Size: size}).Metrics()
-		return int(metrics.HAscent + metrics.HDescent + 0.5)
+		metrics := regular.Metrics(size)
+		return int(metrics.Ascent + metrics.Descent + 0.5)
 	}
 	return SizesFor(line(th.FontSize), line(th.SmallSize))
 }
@@ -91,6 +96,13 @@ type Focuser interface {
 type Ctx struct {
 	Th Theme
 	F  Fonts
+	// Device is the renderer's, which loads the fonts of F. NewCtx sets it and
+	// nothing changes it after: F would keep the fonts of the old one.
+	Device render.Device
+	// sources are the loaded fonts behind F.
+	sources fontSources
+	// bridge turns the ebiten images drawn on into canvases (ebitenbridge.go).
+	bridge ebitenBridge
 	// Sizes follow the line heights of F: set by NewCtx, SetTheme and
 	// SetFonts, never by SetScale, since the scale multiplies at draw time.
 	Sizes Sizes
@@ -141,8 +153,6 @@ type Ctx struct {
 	// it; nil in the app, where counting costs one nil check.
 	Stats *DrawStats
 
-	// masks caches the corner masks of rounded fills; maskMaker builds one
-	// and is nil in the app (a test sets it to need no GPU).
 	// widths caches Width by face and text; see widthKey.
 	widths map[widthKey]int
 	// advances caches Advance by face; see faceKey. Cleared with widths.
@@ -150,10 +160,6 @@ type Ctx struct {
 
 	// sizeScope is the memo of SizesScope.
 	sizeScope sizeScope
-
-	masks     *cornerMasks
-	maskMaker func(radius int) *ebiten.Image
-	ringMaker func(radius, width int) *ebiten.Image
 
 	// TipText is the tooltip text of the element under the pointer, set by
 	// view.Draw for widget.TooltipLayer to show.
@@ -181,24 +187,29 @@ type Ctx struct {
 }
 
 // Cursor is a mouse cursor shape.
-type Cursor int
+type Cursor = render.Cursor
 
+// The cursor shapes.
 const (
-	CursorDefault    Cursor = iota
-	CursorResizeH           // resize left/right, over a vertical divider
-	CursorResizeV           // resize up/down, over a horizontal divider
-	CursorResizeNWSE        // resize along a diagonal, over a top-left or bottom-right corner
-	CursorResizeNESW        // resize along the other diagonal
-	CursorMove              // something is held and being moved: a row, a tab
+	CursorDefault    = render.CursorDefault
+	CursorResizeH    = render.CursorResizeH    // resize left/right, over a vertical divider
+	CursorResizeV    = render.CursorResizeV    // resize up/down, over a horizontal divider
+	CursorResizeNWSE = render.CursorResizeNWSE // resize along a diagonal, over a top-left or bottom-right corner
+	CursorResizeNESW = render.CursorResizeNESW // resize along the other diagonal
+	CursorMove       = render.CursorMove       // something is held and being moved: a row, a tab
 )
 
-// NewCtx returns a context at scale 1.
-func NewCtx(th Theme) (*Ctx, error) {
-	fonts, sizes, err := newFonts(th, 1, FontChoice{})
+// NewCtx returns a context at scale 1 that draws with the renderer device
+// belongs to.
+func NewCtx(th Theme, device render.Device) (*Ctx, error) {
+	sources, err := loadFonts(device, FontChoice{})
 	if err != nil {
 		return nil, err
 	}
-	return &Ctx{Th: th, F: fonts, Sizes: sizes, Scale: 1, Clipboard: SystemClipboard(), HostOS: runtime.GOOS}, nil
+	return &Ctx{
+		Th: th, F: facesOf(th, sources, 1), Sizes: sizesOf(th, sources.regular), Device: device, sources: sources,
+		Scale: 1, Clipboard: SystemClipboard(), HostOS: runtime.GOOS,
+	}, nil
 }
 
 // sizeScope is the Sizes.Scope of one Sizes value, kept so a frame that
@@ -250,31 +261,23 @@ func (c *Ctx) CaretVisible() bool {
 	return (c.now().Sub(c.CaretSince)/CaretHalfPeriod)%2 == 0
 }
 
-// SetScale rebuilds the fonts when the device scale factor changes, for
-// example when the window moves to another monitor.
+// SetScale resizes the faces when the device scale factor changes, for
+// example when the window moves to another monitor. The fonts are loaded
+// already, so the error is always nil.
 func (c *Ctx) SetScale(scale float64) error {
 	if scale <= 0 || scale == c.Scale {
 		return nil
 	}
-	fonts, _, err := newFonts(c.Th, scale, c.Chosen)
-	if err != nil {
-		return err
-	}
-	c.F, c.Scale = fonts, scale
+	c.F, c.Scale = facesOf(c.Th, c.sources, scale), scale
 	c.widths, c.advances = nil, nil
-	c.resetMasks()
 	return nil
 }
 
-// SetTheme switches theme and rebuilds the fonts, whose sizes the theme sets.
+// SetTheme switches theme and resizes the faces, whose sizes the theme sets.
+// The fonts are loaded already, so the error is always nil.
 func (c *Ctx) SetTheme(th Theme) error {
-	fonts, sizes, err := newFonts(th, c.Scale, c.Chosen)
-	if err != nil {
-		return err
-	}
-	c.Th, c.F, c.Sizes = th, fonts, sizes
+	c.Th, c.F, c.Sizes = th, facesOf(th, c.sources, c.Scale), sizesOf(th, c.sources.regular)
 	c.widths, c.advances = nil, nil
-	c.resetMasks()
 	return nil
 }
 
@@ -282,11 +285,12 @@ func (c *Ctx) SetTheme(th Theme) error {
 // embedded font. Fonts that cannot be read change nothing.
 func (c *Ctx) SetFonts(ui, code FontData) error {
 	chosen := FontChoice{UI: ui, Code: code}
-	fonts, sizes, err := newFonts(c.Th, c.Scale, chosen)
+	sources, err := loadFonts(c.Device, chosen)
 	if err != nil {
 		return err
 	}
-	c.Chosen, c.F, c.Sizes = chosen, fonts, sizes
+	c.Chosen, c.sources = chosen, sources
+	c.F, c.Sizes = facesOf(c.Th, sources, c.Scale), sizesOf(c.Th, sources.regular)
 	c.widths, c.advances = nil, nil
 	return nil
 }
@@ -304,6 +308,11 @@ func (c *Ctx) devRect(rect Rect) (x0, y0, x1, y1 float32) {
 	return c.dev(float32(rect.X)), c.dev(float32(rect.Y)), c.dev(float32(rect.X + rect.W)), c.dev(float32(rect.Y + rect.H))
 }
 
+// snapBox is rect in device pixels, each edge on a whole one.
+func (c *Ctx) snapBox(rect Rect) render.Box {
+	return render.Box{X0: c.snap(rect.X), Y0: c.snap(rect.Y), X1: c.snap(rect.X + rect.W), Y1: c.snap(rect.Y + rect.H)}
+}
+
 // snap is a logical coordinate as a device pixel position. Rounding the
 // edges (not the sizes) lets neighbouring rectangles share an edge at any
 // scale, with no gap or overlap.
@@ -315,52 +324,46 @@ func (c *Ctx) snap(pixels int) float32 { return float32(math.Round(float64(pixel
 func (c *Ctx) LineWidth() float32 { return float32(max(1, math.Round(c.Scale))) }
 
 // Fill paints r with clr, its edges on device pixels.
-func (c *Ctx) Fill(dst *ebiten.Image, rect Rect, clr color.RGBA) {
-	x0, y0 := c.snap(rect.X), c.snap(rect.Y)
-	vector.FillRect(dst, x0, y0, c.snap(rect.X+rect.W)-x0, c.snap(rect.Y+rect.H)-y0, clr, false)
+func (c *Ctx) Fill(dst Surface, rect Rect, clr color.RGBA) {
+	c.CanvasOf(dst).FillRect(c.snapBox(rect), clr)
 }
 
 // Outline strokes a one-pixel border just inside r.
-func (c *Ctx) Outline(dst *ebiten.Image, rect Rect, clr color.RGBA) {
-	w := c.LineWidth()
-	x0, y0 := c.snap(rect.X), c.snap(rect.Y)
-	vector.StrokeRect(dst, x0+w/2, y0+w/2, c.snap(rect.X+rect.W)-x0-w, c.snap(rect.Y+rect.H)-y0-w, w, clr, false)
+func (c *Ctx) Outline(dst Surface, rect Rect, clr color.RGBA) {
+	c.CanvasOf(dst).StrokeRect(c.snapBox(rect), c.LineWidth(), clr)
 }
 
 // HLine draws a one-pixel horizontal line.
-func (c *Ctx) HLine(dst *ebiten.Image, posX, posY, width int, clr color.RGBA) {
-	x0 := c.snap(posX)
-	vector.FillRect(dst, x0, c.snap(posY), c.snap(posX+width)-x0, c.LineWidth(), clr, false)
+func (c *Ctx) HLine(dst Surface, posX, posY, width int, clr color.RGBA) {
+	top := c.snap(posY)
+	c.CanvasOf(dst).FillRect(render.Box{X0: c.snap(posX), Y0: top, X1: c.snap(posX + width), Y1: top + c.LineWidth()}, clr)
 }
 
 // VLine draws a one-pixel vertical line.
-func (c *Ctx) VLine(dst *ebiten.Image, posX, posY, height int, clr color.RGBA) {
-	y0 := c.snap(posY)
-	vector.FillRect(dst, c.snap(posX), y0, c.LineWidth(), c.snap(posY+height)-y0, clr, false)
+func (c *Ctx) VLine(dst Surface, posX, posY, height int, clr color.RGBA) {
+	left := c.snap(posX)
+	c.CanvasOf(dst).FillRect(render.Box{X0: left, Y0: c.snap(posY), X1: left + c.LineWidth(), Y1: c.snap(posY + height)}, clr)
 }
 
-// Clip returns dst limited to r, so drawing outside r is discarded.
-func (c *Ctx) Clip(dst *ebiten.Image, rect Rect) *ebiten.Image {
-	b := dst.Bounds()
-	x0 := max(int(c.dev(float32(rect.X))), b.Min.X)
-	y0 := max(int(c.dev(float32(rect.Y))), b.Min.Y)
-	x1 := min(int(c.dev(float32(rect.X+rect.W))+0.5), b.Max.X)
-	y1 := min(int(c.dev(float32(rect.Y+rect.H))+0.5), b.Max.Y)
-	return dst.SubImage(image.Rect(x0, y0, max(x1, x0), max(y1, y0))).(*ebiten.Image)
+// ClipCanvas returns canvas limited to r, so drawing outside r is discarded.
+func (c *Ctx) ClipCanvas(canvas render.Canvas, rect Rect) render.Canvas {
+	left, top, right, bottom := c.devRect(rect)
+	least := image.Pt(int(left), int(top))
+	most := image.Pt(max(int(right+0.5), least.X), max(int(bottom+0.5), least.Y))
+	return canvas.Sub(image.Rectangle{Min: least, Max: most})
 }
 
 // Width is the logical width of s in face, a tab as a gap of TabStop
 // spaces (as Text draws it).
-func (c *Ctx) Width(face *text.GoTextFace, content string) int {
-	key := widthKey{source: face.Source, size: face.Size, content: content}
+func (c *Ctx) Width(face render.Face, content string) int {
+	key := widthKey{face: face, content: content}
 	if width, ok := c.widths[key]; ok {
 		return width
 	}
 	if c.Stats != nil {
 		c.Stats.Widths++
 	}
-	w, _ := text.Measure(tabsAsGaps(content), face, 0)
-	width := int(w/c.Scale + 0.5)
+	width := int(face.Measure(tabsAsGaps(content))/c.Scale + 0.5)
 	if len(c.widths) >= widthCacheLimit {
 		clear(c.widths)
 	}
@@ -378,22 +381,16 @@ func (c *Ctx) Width(face *text.GoTextFace, content string) int {
 // when a frame's hit rate falls under 80%.
 const widthCacheLimit = 4096
 
-// widthKey is what a width depends on. Every face the toolkit makes sets
-// only its font source and size, so these two stand for the face, and an
-// element's own font (a new face value each call) still hits. The scale
-// is not in the key: SetScale drops the cache.
+// widthKey is what a width depends on. A face is its font source and size, so
+// an element's own font (a new face value each call) still hits. The scale is
+// not in the key: SetScale drops the cache.
 type widthKey struct {
-	source  *text.GoTextFaceSource
-	size    float64
+	face    render.Face
 	content string
 }
 
-// faceKey is what a face's metrics depend on, like widthKey without the
-// text.
-type faceKey struct {
-	source *text.GoTextFaceSource
-	size   float64
-}
+// faceKey is what a face's metrics depend on: the face.
+type faceKey = render.Face
 
 // Advance is the exact logical width of one character of a monospace face,
 // not rounded: columns placed at whole multiples of the rounded Width drift
@@ -401,31 +398,29 @@ type faceKey struct {
 // once per face and kept until the scale, theme or fonts change, because
 // every mono widget asks for it several times a frame. The map holds one
 // entry per face, so it needs no bound.
-func (c *Ctx) Advance(face *text.GoTextFace) float64 {
-	key := faceKey{source: face.Source, size: face.Size}
-	if advance, ok := c.advances[key]; ok {
+func (c *Ctx) Advance(face render.Face) float64 {
+	if advance, ok := c.advances[face]; ok {
 		return advance
 	}
 	if c.Stats != nil {
 		c.Stats.Advances++
 	}
-	w, _ := text.Measure("0", face, 0)
-	advance := w / c.Scale
+	advance := face.Measure("0") / c.Scale
 	if c.advances == nil {
 		c.advances = map[faceKey]float64{}
 	}
-	c.advances[key] = advance
+	c.advances[face] = advance
 	return advance
 }
 
 // LineH is the logical line height of face.
-func (c *Ctx) LineH(face *text.GoTextFace) int {
-	m := face.Metrics()
-	return int((m.HAscent+m.HDescent)/c.Scale + 0.5)
+func (c *Ctx) LineH(face render.Face) int {
+	metrics := face.Metrics()
+	return int((metrics.Ascent+metrics.Descent)/c.Scale + 0.5)
 }
 
 // Ascent is the logical distance from the top of a line of face to its baseline.
-func (c *Ctx) Ascent(face *text.GoTextFace) int { return int(face.Metrics().HAscent/c.Scale + 0.5) }
+func (c *Ctx) Ascent(face render.Face) int { return int(face.Metrics().Ascent/c.Scale + 0.5) }
 
 // StemBoost is how much heavier text is drawn than its plain coverage:
 // Ctx.Text draws a second pass of the same glyphs at this alpha, so a
@@ -445,38 +440,44 @@ func textPasses(strength float32) []float32 { return []float32{1, strength} }
 
 // Text draws s with its top-left at x, y.
 //
-// Glyphs are unhinted outlines placed at fractional x positions (text/v2
-// keeps up to 8 subpixel variants per glyph; y snaps to a whole device
-// pixel), drawn twice at the same place so partly covered edge pixels get
-// heavier by StemBoost, like the stem darkening of macOS text. Why a
-// second pass rather than a coverage shader or a wider outline: the pass
-// changes only partial pixels, never the outline or the advances, so Width,
-// Advance and LineH measure exactly what is drawn (style.md, Typography).
-func (c *Ctx) Text(dst *ebiten.Image, face *text.GoTextFace, content string, posX, posY int, clr color.RGBA) {
+// Glyphs are unhinted outlines placed at fractional x positions (the
+// Ebitengine renderer keeps up to 8 subpixel variants per glyph; y snaps to a
+// whole device pixel), drawn twice at the same place so partly covered edge
+// pixels get heavier by StemBoost, like the stem darkening of macOS text. The
+// second pass takes the color scaled by StemBoost. Why a second pass rather
+// than a coverage shader or a wider outline: the pass changes only partial
+// pixels, never the outline or the advances, so Width, Advance and LineH
+// measure exactly what is drawn (style.md, Typography).
+func (c *Ctx) Text(dst Surface, face render.Face, content string, posX, posY int, clr color.RGBA) {
+	canvas := c.CanvasOf(dst)
 	content = tabsAsGaps(content)
+	left, top := float64(posX)*c.Scale, float64(posY)*c.Scale
 	for _, alpha := range textPasses(StemBoost) {
-		op := &text.DrawOptions{}
-		op.GeoM.Translate(float64(posX)*c.Scale, float64(posY)*c.Scale)
-		op.ColorScale.ScaleWithColor(clr)
-		op.ColorScale.ScaleAlpha(alpha)
-		text.Draw(dst, content, face, op)
+		canvas.DrawText(face, content, left, top, fade(clr, alpha))
 	}
 }
 
+// fade is the premultiplied clr at alpha: every channel scaled, rounded to the
+// nearest step.
+func fade(clr color.RGBA, alpha float32) color.RGBA {
+	scaled := func(value uint8) uint8 { return uint8(float32(value)*alpha + 0.5) }
+	return color.RGBA{R: scaled(clr.R), G: scaled(clr.G), B: scaled(clr.B), A: scaled(clr.A)}
+}
+
 // TextMid draws s starting at x, vertically centered in r.
-func (c *Ctx) TextMid(dst *ebiten.Image, face *text.GoTextFace, content string, posX int, rect Rect, clr color.RGBA) {
+func (c *Ctx) TextMid(dst Surface, face render.Face, content string, posX int, rect Rect, clr color.RGBA) {
 	c.Text(dst, face, content, posX, rect.Y+(rect.H-c.LineH(face))/2, clr)
 }
 
 // TextCenter draws s centered in r.
-func (c *Ctx) TextCenter(dst *ebiten.Image, face *text.GoTextFace, content string, rect Rect, clr color.RGBA) {
+func (c *Ctx) TextCenter(dst Surface, face render.Face, content string, rect Rect, clr color.RGBA) {
 	c.TextMid(dst, face, content, rect.X+(rect.W-c.Width(face, content))/2, rect, clr)
 }
 
 // Ellipsize shortens s with "..." until it fits maxW pixels. The longest
 // prefix whose trimmed form plus the dots fits is found by binary search on
 // the rune count, as CursorAt does, not by measuring every prefix.
-func (c *Ctx) Ellipsize(face *text.GoTextFace, content string, maxW int) string {
+func (c *Ctx) Ellipsize(face render.Face, content string, maxW int) string {
 	if c.Width(face, content) <= maxW {
 		return content
 	}
@@ -528,15 +529,9 @@ func abs(count int) int {
 }
 
 // Line draws an antialiased segment between logical points.
-func (c *Ctx) Line(dst *ebiten.Image, x0, y0, x1, y1, width float32, clr color.RGBA) {
-	vector.StrokeLine(dst, c.dev(x0), c.dev(y0), c.dev(x1), c.dev(y1), c.dev(width), clr, true)
+func (c *Ctx) Line(dst Surface, x0, y0, x1, y1, width float32, clr color.RGBA) {
+	c.CanvasOf(dst).StrokeLine(c.dev(x0), c.dev(y0), c.dev(x1), c.dev(y1), c.dev(width), clr)
 }
-
-var gradientSrc = func() *ebiten.Image {
-	img := ebiten.NewImage(1, 1)
-	img.Fill(color.White)
-	return img
-}()
 
 // Radius is the corner radius of the named control in this theme, after
 // the user's corner setting: what every component draws its corners with.
@@ -544,8 +539,9 @@ func (c *Ctx) Radius(control string) float64 { return c.Th.Style(control).Radius
 
 // FillStyled paints r the way a control style says: a flat or vertical
 // gradient fill from top to bottom, with rounded corners when the style
-// has a radius. Square flat fills stay on the crisp rectangle path.
-func (c *Ctx) FillStyled(dst *ebiten.Image, rect Rect, top, bottom color.RGBA, radius float64) {
+// has a radius. Square flat fills stay on the crisp rectangle path; a square
+// gradient is not snapped to device pixels.
+func (c *Ctx) FillStyled(dst Surface, rect Rect, top, bottom color.RGBA, radius float64) {
 	if radius*c.Scale >= 1 {
 		c.fillRounded(dst, rect, top, bottom, radius, CornersAll)
 		return
@@ -554,99 +550,50 @@ func (c *Ctx) FillStyled(dst *ebiten.Image, rect Rect, top, bottom color.RGBA, r
 		c.Fill(dst, rect, top)
 		return
 	}
-	x0, y0, x1, y1 := c.devRect(rect)
-	c.fillGradient(dst, rectPath(x0, y0, x1, y1), y0, y1, top, bottom)
+	left, upper, right, lower := c.devRect(rect)
+	c.CanvasOf(dst).FillRectGradient(render.Box{X0: left, Y0: upper, X1: right, Y1: lower}, top, bottom)
 }
 
-// fillGradient fills the square-cornered path, which spans y0 to y1 (device
-// pixels), from top to bottom.
-func (c *Ctx) fillGradient(dst *ebiten.Image, path *vector.Path, y0, y1 float32, top, bottom color.RGBA) {
-	verts, idx := path.AppendVerticesAndIndicesForFilling(nil, nil)
-	for i := range verts {
-		verts[i].ColorR, verts[i].ColorG, verts[i].ColorB, verts[i].ColorA = gradientAt(top, bottom, y0, y1, verts[i].DstY)
-		verts[i].SrcX, verts[i].SrcY = 0.5, 0.5
-	}
-	if len(verts) == 0 {
-		return
-	}
-	dst.DrawTriangles(verts, idx, gradientSrc, &ebiten.DrawTrianglesOptions{})
-}
-
-// fillRounded paints rect with the corners in the set rounded: the edges
-// snap to device pixels as Fill's do, and the corners are quarters of a
-// cached anti-aliased disc, so the whole fill is one DrawTriangles with no
-// offscreen. The gradient rides on the vertex colors.
-func (c *Ctx) fillRounded(dst *ebiten.Image, rect Rect, top, bottom color.RGBA, radius float64, corners Corners) {
-	x0, y0 := c.snap(rect.X), c.snap(rect.Y)
-	x1, y1 := c.snap(rect.X+rect.W), c.snap(rect.Y+rect.H)
-	r := min(float32(max(1, math.Round(float64(c.dev(float32(radius)))))), float32(math.Floor(float64(min(x1-x0, y1-y0))/2)))
-	if r < 1 || corners == 0 {
-		c.fillGradient(dst, rectPath(x0, y0, x1, y1), y0, y1, top, bottom)
-		return
-	}
-	mask := c.cornerMask(int(r))
-	quads := sliceQuads(x0, y0, x1, y1, r, corners)
-	verts := make([]ebiten.Vertex, 0, 4*len(quads))
-	idx := make([]uint16, 0, 6*len(quads))
-	for _, q := range quads {
-		base := uint16(len(verts))
-		for _, corner := range [4][4]float32{
-			{q.dst.x0, q.dst.y0, q.src.x0, q.src.y0}, {q.dst.x1, q.dst.y0, q.src.x1, q.src.y0},
-			{q.dst.x1, q.dst.y1, q.src.x1, q.src.y1}, {q.dst.x0, q.dst.y1, q.src.x0, q.src.y1},
-		} {
-			red, green, blue, alpha := gradientAt(top, bottom, y0, y1, corner[1])
-			verts = append(verts, ebiten.Vertex{DstX: corner[0], DstY: corner[1], SrcX: corner[2], SrcY: corner[3], ColorR: red, ColorG: green, ColorB: blue, ColorA: alpha})
-		}
-		idx = append(idx, base, base+1, base+2, base, base+2, base+3)
-	}
+// fillRounded paints rect with the corners in the set rounded, its edges
+// snapped to device pixels as Fill's are.
+func (c *Ctx) fillRounded(dst Surface, rect Rect, top, bottom color.RGBA, radius float64, corners Corners) {
 	if c.Stats != nil {
 		c.Stats.MaskFills++
 	}
-	dst.DrawTriangles(verts, idx, mask, &ebiten.DrawTrianglesOptions{})
+	c.CanvasOf(dst).FillRoundRect(c.snapBox(rect), c.dev(float32(radius)), corners, top, bottom)
 }
 
-// rectPath is the square-cornered rectangle as a path.
-func rectPath(x0, y0, x1, y1 float32) *vector.Path {
-	var path vector.Path
-	path.MoveTo(x0, y0)
-	path.LineTo(x1, y0)
-	path.LineTo(x1, y1)
-	path.LineTo(x0, y1)
-	path.Close()
-	return &path
-}
-
-// DrawStats counts what one frame asks the GPU for, to pin and measure the
-// batching of rounded shapes. Set Ctx.Stats to collect; the caller zeroes it
-// between frames.
+// DrawStats counts what one frame asks the renderer for, to pin and measure
+// the batching of rounded shapes. Set Ctx.Stats to collect; the caller zeroes
+// it between frames.
 type DrawStats struct {
-	MaskFills int // rounded fills drawn from the corner mask, one DrawTriangles each
-	RingFills int // rounded outlines drawn from the ring mask, one DrawTriangles each
+	MaskFills int // Canvas.FillRoundRect calls: rounded fills, which a renderer draws from a corner mask
+	RingFills int // Canvas.StrokeRoundRect calls: rounded outlines, drawn from a ring mask
 	Widths    int // Ctx.Width measurements
 	Advances  int // Ctx.Advance measurements
 	Elements  int // elements the view runtime drew; one skipped outside its clip is not counted
 }
 
 // Corners is a set of rectangle corners.
-type Corners uint8
+type Corners = render.Corners
 
 // The corners of a rectangle.
 const (
-	CornerTL Corners = 1 << iota
-	CornerTR
-	CornerBR
-	CornerBL
+	CornerTL = render.CornerTL
+	CornerTR = render.CornerTR
+	CornerBR = render.CornerBR
+	CornerBL = render.CornerBL
 
-	CornersTop    = CornerTL | CornerTR
-	CornersBottom = CornerBL | CornerBR
-	CornersAll    = CornersTop | CornersBottom
+	CornersTop    = render.CornersTop
+	CornersBottom = render.CornersBottom
+	CornersAll    = render.CornersAll
 )
 
 // FillStyledCorners is FillStyled with only the given corners rounded, for
 // a bar or a column that sits in the corner of a rounded panel: its corner
 // follows the panel's, with anti-aliased (alpha) edges, instead of poking
 // out past it.
-func (c *Ctx) FillStyledCorners(dst *ebiten.Image, rect Rect, top, bottom color.RGBA, radius float64, corners Corners) {
+func (c *Ctx) FillStyledCorners(dst Surface, rect Rect, top, bottom color.RGBA, radius float64, corners Corners) {
 	if radius*c.Scale < 1 || corners == 0 {
 		c.FillStyled(dst, rect, top, bottom, 0)
 		return
@@ -654,99 +601,17 @@ func (c *Ctx) FillStyledCorners(dst *ebiten.Image, rect Rect, top, bottom color.
 	c.fillRounded(dst, rect, top, bottom, radius, corners)
 }
 
-// cornersPath is r with the corners in the set rounded by rad.
-func cornersPath(x0, y0, x1, y1, rad float32, corners Corners) *vector.Path {
-	rad = min(rad, (x1-x0)/2, (y1-y0)/2)
-	r := func(cornersValue Corners) float32 {
-		if corners&cornersValue != 0 {
-			return rad
-		}
-		return 0
-	}
-	tl, tr, br, bl := r(CornerTL), r(CornerTR), r(CornerBR), r(CornerBL)
-	var p vector.Path
-	p.MoveTo(x0+tl, y0)
-	p.LineTo(x1-tr, y0)
-	if tr > 0 {
-		p.Arc(x1-tr, y0+tr, tr, -math.Pi/2, 0, vector.Clockwise)
-	}
-	p.LineTo(x1, y1-br)
-	if br > 0 {
-		p.Arc(x1-br, y1-br, br, 0, math.Pi/2, vector.Clockwise)
-	}
-	p.LineTo(x0+bl, y1)
-	if bl > 0 {
-		p.Arc(x0+bl, y1-bl, bl, math.Pi/2, math.Pi, vector.Clockwise)
-	}
-	p.LineTo(x0, y0+tl)
-	if tl > 0 {
-		p.Arc(x0+tl, y0+tl, tl, math.Pi, 3*math.Pi/2, vector.Clockwise)
-	}
-	p.Close()
-	return &p
-}
-
 // OutlineStyled strokes a border just inside r, LineWidth thick, with
 // rounded corners when radius is set. The edges snap to device pixels as
-// Outline's do, and the rounded outline is one DrawTriangles from the cached
-// ring mask. The width is LineWidth (the unrounded scale a stroke used to
+// Outline's do. The width is LineWidth (the unrounded scale a stroke used to
 // take would blur on a fractional scale and not match Outline's lines).
-func (c *Ctx) OutlineStyled(dst *ebiten.Image, rect Rect, clr color.RGBA, radius float64) {
+func (c *Ctx) OutlineStyled(dst Surface, rect Rect, clr color.RGBA, radius float64) {
 	if radius*c.Scale < 1 {
 		c.Outline(dst, rect, clr)
 		return
 	}
-	x0, y0 := c.snap(rect.X), c.snap(rect.Y)
-	x1, y1 := c.snap(rect.X+rect.W), c.snap(rect.Y+rect.H)
-	r := min(float32(max(1, math.Round(float64(c.dev(float32(radius)))))), float32(math.Floor(float64(min(x1-x0, y1-y0))/2)))
-	if r < 1 {
-		c.Outline(dst, rect, clr)
-		return
-	}
-	width := min(c.LineWidth(), r)
-	mask := c.ringMask(int(r), int(width))
-	quads := ringQuads(x0, y0, x1, y1, r, width)
-	red, green, blue, alpha := float32(clr.R)/255, float32(clr.G)/255, float32(clr.B)/255, float32(clr.A)/255
-	verts := make([]ebiten.Vertex, 0, 4*len(quads))
-	idx := make([]uint16, 0, 6*len(quads))
-	for _, q := range quads {
-		base := uint16(len(verts))
-		for _, corner := range [4][4]float32{
-			{q.dst.x0, q.dst.y0, q.src.x0, q.src.y0}, {q.dst.x1, q.dst.y0, q.src.x1, q.src.y0},
-			{q.dst.x1, q.dst.y1, q.src.x1, q.src.y1}, {q.dst.x0, q.dst.y1, q.src.x0, q.src.y1},
-		} {
-			verts = append(verts, ebiten.Vertex{DstX: corner[0], DstY: corner[1], SrcX: corner[2], SrcY: corner[3], ColorR: red, ColorG: green, ColorB: blue, ColorA: alpha})
-		}
-		idx = append(idx, base, base+1, base+2, base, base+2, base+3)
-	}
 	if c.Stats != nil {
 		c.Stats.RingFills++
 	}
-	dst.DrawTriangles(verts, idx, mask, &ebiten.DrawTrianglesOptions{})
-}
-
-// cornerMask is the cached white mask for corners of radius device pixels.
-func (c *Ctx) cornerMask(radius int) *ebiten.Image { return c.maskCache().get(radius) }
-
-// ringMask is the cached white ring mask for corners of radius device pixels
-// and a line width in device pixels.
-func (c *Ctx) ringMask(radius, width int) *ebiten.Image { return c.maskCache().getRing(radius, width) }
-
-func (c *Ctx) maskCache() *cornerMasks {
-	if c.masks == nil {
-		c.masks = &cornerMasks{make: buildCornerMask, makeRing: buildRingMask}
-	}
-	if c.maskMaker != nil {
-		c.masks.make = c.maskMaker
-	}
-	if c.ringMaker != nil {
-		c.masks.makeRing = c.ringMaker
-	}
-	return c.masks
-}
-
-func (c *Ctx) resetMasks() {
-	if c.masks != nil {
-		c.masks.reset()
-	}
+	c.CanvasOf(dst).StrokeRoundRect(c.snapBox(rect), c.dev(float32(radius)), c.LineWidth(), clr)
 }

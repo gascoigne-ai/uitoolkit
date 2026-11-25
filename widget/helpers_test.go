@@ -7,13 +7,14 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/theming"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
 func testCtx(t *testing.T) *core.Ctx {
 	t.Helper()
-	c, err := core.NewCtx(theming.Dark())
+	c, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +93,7 @@ func (m *memClip) Write(content string) error { m.text = content; return nil }
 // viewport is a 600x400 code view at the origin of a context with a memory clipboard.
 func viewport(t *testing.T) (*CodeView, *core.Ctx, *memClip, core.Rect) {
 	t.Helper()
-	c, err := core.NewCtx(theming.Dark())
+	c, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}

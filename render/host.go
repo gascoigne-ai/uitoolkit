@@ -1,7 +1,6 @@
 package render
 
-// Cursor is a mouse cursor shape. For now it duplicates core.Cursor (which is
-// an int); task 003 removes the duplicate.
+// Cursor is a mouse cursor shape; core.Cursor is an alias of it.
 type Cursor uint8
 
 // The cursor shapes.

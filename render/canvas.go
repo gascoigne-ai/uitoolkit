@@ -12,8 +12,7 @@ import (
 // clips.
 type Box struct{ X0, Y0, X1, Y1 float32 }
 
-// Corners is a set of rectangle corners. For now it duplicates core.Corners;
-// task 003 makes core.Corners an alias of this type.
+// Corners is a set of rectangle corners; core.Corners is an alias of it.
 type Corners uint8
 
 // The corners of a rectangle.

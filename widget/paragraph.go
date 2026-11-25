@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -21,7 +21,7 @@ type paragraphB struct {
 
 // wrapParagraph breaks content before the word that would pass width. A word
 // wider than width stands alone on its line.
-func wrapParagraph(ctx *core.Ctx, face *text.GoTextFace, content string, width int) []string {
+func wrapParagraph(ctx *core.Ctx, face render.Face, content string, width int) []string {
 	var lines []string
 	line := ""
 	for _, word := range strings.Fields(content) {

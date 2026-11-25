@@ -3,6 +3,8 @@ package core
 import (
 	"runtime"
 	"testing"
+
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 )
 
 func TestThePrimaryModifierIsCommandOnMacAndControlElsewhere(t *testing.T) {
@@ -48,7 +50,7 @@ func TestKeyTextNamesThePrimaryModifierForThePlatform(t *testing.T) {
 }
 
 func TestANewCtxFollowsTheRunningOS(t *testing.T) {
-	ctx, err := NewCtx(Theme{FontSize: 14, SmallSize: 12, MonoSize: 13})
+	ctx, err := NewCtx(Theme{FontSize: 14, SmallSize: 12, MonoSize: 13}, ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}

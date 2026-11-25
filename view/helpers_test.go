@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/theming"
 )
 
@@ -14,7 +15,7 @@ import (
 
 func testCtx(t *testing.T) *core.Ctx {
 	t.Helper()
-	c, err := core.NewCtx(theming.Dark())
+	c, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}

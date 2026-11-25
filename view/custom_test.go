@@ -7,6 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/theming"
 	"github.com/gascoigne-ai/uitoolkit/view"
 )
@@ -32,7 +33,7 @@ func probeSize(size int) view.Option {
 
 func newCtx(t *testing.T) *core.Ctx {
 	t.Helper()
-	ctx, err := core.NewCtx(theming.Dark())
+	ctx, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}

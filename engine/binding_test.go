@@ -6,6 +6,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 func TestParseAndFormatBindings(t *testing.T) {
@@ -81,9 +82,9 @@ func TestBindingFromReadsTheCombinationPressedThisFrame(t *testing.T) {
 		want   Binding
 		wantOK bool
 	}{
-		{"key with modifiers", core.Input{Keys: []ebiten.Key{ebiten.KeyTab}, Ctrl: true, Shift: true}, Binding{Key: ebiten.KeyTab, Ctrl: true, Shift: true, Bound: true}, true},
-		{"modifier keys alone are waited out", core.Input{Keys: []ebiten.Key{ebiten.KeyControlLeft}, Ctrl: true}, Binding{}, false},
-		{"modifier then key takes the key", core.Input{Keys: []ebiten.Key{ebiten.KeyShiftLeft, ebiten.KeyA}, Shift: true}, Binding{Key: ebiten.KeyA, Shift: true, Bound: true}, true},
+		{"key with modifiers", core.Input{Keys: []render.Key{render.KeyTab}, Ctrl: true, Shift: true}, Binding{Key: ebiten.KeyTab, Ctrl: true, Shift: true, Bound: true}, true},
+		{"modifier keys alone are waited out", core.Input{Keys: []render.Key{render.KeyControlLeft}, Ctrl: true}, Binding{}, false},
+		{"modifier then key takes the key", core.Input{Keys: []render.Key{render.KeyShiftLeft, render.KeyA}, Shift: true}, Binding{Key: ebiten.KeyA, Shift: true, Bound: true}, true},
 		{"escape alone", core.Input{Escape: true}, Binding{Key: ebiten.KeyEscape, Bound: true}, true},
 		{"nothing pressed", core.Input{}, Binding{}, false},
 	}

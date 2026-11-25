@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 )
 
 func TestThemeFollowsPrefsAndFallsBack(t *testing.T) {
@@ -177,7 +178,7 @@ func TestChoiceTablesAreCopies(t *testing.T) {
 // the bases (and every height built on them) must move with it.
 func TestBaseLineIsTheDefaultFaceLineHeight(t *testing.T) {
 	th := NewCatalog(Builtins()).Theme(Prefs{})
-	ctx, err := core.NewCtx(th)
+	ctx, err := core.NewCtx(th, ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,7 +195,7 @@ func TestEveryFontSizeGivesSaneSizes(t *testing.T) {
 	for font := MinFontSize; font <= MaxFontSize; font++ {
 		t.Run(strconv.Itoa(font), func(t *testing.T) {
 			th := NewCatalog(Builtins()).For("dark", FontSizes{UI: font, Small: MaxSmallSize, Code: MaxCodeSize})
-			ctx, err := core.NewCtx(th)
+			ctx, err := core.NewCtx(th, ebitenrender.NewDevice())
 			if err != nil {
 				t.Fatal(err)
 			}

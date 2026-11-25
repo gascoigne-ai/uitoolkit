@@ -2,17 +2,19 @@ package core
 
 import (
 	"testing"
+
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 )
 
 func TestAdvanceIsMeasuredOncePerFont(t *testing.T) {
-	ctx, err := NewCtx(testTheme())
+	ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
 	if err != nil {
 		t.Fatal(err)
 	}
 	ctx.Stats = &DrawStats{}
 	first := ctx.Advance(ctx.F.Mono)
-	copied := *ctx.F.Mono
-	second := ctx.Advance(&copied)
+	copied := ctx.F.Mono
+	second := ctx.Advance(copied)
 	if first != second || first <= 0 {
 		t.Fatalf("advances %v and %v, want the same positive advance", first, second)
 	}
@@ -38,7 +40,7 @@ func TestAdvanceIsMeasuredAgainAfterScaleThemeOrFontsChange(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ctx, err := NewCtx(testTheme())
+			ctx, err := NewCtx(testTheme(), ebitenrender.NewDevice())
 			if err != nil {
 				t.Fatal(err)
 			}

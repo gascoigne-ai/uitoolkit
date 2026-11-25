@@ -7,6 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 )
 
 // keyNames spells keys whose ebiten name is not what users read. It has no
@@ -116,8 +117,9 @@ func BindingFrom(input core.Input) (binding Binding, ok bool) {
 	if input.Escape && !input.Ctrl && !input.Alt {
 		return Binding{Key: ebiten.KeyEscape, Bound: true}, true
 	}
-	for _, key := range input.Keys {
-		if IsModifierKey(key) {
+	for _, pressed := range input.Keys {
+		key, ok := ebitenrender.KeyToEbiten(pressed)
+		if !ok || IsModifierKey(key) {
 			continue
 		}
 		return Binding{Key: key, Ctrl: input.Ctrl, Shift: input.Shift, Alt: input.Alt, Bound: true}, true
