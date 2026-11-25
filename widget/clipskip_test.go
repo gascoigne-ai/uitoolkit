@@ -3,9 +3,8 @@ package widget
 import (
 	"testing"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -16,7 +15,7 @@ type drawCounter struct {
 }
 
 func (c *drawCounter) Measure(*El, *core.Ctx, int) (int, int) { return 50, 20 }
-func (c *drawCounter) Draw(*El, *core.Ctx, *ebiten.Image)     { c.draws++ }
+func (c *drawCounter) Draw(*El, *core.Ctx, render.Canvas)     { c.draws++ }
 
 func countedRows(count int) ([]*drawCounter, []Item) {
 	counters := make([]*drawCounter, count)

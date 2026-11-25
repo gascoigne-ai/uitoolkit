@@ -1,9 +1,8 @@
 package widget
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -66,7 +65,7 @@ func (s *splitB) Layout(element *El, ctx *core.Ctx) {
 	element.Children()[1].Place(ctx, core.Rect{X: r.X + px + 1, Y: r.Y, W: avail - px, H: r.H})
 }
 
-func (s *splitB) Draw(element *El, ctx *core.Ctx, dst *ebiten.Image) {
+func (s *splitB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	ctx.Fill(dst, s.divider, ctx.Color(core.Border))
 }
 

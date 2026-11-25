@@ -13,9 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hajimehoshi/ebiten/v2/vector"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 // An icon is a small SVG file: the subset below, drawn by the toolkit in
@@ -67,8 +66,8 @@ type svgShape struct {
 	cmds       []svgCmd
 	fill, line svgPaint
 	width      float64
-	cap        vector.LineCap
-	join       vector.LineJoin
+	cap        render.LineCap
+	join       render.LineJoin
 }
 
 // svgIcon is a parsed SVG icon.
@@ -84,12 +83,12 @@ type svgIcon struct {
 type svgStyle struct {
 	fill, stroke svgPaint
 	width        float64
-	cap          vector.LineCap
-	join         vector.LineJoin
+	cap          render.LineCap
+	join         render.LineJoin
 }
 
 func defaultSVGStyle() svgStyle {
-	return svgStyle{fill: svgPaint{}, stroke: svgPaint{none: true}, width: 1, cap: vector.LineCapButt, join: vector.LineJoinMiter}
+	return svgStyle{fill: svgPaint{}, stroke: svgPaint{none: true}, width: 1, cap: render.LineCapButt, join: render.LineJoinMiter}
 }
 
 type svgError struct {
@@ -267,17 +266,17 @@ func (paints paintParser) parse(value string) (svgPaint, error) {
 }
 
 // lineCaps has an empty row: a present but empty stroke-linecap is butt.
-var lineCaps = map[string]vector.LineCap{
-	"":       vector.LineCapButt,
-	"butt":   vector.LineCapButt,
-	"round":  vector.LineCapRound,
-	"square": vector.LineCapSquare,
+var lineCaps = map[string]render.LineCap{
+	"":       render.LineCapButt,
+	"butt":   render.LineCapButt,
+	"round":  render.LineCapRound,
+	"square": render.LineCapSquare,
 }
 
-var lineJoins = map[string]vector.LineJoin{
-	"miter": vector.LineJoinMiter,
-	"round": vector.LineJoinRound,
-	"bevel": vector.LineJoinBevel,
+var lineJoins = map[string]render.LineJoin{
+	"miter": render.LineJoinMiter,
+	"round": render.LineJoinRound,
+	"bevel": render.LineJoinBevel,
 }
 
 // namedAttr is the table's value for attribute name, or current when the

@@ -2,8 +2,9 @@
 
 `render` says what the toolkit draws through and what a renderer runs: `Canvas`, `Image`,
 `Offscreen`, `Path` and `Stroke`, `FontSource` and `Face`, `Device`, `InputState`, `Key`, `Cursor`
-and `Host`. `core.Ctx` draws through it; `widget` still hands it ebiten images, and `view` hands
-them only to behaviors (see core, Bridge, and view, Runtime rules).
+and `Host`. `core.Ctx`, `view` and `widget` draw through it and import no GPU library
+(`TestViewImportsNoEbiten`, `TestWidgetImportsNoEbiten`); only the bridge of `core` still takes
+ebiten images, until task 006.
 
 Invariants:
 
@@ -168,9 +169,8 @@ state: no diffing and no reactive system. Elements and options are indexed in th
   (`Ctx.ClipCanvas`) and `drawKids` work on it, and culling compares with `kidsDst.Bounds()`. A clip
   off the canvas has empty bounds and `drawKids` draws nothing then (an empty box would otherwise
   "reach" a child near the origin). `Behavior.Draw`, `OverDrawer.DrawOver` and the text behavior
-  keep the `*ebiten.Image` signature until task 005: they get `Ctx.EbitenImage(canvas)` and are
-  skipped on a canvas of another renderer, so text records nothing there yet. Only `custom.go` and
-  `leaf.go` import Ebitengine (`TestOnlyCustomAndLeafImportEbiten`).
+  take the same (clipped) canvas, so a behavior draws on a canvas of any renderer and text records
+  `DrawText`. No file of `view` imports Ebitengine (`TestViewImportsNoEbiten`).
 - **Layout writes no state** (`view.Layout` doc, `widget/layoutpure_test.go`); `Update` settles it.
 - **Drawing culls** off-image children (`view.Draw` doc, `BenchmarkLongList`), so a `Behavior`
   keeps no state that only its `Draw` writes.
@@ -247,7 +247,8 @@ Each is also said in the doc comment of what breaks the rule; a new exception ad
 - Rule 7: state types are values (`NewTextField`, `NewTextArea`, `NewMenu`); `OpenMenu` stores a
   pointer to its own copy.
 - Rule 11: `core.Ctx.Menu` is `any`, because `widget` owns `MenuState` and `core` cannot name it;
-  that is the price of any element opening a menu without a host. `core.Ctx.FocusOwner` is typed,
+  that is the price of any element opening a menu without a host. `core.MaskKey.Source` is `any`
+  for the same reason: it holds the pointer to the parsed icon, a `widget` type. `core.Ctx.FocusOwner` is typed,
   since its interface (`core.Focuser`, aliased by `view.Focuser`) uses no widget type.
 - Exported mutable tables are copies (`theming.CornerChoices` and the other choice lists);
   `engine.keyNames` is unexported, since nothing outside `engine` reads it.
@@ -267,8 +268,12 @@ Each is also said in the doc comment of what breaks the rule; a new exception ad
   in `Ctx.TipText`, and `widget.TooltipLayer`, mounted last in the window's Stack, shows it after a
   rest. While a tip waits the app keeps drawing (`TooltipState.Waiting`). Their look is in `style.md`.
 - **Icons** (look and sources: `style.md`, Icons). The SVG subset is in `svg.go`; `RegisterIcons(fs)`
-  adds or replaces icons from a folder; one-color icons are cached as white masks and tinted
-  (`iconMask`).
+  adds or replaces icons from a folder; one-color icons are white masks kept by the `core.Ctx` (`Ctx.Mask`, at most 512, dropped whole and
+  released when full, and on `SetScale` and `SetTheme`) and tinted with `DrawMask`; icons with token
+  paints are drawn as `render.Path`s every frame. The package keeps no GPU cache.
+- **Images.** `widget.Image` takes a `render.Image` and draws it scaled to fit with
+  `render.FilterLinear`; a nil picture, also a nil pointer in the interface, measures 0x0. Markup may
+  still pass an `*ebiten.Image` until task 006.
 - **Sharp edges.** `Ctx.Fill`, `Outline`, `HLine` and `VLine` snap each logical edge to device
   pixels (`Ctx.snap`), so neighbours share an edge, and draw lines `Ctx.LineWidth()` thick. Rounded
   fills and outlines (`FillStyled`, `OutlineStyled`) snap the same way and are one canvas call,

@@ -158,6 +158,9 @@ type Ctx struct {
 	// advances caches Advance by face; see faceKey. Cleared with widths.
 	advances map[faceKey]float64
 
+	// masks are the white masks drawn through Mask, by key.
+	masks map[MaskKey]render.Offscreen
+
 	// sizeScope is the memo of SizesScope.
 	sizeScope sizeScope
 
@@ -270,6 +273,7 @@ func (c *Ctx) SetScale(scale float64) error {
 	}
 	c.F, c.Scale = facesOf(c.Th, c.sources, scale), scale
 	c.widths, c.advances = nil, nil
+	c.dropMasks()
 	return nil
 }
 
@@ -278,6 +282,7 @@ func (c *Ctx) SetScale(scale float64) error {
 func (c *Ctx) SetTheme(th Theme) error {
 	c.Th, c.F, c.Sizes = th, facesOf(th, c.sources, c.Scale), sizesOf(th, c.sources.regular)
 	c.widths, c.advances = nil, nil
+	c.dropMasks()
 	return nil
 }
 

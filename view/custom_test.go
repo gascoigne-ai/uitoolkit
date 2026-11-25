@@ -4,10 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
+	"github.com/gascoigne-ai/uitoolkit/render"
+	"github.com/gascoigne-ai/uitoolkit/render/rendertest"
 	"github.com/gascoigne-ai/uitoolkit/theming"
 	"github.com/gascoigne-ai/uitoolkit/view"
 )
@@ -23,7 +22,7 @@ type probe struct {
 func (p *probe) Measure(*view.El, *core.Ctx, int) (int, int) { return p.size, 20 }
 func (p *probe) Layout(*view.El, *core.Ctx)                  { p.laid++ }
 func (p *probe) Update(*view.El, *core.Ctx)                  { p.updates++ }
-func (p *probe) Draw(*view.El, *core.Ctx, *ebiten.Image)     { p.draws++ }
+func (p *probe) Draw(*view.El, *core.Ctx, render.Canvas)     { p.draws++ }
 
 // probeSize is an option of the component: it reaches the behavior through
 // the element, as a widget's own options do.
@@ -33,7 +32,7 @@ func probeSize(size int) view.Option {
 
 func newCtx(t *testing.T) *core.Ctx {
 	t.Helper()
-	ctx, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
+	ctx, err := core.NewCtx(theming.Dark(), view.NewTestDevice())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +53,7 @@ func TestCustomBehaviorIsMeasuredLaidOutUpdatedAndDrawn(t *testing.T) {
 		t.Fatal("Layout was not called")
 	}
 	view.Update(ctx, root)
-	view.Draw(ctx, root, ebiten.NewImage(200, 100))
+	view.Draw(ctx, root, rendertest.NewCanvas(200, 100))
 	if behavior.updates != 1 || behavior.draws != 1 {
 		t.Fatalf("updates %d draws %d, want 1 and 1", behavior.updates, behavior.draws)
 	}
@@ -191,8 +190,8 @@ type hooked struct {
 
 func (h hooked) PreUpdate(*view.El, *core.Ctx)               { h.order.note("pre") }
 func (h hooked) Update(*view.El, *core.Ctx)                  { h.order.note("update") }
-func (h hooked) Draw(*view.El, *core.Ctx, *ebiten.Image)     { h.order.note("draw") }
-func (h hooked) DrawOver(*view.El, *core.Ctx, *ebiten.Image) { h.order.note("over") }
+func (h hooked) Draw(*view.El, *core.Ctx, render.Canvas)     { h.order.note("draw") }
+func (h hooked) DrawOver(*view.El, *core.Ctx, render.Canvas) { h.order.note("over") }
 
 type noter struct {
 	view.Base
@@ -201,7 +200,7 @@ type noter struct {
 }
 
 func (n noter) Update(*view.El, *core.Ctx)              { n.order.note(n.name + " update") }
-func (n noter) Draw(*view.El, *core.Ctx, *ebiten.Image) { n.order.note(n.name + " draw") }
+func (n noter) Draw(*view.El, *core.Ctx, render.Canvas) { n.order.note(n.name + " draw") }
 
 func TestPreUpdaterRunsBeforeTheChildrenAndOverDrawerAfterThem(t *testing.T) {
 	ctx := newCtx(t)
@@ -209,7 +208,7 @@ func TestPreUpdaterRunsBeforeTheChildrenAndOverDrawerAfterThem(t *testing.T) {
 	root := view.Custom(hooked{order: rec}, view.Custom(noter{order: rec, name: "child"}))
 	view.Layout(ctx, root, 100, 100)
 	view.Update(ctx, root)
-	view.Draw(ctx, root, ebiten.NewImage(100, 100))
+	view.Draw(ctx, root, rendertest.NewCanvas(100, 100))
 	got := strings.Join(rec.calls, ",")
 	want := "pre,child update,update,draw,child draw,over"
 	if got != want {

@@ -1,9 +1,8 @@
 package view
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 // Behavior is what a component outside this package supplies to be an
@@ -11,10 +10,6 @@ import (
 // how it reacts to the frame's input and how it draws. Read the rect and
 // the children through element (Rect, Children); embed Base for the methods a
 // component does not need.
-//
-// Draw (and DrawOver of an OverDrawer) is called only when the tree is drawn
-// on an ebiten canvas; on a canvas of another renderer it is skipped, until
-// task 005 gives behaviors a render.Canvas.
 type Behavior interface {
 	// Measure is the size the element wants when at most maxW wide.
 	Measure(element *El, ctx *core.Ctx, maxW int) (w, h int)
@@ -25,7 +20,7 @@ type Behavior interface {
 	// Draw paints the element; its children are drawn after it. Draw is
 	// skipped for an element that cannot reach the target image (see Draw),
 	// so it must not write state that the next Update reads.
-	Draw(element *El, ctx *core.Ctx, dst *ebiten.Image)
+	Draw(element *El, ctx *core.Ctx, dst render.Canvas)
 }
 
 // Base is a Behavior that measures nothing, lays nothing out, ignores
@@ -35,7 +30,7 @@ type Base struct{}
 func (Base) Measure(*El, *core.Ctx, int) (int, int) { return 0, 0 }
 func (Base) Layout(*El, *core.Ctx)                  {}
 func (Base) Update(*El, *core.Ctx)                  {}
-func (Base) Draw(*El, *core.Ctx, *ebiten.Image)     {}
+func (Base) Draw(*El, *core.Ctx, render.Canvas)     {}
 
 // Custom makes an element that behaves as behavior. The component's options
 // configure behavior through Behavior.
@@ -90,9 +85,9 @@ type PreUpdater interface {
 }
 
 // OverDrawer is implemented by a Behavior that paints over its children.
-// DrawOver is called only on an ebiten canvas until task 005, as Behavior.Draw.
+// DrawOver is called after the children, on the same canvas as Behavior.Draw.
 type OverDrawer interface {
-	DrawOver(element *El, ctx *core.Ctx, dst *ebiten.Image)
+	DrawOver(element *El, ctx *core.Ctx, dst render.Canvas)
 }
 
 // Scroller is implemented by a Behavior that scrolls its children. When

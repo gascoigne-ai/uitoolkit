@@ -1,9 +1,8 @@
 package widget
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -124,7 +123,7 @@ func (s *sliderB) Update(element *El, ctx *core.Ctx) {
 	}
 }
 
-func (s *sliderB) Draw(element *El, ctx *core.Ctx, dst *ebiten.Image) {
+func (s *sliderB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	r := element.Rect()
 	x, w := s.track(element)
 	frac := s.fracOf(s.state.Shown(s.value))

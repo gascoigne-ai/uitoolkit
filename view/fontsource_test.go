@@ -4,14 +4,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/render"
+	"github.com/gascoigne-ai/uitoolkit/render/text"
 	"golang.org/x/image/font/gofont/gomono"
 )
 
 func monoSource(t *testing.T) render.FontSource {
 	t.Helper()
-	source, err := ebitenrender.NewDevice().NewFontSource(gomono.TTF)
+	source, err := testDevice{}.NewFontSource(gomono.TTF)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,7 +31,7 @@ func TestTextWithAFontSourceIsMeasuredInThatFont(t *testing.T) {
 // A font list keeps a nil pointer for a file it could not read. In the
 // interface it is not equal to nil, and measuring through it would crash.
 func TestANilPointerAsAFontSourceKeepsTheInterfaceFont(t *testing.T) {
-	unread := Text("iiiiii", FontSource((*ebitenrender.FontSource)(nil)))
+	unread := Text("iiiiii", FontSource((*text.FontSource)(nil)))
 	if unread.fontSource != nil {
 		t.Fatalf("fontSource = %#v, want nil: the interface font", unread.fontSource)
 	}

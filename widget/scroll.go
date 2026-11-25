@@ -1,9 +1,8 @@
 package widget
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -76,7 +75,7 @@ func (s *scrollB) Update(element *El, ctx *core.Ctx) {
 // bars is the scrollbar layout of the box: a vertical bar along its right edge.
 func (s *scrollB) bars(element *El) bars { return layoutBars(element.Rect(), 0, s.content) }
 
-func (s *scrollB) DrawOver(element *El, ctx *core.Ctx, dst *ebiten.Image) {
+func (s *scrollB) DrawOver(element *El, ctx *core.Ctx, dst render.Canvas) {
 	drawBars(ctx, dst, s.bars(element), s.state.drag, 0, s.content, 0, s.state.Y)
 }
 

@@ -1,9 +1,8 @@
 package widget
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -31,7 +30,7 @@ func (b switchB) Update(element *El, ctx *core.Ctx) {
 	element.Changed()
 }
 
-func (b switchB) Draw(element *El, ctx *core.Ctx, dst *ebiten.Image) {
+func (b switchB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	track := element.Rect()
 	knob := ctx.Sizes.Checkbox
 	pill := func(side int) float64 { return float64(side) / 2 * min(ctx.Th.RadiusScale, 1) }

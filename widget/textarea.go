@@ -4,9 +4,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 // TextArea is a multi-line editor: a multi-line TextField plus the
@@ -266,12 +265,12 @@ func (a *TextArea) reveal(rect core.Rect, geometry areaGeometry, sizes bars) {
 
 // Draw paints the editor inside r; the caller fills the background.
 // Line numbers stay put while the text scrolls sideways.
-func (a *TextArea) Draw(ctx *core.Ctx, dst *ebiten.Image, rect core.Rect) {
+func (a *TextArea) Draw(ctx *core.Ctx, dst render.Canvas, rect core.Rect) {
 	g := a.geometry(ctx, rect)
 	b := layoutBars(rect, g.contentW(rect), g.contentH())
 	view := core.Rect{X: rect.X, Y: rect.Y, W: b.viewW, H: b.viewH}
 	body := core.Rect{X: g.textX - 4, Y: rect.Y, W: b.viewW - (g.textX - 4 - rect.X), H: b.viewH}
-	area, text := ctx.Clip(dst, view), ctx.Clip(dst, body)
+	area, text := ctx.ClipCanvas(dst, view), ctx.ClipCanvas(dst, body)
 	curLine, _ := a.LineCol(a.Cursor)
 	lo, hi, hasSel := a.Selection()
 
@@ -324,7 +323,7 @@ func (a *TextArea) lineSpans(line string) []Span {
 }
 
 // drawRow draws the part of its line's spans that a row shows.
-func (a *TextArea) drawRow(ctx *core.Ctx, dst *ebiten.Image, geometry areaGeometry, row visualRow, cell core.Rect, spans []Span) {
+func (a *TextArea) drawRow(ctx *core.Ctx, dst render.Canvas, geometry areaGeometry, row visualRow, cell core.Rect, spans []Span) {
 	if row.from > 0 || row.to < len([]rune(geometry.lines[row.line])) {
 		spans = appendRowSpans(nil, spans, row.from, row.to)
 	}
@@ -333,7 +332,7 @@ func (a *TextArea) drawRow(ctx *core.Ctx, dst *ebiten.Image, geometry areaGeomet
 
 // drawSelection highlights the part of a row inside the selection [lo, hi);
 // the last row of a line also fills one character for its line break.
-func (a *TextArea) drawSelection(ctx *core.Ctx, dst *ebiten.Image, geometry areaGeometry, row visualRow, posY, lo, hi int) {
+func (a *TextArea) drawSelection(ctx *core.Ctx, dst render.Canvas, geometry areaGeometry, row visualRow, posY, lo, hi int) {
 	start := geometry.starts[row.line] + row.from
 	end := geometry.starts[row.line] + row.to
 	if row.to == len([]rune(geometry.lines[row.line])) {

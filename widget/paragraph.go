@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
 	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
@@ -54,7 +52,7 @@ func (p paragraphB) Measure(element *El, ctx *core.Ctx, maxW int) (int, int) {
 	return min(widest, max(maxW, 1)), len(lines) * ctx.LineH(face)
 }
 
-func (p paragraphB) Draw(element *El, ctx *core.Ctx, dst *ebiten.Image) {
+func (p paragraphB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	face := ctx.F.Small
 	rect := element.Rect()
 	clr := ctx.Color(core.Muted)

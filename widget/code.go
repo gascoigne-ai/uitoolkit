@@ -1,9 +1,8 @@
 package widget
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -24,7 +23,7 @@ func (b *codeB) Update(element *El, ctx *core.Ctx) {
 	b.view.Update(ctx, element.Rect())
 }
 
-func (b *codeB) Draw(element *El, ctx *core.Ctx, dst *ebiten.Image) {
+func (b *codeB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	b.view.Wrap = b.wrap
 	b.view.Draw(ctx, dst, element.Rect())
 	if b.view.Focused {

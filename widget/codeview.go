@@ -7,8 +7,6 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
 	"github.com/gascoigne-ai/uitoolkit/render"
 )
@@ -509,7 +507,7 @@ func (v *CodeView) updateKeys(ctx *core.Ctx, geometry codeGeometry, sizes bars, 
 
 // Draw paints the visible lines inside r; the caller fills the background.
 // Line numbers and fold arrows stay put while the text scrolls sideways.
-func (v *CodeView) Draw(ctx *core.Ctx, dst *ebiten.Image, rect core.Rect) {
+func (v *CodeView) Draw(ctx *core.Ctx, dst render.Canvas, rect core.Rect) {
 	g := v.geometry(ctx, rect)
 	layout := v.layout(g, rect)
 	rows := layout.rows
@@ -519,8 +517,8 @@ func (v *CodeView) Draw(ctx *core.Ctx, dst *ebiten.Image, rect core.Rect) {
 	muted := ctx.Color(core.Muted)
 	gutter := core.Rect{X: rect.X, Y: rect.Y, W: g.textX - rect.X - 4, H: b.viewH}
 	body := core.Rect{X: gutter.X + gutter.W, Y: rect.Y, W: b.viewW - gutter.W, H: b.viewH}
-	area := ctx.Clip(dst, core.Rect{X: rect.X, Y: rect.Y, W: b.viewW, H: b.viewH})
-	text := ctx.Clip(dst, body)
+	area := ctx.ClipCanvas(dst, core.Rect{X: rect.X, Y: rect.Y, W: b.viewW, H: b.viewH})
+	text := ctx.ClipCanvas(dst, body)
 
 	for rowIdx := v.ScrollY / g.lineH; rowIdx < len(rows); rowIdx++ {
 		y := rect.Y + rowIdx*g.lineH - v.ScrollY
@@ -578,7 +576,7 @@ func (v *CodeView) Selected() bool { _, _, ok := v.selRange(); return ok }
 
 // drawSelection fills the selected part of line idx; lines that continue
 // into the next selected line also fill one character for the newline.
-func (v *CodeView) drawSelection(ctx *core.Ctx, dst *ebiten.Image, geometry codeGeometry, layout wrapLayout, cell core.Rect, row visualRow, lo, hi textPos) {
+func (v *CodeView) drawSelection(ctx *core.Ctx, dst render.Canvas, geometry codeGeometry, layout wrapLayout, cell core.Rect, row visualRow, lo, hi textPos) {
 	idx := row.line
 	from, to := row.from, row.to
 	if idx == lo.line {
@@ -671,7 +669,7 @@ func (v *CodeView) applyReveal(rect core.Rect, geometry codeGeometry, sizes bars
 
 // drawMatches fills the search hits on a row. A folded row shows a
 // preview, whose columns are not the line's, so it shows no hits.
-func (v *CodeView) drawMatches(ctx *core.Ctx, dst *ebiten.Image, geometry codeGeometry, layout wrapLayout, cell core.Rect, row visualRow) {
+func (v *CodeView) drawMatches(ctx *core.Ctx, dst render.Canvas, geometry codeGeometry, layout wrapLayout, cell core.Rect, row visualRow) {
 	if v.folded(row.line) {
 		return
 	}

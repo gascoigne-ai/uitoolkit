@@ -1,9 +1,8 @@
 package widget
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -196,7 +195,7 @@ func (s *hscrollB) Update(element *El, ctx *core.Ctx) {
 	*wheel = 0
 }
 
-func (s *hscrollB) DrawOver(element *El, ctx *core.Ctx, dst *ebiten.Image) {
+func (s *hscrollB) DrawOver(element *El, ctx *core.Ctx, dst render.Canvas) {
 	left, right := s.arrows(element)
 	showL, showR := s.arrowsShown(element)
 	for _, a := range []struct {

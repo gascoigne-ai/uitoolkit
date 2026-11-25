@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
 	"github.com/gascoigne-ai/uitoolkit/render"
 	"github.com/gascoigne-ai/uitoolkit/theming"
 )
@@ -248,7 +247,7 @@ func TestCodeViewWheelScrollsOnlyWhenOver(t *testing.T) {
 
 func TestCodeViewEmptyContentIsHarmless(t *testing.T) {
 	var v CodeView
-	c, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
+	c, err := core.NewCtx(theming.Dark(), testDevice{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -260,7 +259,7 @@ func TestCodeViewEmptyContentIsHarmless(t *testing.T) {
 }
 
 func TestCtxSetThemeSwitchesColorsAndFontSizes(t *testing.T) {
-	c, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
+	c, err := core.NewCtx(theming.Dark(), testDevice{})
 	if err != nil {
 		t.Fatal(err)
 	}

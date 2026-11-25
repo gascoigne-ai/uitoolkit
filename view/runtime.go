@@ -190,8 +190,8 @@ func cycleFocus(ctx *core.Ctx, root Node) {
 // whose rect, grown by its draw reach, misses the image it would draw into
 // (the active clip or the screen) is skipped with its subtree: no Draw, no
 // DrawOver, no hover flag or tooltip. A long scrolled list so costs only
-// the rows in view. dst is a canvas, or an ebiten image until the callers
-// all hold canvases (see core.Surface).
+// the rows in view. dst is a canvas, or an ebiten image until task 006
+// (see core.Surface).
 func Draw(ctx *core.Ctx, root Node, dst core.Surface) {
 	ctx.HoverOff = hasModal(root) // only the overlay's own elements react to the pointer
 	ctx.TipText = ""
@@ -342,9 +342,7 @@ func (e *El) drawSelf(ctx *core.Ctx, canvas render.Canvas) {
 		ctx.HLine(canvas, r.X, r.Y+r.H-1, r.W, ctx.Color(e.borderB))
 	}
 
-	if img, ok := ctx.EbitenImage(canvas); ok {
-		e.b.Draw(e, ctx, img)
-	}
+	e.b.Draw(e, ctx, canvas)
 }
 
 // kidsDst is the canvas the children draw into: canvas, or its clip.
@@ -383,9 +381,7 @@ func (e *El) drawAfter(ctx *core.Ctx, canvas render.Canvas) {
 		ctx.OutlineStyled(canvas, r, ctx.Color(border), style.Radius)
 	}
 	if o, ok := e.b.(OverDrawer); ok {
-		if img, ok := ctx.EbitenImage(canvas); ok {
-			o.DrawOver(e, ctx, img)
-		}
+		o.DrawOver(e, ctx, canvas)
 	}
 
 	if e.edgeTok != "" { // the open tab's outline: top, left and right, bottom left open unless EdgeB asks

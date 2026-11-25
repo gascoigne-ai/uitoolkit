@@ -1,9 +1,8 @@
 package widget
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -30,7 +29,7 @@ func (b *areaB) Update(element *El, ctx *core.Ctx) {
 	element.Changed()
 }
 
-func (b *areaB) Draw(element *El, ctx *core.Ctx, dst *ebiten.Image) {
+func (b *areaB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	b.area.Wrap = b.wrap
 	b.area.Draw(ctx, dst, element.Rect())
 }

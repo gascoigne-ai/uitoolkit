@@ -3,9 +3,8 @@ package view_test
 import (
 	"testing"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	"github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -19,7 +18,7 @@ func (c *counted) Measure(*view.El, *core.Ctx, int) (int, int) {
 	c.measures++
 	return c.width, 20
 }
-func (c *counted) Draw(*view.El, *core.Ctx, *ebiten.Image) {}
+func (c *counted) Draw(*view.El, *core.Ctx, render.Canvas) {}
 
 func nested(leaf view.Node) *view.El {
 	return view.Col(view.Row(view.Col(view.Row(leaf), view.Row(view.Spacer()))), view.Row(view.Spacer()))

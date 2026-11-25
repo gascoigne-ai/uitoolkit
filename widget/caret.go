@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
 	"github.com/gascoigne-ai/uitoolkit/render"
 )
@@ -27,7 +25,7 @@ func caretBlock(row core.Rect, posX, width, lineH int) core.Rect {
 // drawBlockCaret paints a solid accent-colored block over the character at x and redraws
 // that character in the accent text color so it stays readable. row is the
 // line the text is centered in.
-func drawBlockCaret(ctx *core.Ctx, dst *ebiten.Image, face render.Face, glyph string, posX int, row core.Rect) {
+func drawBlockCaret(ctx *core.Ctx, dst render.Canvas, face render.Face, glyph string, posX int, row core.Rect) {
 	ctx.Fill(dst, caretBlock(row, posX, ctx.Width(face, glyph), ctx.LineH(face)), ctx.Color(core.Accent))
 	ctx.TextMid(dst, face, glyph, posX, row, ctx.Color(core.AccentText))
 }

@@ -1,11 +1,18 @@
 package widget
 
 import (
+	"image"
+	"image/color"
+	"math"
+	"reflect"
 	"strings"
 	"testing"
 	"testing/fstest"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
+	"github.com/gascoigne-ai/uitoolkit/render/rendertest"
+	"github.com/gascoigne-ai/uitoolkit/theming"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -152,45 +159,162 @@ func TestPathDataCommands(t *testing.T) {
 	}
 }
 
-func TestThemeIconStrokeScalesTheLines(t *testing.T) {
-	c := testCtx(t)
-	c.Th.IconStroke = 1.6
-	drawn(t, c, Row(W(30), H(30), Icon("trash")), 30, 30) // draws with the thicker stroke without a window
+// parsedIcon parses an icon of the tests or fails.
+func parsedIcon(t *testing.T, src string) *svgIcon {
+	t.Helper()
+	ic, err := parseSVG("t.svg", []byte(src))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return ic
 }
 
-func TestIconMasksAreCachedPerSizeAndWeightAndTokenIconsAreDrawnDirectly(t *testing.T) {
+const strokedIcon = `<svg viewBox="0 0 10 10"><path d="M1 1L9 9" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="bevel"/></svg>`
+
+func TestRenderShapesStrokesAndFillsTheShapesAsPaths(t *testing.T) {
+	ic := parsedIcon(t, `<svg viewBox="0 0 10 10"><path d="M1 1L9 9" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="bevel"/><path d="M0 0L4 0L4 4Z" fill="currentColor"/></svg>`)
+	canvas := rendertest.NewCanvas(100, 100)
+	tint := color.RGBA{9, 8, 7, 255}
+	renderShapes(canvas, ic, 10, 20, 3, 1.6, func(svgPaint) color.RGBA { return tint })
+	clip := image.Rect(0, 0, 100, 100)
+	var line render.Path
+	line.MoveTo(13, 23)
+	line.LineTo(37, 47)
+	var triangle render.Path
+	triangle.MoveTo(10, 20)
+	triangle.LineTo(22, 20)
+	triangle.LineTo(22, 32)
+	triangle.Close()
+	want := []rendertest.Op{
+		rendertest.StrokePath{Clip: clip, Segments: line.Segments(), Color: tint,
+			Stroke: render.Stroke{Width: float32(2 * 3 * 1.6), Cap: render.LineCapRound, Join: render.LineJoinBevel}},
+		rendertest.FillPath{Clip: clip, Segments: triangle.Segments(), Color: tint},
+	}
+	if got := canvas.Ops(); !reflect.DeepEqual(got, want) {
+		t.Errorf("ops = %#v\nwant %#v", got, want)
+	}
+}
+
+func TestATokenIconIsDrawnAsPathsInTheColorOfEachShape(t *testing.T) {
+	ic := parsedIcon(t, `<svg viewBox="0 0 4 4"><path d="M0 0L4 4" stroke="token(error)" fill="none"/><path d="M0 0L2 0L2 2Z" fill="token(accent)"/><path d="M0 4L4 4" stroke="currentColor" fill="none"/></svg>`)
+	if ic.cacheable() {
+		t.Fatal("an icon with a token paint is drawn directly")
+	}
+	c := testCtx(t)
+	canvas := rendertest.NewCanvas(100, 100)
+	paintIcon(c, canvas, ic, 0, 0, 1, core.Muted)
+	var colors []color.RGBA
+	for _, op := range canvas.Ops() {
+		switch op := op.(type) {
+		case rendertest.StrokePath:
+			colors = append(colors, op.Color)
+		case rendertest.FillPath:
+			colors = append(colors, op.Color)
+		default:
+			t.Errorf("unexpected op %#v: a token icon makes no mask", op)
+		}
+	}
+	want := []color.RGBA{c.Color("error"), c.Color("accent"), c.Color(core.Muted)}
+	if !reflect.DeepEqual(colors, want) {
+		t.Errorf("colors %v, want %v", colors, want)
+	}
+	if c.MaskCount() != 0 {
+		t.Errorf("%d masks for a token icon", c.MaskCount())
+	}
+}
+
+func TestThemeIconStrokeScalesTheLines(t *testing.T) {
+	ic := parsedIcon(t, strokedIcon)
+	widthAt := func(weight float64) float32 {
+		c := testCtx(t)
+		c.Th.IconStroke = weight
+		paintIcon(c, rendertest.NewCanvas(100, 100), ic, 0, 0, 1, core.Muted)
+		for _, op := range iconMask(c, ic, 1, weight).(*rendertest.Offscreen).Ops() {
+			if stroke, ok := op.(rendertest.StrokePath); ok {
+				return stroke.Stroke.Width
+			}
+		}
+		t.Fatal("no stroke in the mask")
+		return 0
+	}
+	thin, thick := widthAt(1), widthAt(1.6)
+	if thin != 2 || thick != float32(2*1.6) {
+		t.Errorf("stroke widths %v and %v, want 2 and %v", thin, thick, float32(2*1.6))
+	}
+}
+
+func TestACurrentColorIconIsAWhiteMaskTintedWhenDrawn(t *testing.T) {
+	ic := parsedIcon(t, strokedIcon)
+	for _, scale := range []float64{1, 1.5, 2} {
+		c := testCtx(t)
+		if err := c.SetScale(scale); err != nil {
+			t.Fatal(err)
+		}
+		canvas := rendertest.NewCanvas(100, 100)
+		paintIcon(c, canvas, ic, 1.3, 2.4, 1, core.Info)
+		mask := iconMask(c, ic, scale, 1)
+		want := []rendertest.Op{rendertest.DrawMask{
+			Clip: image.Rect(0, 0, 100, 100), Mask: mask,
+			Left: math.Round(1.3*scale) - iconMaskMargin, Top: math.Round(2.4*scale) - iconMaskMargin,
+			Color: c.Color(core.Info),
+		}}
+		if got := canvas.Ops(); !reflect.DeepEqual(got, want) {
+			t.Errorf("scale %v: ops = %#v\nwant %#v", scale, got, want)
+		}
+		white := color.RGBA{255, 255, 255, 255}
+		for _, op := range mask.(*rendertest.Offscreen).Ops() {
+			if stroke, ok := op.(rendertest.StrokePath); !ok || stroke.Color != white {
+				t.Errorf("scale %v: mask op %#v, want a white stroke", scale, op)
+			}
+		}
+		if got := mask.Bounds(); got.Dx() != int(math.Ceil(10*scale))+2*iconMaskMargin {
+			t.Errorf("scale %v: mask %v", scale, got)
+		}
+	}
+}
+
+func TestIconMasksAreKeptByTheCtxPerSizeAndWeight(t *testing.T) {
+	c := testCtx(t)
 	ic, _ := lookupIcon("trash")
-	a := iconMask(ic, 2, 1)
-	if b := iconMask(ic, 2, 1); b != a {
+	first := iconMask(c, ic, 2, 1)
+	if iconMask(c, ic, 2, 1) != first {
 		t.Fatal("the same icon, scale and weight must reuse its mask")
 	}
-	if iconMask(ic, 3, 1) == a || iconMask(ic, 2, 1.5) == a {
+	if iconMask(c, ic, 3, 1) == first || iconMask(c, ic, 2, 1.5) == first {
 		t.Fatal("another scale or weight is another mask")
 	}
-	if b := a.Bounds(); b.Dx() != 28+2*iconMaskMargin || b.Dy() != 32+2*iconMaskMargin {
+	if b := first.Bounds(); b.Dx() != 28+2*iconMaskMargin || b.Dy() != 32+2*iconMaskMargin {
 		t.Fatalf("mask %v for a 14x16 icon at 2x", b)
 	}
 	if !ic.cacheable() {
 		t.Fatal("a currentColor icon is cacheable")
 	}
-	tok, err := parseSVG("t.svg", []byte(`<svg viewBox="0 0 4 4"><path d="M0 0L4 4" stroke="token(error)" fill="none"/></svg>`))
-	if err != nil || tok.cacheable() {
-		t.Fatalf("an icon with a token paint is drawn directly: %v %v", err, tok.cacheable())
+	other := testCtx(t)
+	if other.MaskCount() != 0 || iconMask(other, ic, 2, 1) == first {
+		t.Fatal("masks belong to one Ctx, not to the package")
 	}
-	masks.Lock()
-	for k := range masks.m {
-		delete(masks.m, k)
-	}
-	masks.Unlock()
+}
+
+func TestDrawingAnIconAgainReusesItsMaskUntilTheScaleOrThemeChanges(t *testing.T) {
 	c := testCtx(t)
 	for range 3 { // several frames, hovered and not: one mask per size
 		drawn(t, c, Row(W(30), H(30), Icon("trash")), 30, 30)
 	}
-	masks.Lock()
-	n := len(masks.m)
-	masks.Unlock()
-	if n != 1 {
-		t.Fatalf("%d masks after drawing one icon three times", n)
+	if c.MaskCount() != 1 {
+		t.Fatalf("%d masks after drawing one icon three times", c.MaskCount())
+	}
+	if err := c.SetScale(2); err != nil {
+		t.Fatal(err)
+	}
+	if c.MaskCount() != 0 {
+		t.Errorf("%d masks after SetScale", c.MaskCount())
+	}
+	drawn(t, c, Row(W(30), H(30), Icon("trash")), 30, 30)
+	if err := c.SetTheme(theming.Light()); err != nil {
+		t.Fatal(err)
+	}
+	if c.MaskCount() != 0 {
+		t.Errorf("%d masks after SetTheme", c.MaskCount())
 	}
 }
 
@@ -236,25 +360,16 @@ func TestReplayIconExists(t *testing.T) {
 // The checkbox's check and the code view's fold arrows are SVG icons, drawn
 // as icon masks like every other icon, not paths built in the draw code.
 func TestCheckboxCheckAndFoldArrowsAreIcons(t *testing.T) {
-	masks.Lock()
-	for key := range masks.m {
-		delete(masks.m, key)
-	}
-	masks.Unlock()
 	c := testCtx(t)
 	drawn(t, c, Row(W(30), H(30), Checkbox(true)), 30, 30)
-	masks.Lock()
-	checks := len(masks.m)
-	masks.Unlock()
+	checks := c.MaskCount()
 	if !HasIcon("check") || checks != 1 {
 		t.Fatalf("check icon %v, %d masks after drawing a checked box, want 1", HasIcon("check"), checks)
 	}
 	var code CodeView
 	code.SetLines([]Line{{Spans: []Span{{Text: "{"}}, Foldable: true}, {Spans: []Span{{Text: "}"}}}})
 	drawn(t, c, Row(W(200), H(80), Code(&code)), 200, 80)
-	masks.Lock()
-	folds := len(masks.m)
-	masks.Unlock()
+	folds := c.MaskCount()
 	if folds != 2 {
 		t.Fatalf("%d masks after drawing a fold arrow, want the check and the arrow", folds)
 	}
@@ -263,17 +378,11 @@ func TestCheckboxCheckAndFoldArrowsAreIcons(t *testing.T) {
 // A code view span with an Icon is painted as that icon in the span's
 // cell; its Text stays what search and copy see.
 func TestCodeViewSpanWithAnIconDrawsTheIconNotItsText(t *testing.T) {
-	masks.Lock()
-	for key := range masks.m {
-		delete(masks.m, key)
-	}
-	masks.Unlock()
 	var code CodeView
 	code.SetLines([]Line{{Spans: []Span{{Text: "↑", Icon: "arrow-up", Style: core.Info}, {Text: " sent"}}}})
-	drawn(t, testCtx(t), Row(W(200), H(40), Code(&code)), 200, 40)
-	masks.Lock()
-	count := len(masks.m)
-	masks.Unlock()
+	c := testCtx(t)
+	drawn(t, c, Row(W(200), H(40), Code(&code)), 200, 40)
+	count := c.MaskCount()
 	if count != 1 {
 		t.Fatalf("%d icon masks, want the arrow's", count)
 	}

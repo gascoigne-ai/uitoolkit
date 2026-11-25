@@ -11,25 +11,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
 	"github.com/gascoigne-ai/uitoolkit/render"
 	"github.com/gascoigne-ai/uitoolkit/render/rendertest"
 )
 
-// Only the files that declare the extension point (Behavior, OverDrawer) and
-// the text behavior may name the GPU library, so that the runtime draws on a
-// canvas of any renderer.
-func TestOnlyCustomAndLeafImportEbiten(t *testing.T) {
+// The view package draws through render.Canvas alone: no file of it, a test
+// included, imports Ebitengine or the adapter of it.
+func TestViewImportsNoEbiten(t *testing.T) {
 	files, err := filepath.Glob("*.go")
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, name := range files {
-		if strings.HasSuffix(name, "_test.go") || name == "custom.go" || name == "leaf.go" {
-			continue
-		}
 		parsed, err := parser.ParseFile(token.NewFileSet(), name, nil, parser.ImportsOnly)
 		if err != nil {
 			t.Fatal(err)
@@ -40,7 +34,7 @@ func TestOnlyCustomAndLeafImportEbiten(t *testing.T) {
 				t.Fatal(err)
 			}
 			if strings.Contains(path, "hajimehoshi") || strings.HasSuffix(path, "/ebitenrender") {
-				t.Errorf("%s imports %s; only custom.go and leaf.go may", name, path)
+				t.Errorf("%s imports %s", name, path)
 			}
 		}
 	}
@@ -199,44 +193,50 @@ func TestClippingParentCullsAndClipsChildren(t *testing.T) {
 	}
 }
 
-// spy counts the calls of the two ebiten-typed extension points and the bounds
-// of the images they got.
+// spy records the bounds of the canvases the two extension points got.
 type spy struct {
 	Base
 	draws, overs []image.Rectangle
 }
 
-func (s *spy) Draw(_ *El, _ *core.Ctx, dst *ebiten.Image) { s.draws = append(s.draws, dst.Bounds()) }
-func (s *spy) DrawOver(_ *El, _ *core.Ctx, dst *ebiten.Image) {
+func (s *spy) Draw(_ *El, _ *core.Ctx, dst render.Canvas) { s.draws = append(s.draws, dst.Bounds()) }
+func (s *spy) DrawOver(_ *El, _ *core.Ctx, dst render.Canvas) {
 	s.overs = append(s.overs, dst.Bounds())
 }
 
-func TestBehaviorsAreSkippedOnANonEbitenCanvas(t *testing.T) {
+func TestBehaviorsDrawOnAnyCanvas(t *testing.T) {
 	ctx := canvasCtx(t)
 	probe := &spy{}
 	custom := Custom(probe, W(100), H(20), Bg(core.Panel))
 	root := Col(W(100), H(60), custom, Text("hi"))
 	canvas := rendertest.NewCanvas(200, 200)
 	got := drawOnCanvas(ctx, root, 100, 60, canvas)
-	if len(probe.draws)+len(probe.overs) != 0 {
-		t.Errorf("behavior called on a canvas that is not ebiten's: Draw %d, DrawOver %d", len(probe.draws), len(probe.overs))
+	full := image.Rect(0, 0, 200, 200)
+	if len(probe.draws) != 1 || len(probe.overs) != 1 {
+		t.Errorf("behavior calls: Draw %d, DrawOver %d, want 1 each", len(probe.draws), len(probe.overs))
 	}
-	want := []rendertest.Op{rendertest.FillRect{Clip: image.Rect(0, 0, 200, 200), Box: render.Box{X0: 0, Y0: 0, X1: 100, Y1: 20}, Color: ctx.Color(core.Panel)}}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("ops = %#v\nwant %#v", got, want)
+	if len(got) != 3 {
+		t.Fatalf("ops = %#v, want the fill and the two passes of the text", got)
+	}
+	if want := (rendertest.FillRect{Clip: full, Box: render.Box{X0: 0, Y0: 0, X1: 100, Y1: 20}, Color: ctx.Color(core.Panel)}); !reflect.DeepEqual(got[0], want) {
+		t.Errorf("op 0 = %#v\nwant %#v", got[0], want)
+	}
+	text, ok := got[1].(rendertest.DrawText)
+	if !ok || text.Text != "hi" || text.Color != ctx.Color(core.Text) || text.Clip != full {
+		t.Errorf("op 1 = %#v, want DrawText \"hi\" in the text color on the whole canvas", got[1])
 	}
 }
 
-func TestBehaviorsGetTheClippedEbitenImage(t *testing.T) {
+func TestBehaviorsGetTheClippedCanvas(t *testing.T) {
 	ctx := canvasCtx(t)
 	probe := &spy{}
 	custom := Custom(probe, W(20), H(20))
 	root := Col(W(100), H(100), Clip(), custom)
 	Layout(ctx, root, 100, 100)
-	Draw(ctx, root, ebiten.NewImage(200, 200))
+	Draw(ctx, root, rendertest.NewCanvas(200, 200))
 	want := []image.Rectangle{image.Rect(0, 0, 100, 100)}
 	if !reflect.DeepEqual(probe.draws, want) || !reflect.DeepEqual(probe.overs, want) {
-		t.Errorf("Draw got %v, DrawOver got %v, want one image of %v each", probe.draws, probe.overs, want)
+		t.Errorf("Draw got %v, DrawOver got %v, want one canvas of %v each", probe.draws, probe.overs, want)
 	}
 }
 

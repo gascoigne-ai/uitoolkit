@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hajimehoshi/ebiten/v2/vector"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 // svgWant is one expected path command: its letter and the points that
@@ -208,16 +208,16 @@ func TestSVGStyleInheritsFromSvgAndGroups(t *testing.T) {
 		t.Fatalf("%d shapes, want 4", len(icon.shapes))
 	}
 	first, grouped, butt, last := icon.shapes[0], icon.shapes[1], icon.shapes[2], icon.shapes[3]
-	if !first.fill.none || first.line.none || first.width != 2 || first.cap != vector.LineCapRound || first.join != vector.LineJoinBevel {
+	if !first.fill.none || first.line.none || first.width != 2 || first.cap != render.LineCapRound || first.join != render.LineJoinBevel {
 		t.Errorf("first shape style %+v", first)
 	}
-	if grouped.line.token != "error" || grouped.width != 3 || grouped.cap != vector.LineCapSquare || grouped.join != vector.LineJoinMiter {
+	if grouped.line.token != "error" || grouped.width != 3 || grouped.cap != render.LineCapSquare || grouped.join != render.LineJoinMiter {
 		t.Errorf("grouped shape style %+v", grouped)
 	}
-	if butt.cap != vector.LineCapButt || butt.join != vector.LineJoinBevel || butt.fill.token != "accent" || butt.width != 2 {
+	if butt.cap != render.LineCapButt || butt.join != render.LineJoinBevel || butt.fill.token != "accent" || butt.width != 2 {
 		t.Errorf("butt shape style %+v", butt)
 	}
-	if last.cap != vector.LineCapRound || last.line.token != "" {
+	if last.cap != render.LineCapRound || last.line.token != "" {
 		t.Errorf("a group's style must end with it: %+v", last)
 	}
 }
@@ -228,7 +228,7 @@ func TestSVGStyleDefaults(t *testing.T) {
 		t.Fatal(err)
 	}
 	shape := icon.shapes[0]
-	if shape.fill.none || !shape.line.none || shape.width != 1 || shape.cap != vector.LineCapButt || shape.join != vector.LineJoinMiter {
+	if shape.fill.none || !shape.line.none || shape.width != 1 || shape.cap != render.LineCapButt || shape.join != render.LineJoinMiter {
 		t.Errorf("default style %+v", shape)
 	}
 }

@@ -2,22 +2,28 @@ package widget
 
 import (
 	"math"
-
-	"github.com/hajimehoshi/ebiten/v2"
+	"reflect"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
 // Image shows a picture scaled down to fit its box, centered, keeping its
-// proportions; a picture smaller than the box is not scaled up.
-func Image(img *ebiten.Image, opts ...Option) *El {
+// proportions; a picture smaller than the box is not scaled up. A nil picture
+// shows nothing and measures 0x0, and so does a nil pointer held in the
+// interface (what a renderer's loader leaves when it fails), which is not
+// equal to nil.
+func Image(img render.Image, opts ...Option) *El {
+	if value := reflect.ValueOf(img); value.Kind() == reflect.Pointer && value.IsNil() {
+		img = nil
+	}
 	return Custom(imageB{img: img}, With(nil, opts)...)
 }
 
 type imageB struct {
 	Base
-	img *ebiten.Image
+	img render.Image
 }
 
 func (b imageB) Measure(*El, *core.Ctx, int) (int, int) {
@@ -28,7 +34,7 @@ func (b imageB) Measure(*El, *core.Ctx, int) (int, int) {
 	return r.Dx(), r.Dy()
 }
 
-func (b imageB) Draw(element *El, ctx *core.Ctx, dst *ebiten.Image) {
+func (b imageB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	if b.img == nil {
 		return
 	}
@@ -41,9 +47,5 @@ func (b imageB) Draw(element *El, ctx *core.Ctx, dst *ebiten.Image) {
 	k := math.Min(1, math.Min(float64(r.W)/iw, float64(r.H)/ih))
 	ox := float64(r.X) + (float64(r.W)-iw*k)/2
 	oy := float64(r.Y) + (float64(r.H)-ih*k)/2
-	var op ebiten.DrawImageOptions
-	op.Filter = ebiten.FilterLinear
-	op.GeoM.Scale(k*ctx.Scale, k*ctx.Scale)
-	op.GeoM.Translate(ox*ctx.Scale, oy*ctx.Scale)
-	dst.DrawImage(b.img, &op)
+	dst.DrawImage(b.img, ox*ctx.Scale, oy*ctx.Scale, k*ctx.Scale, render.FilterLinear)
 }

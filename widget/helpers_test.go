@@ -1,20 +1,21 @@
 package widget
 
 import (
+	"image"
 	"strings"
 	"testing"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
+	"github.com/gascoigne-ai/uitoolkit/render"
+	"github.com/gascoigne-ai/uitoolkit/render/rendertest"
+	"github.com/gascoigne-ai/uitoolkit/render/text"
 	"github.com/gascoigne-ai/uitoolkit/theming"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
 func testCtx(t *testing.T) *core.Ctx {
 	t.Helper()
-	c, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
+	c, err := core.NewCtx(theming.Dark(), testDevice{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +25,7 @@ func testCtx(t *testing.T) *core.Ctx {
 func drawn(t *testing.T, ctx *core.Ctx, root *El, width, height int) {
 	t.Helper()
 	Layout(ctx, root, width, height)
-	Draw(ctx, root, ebiten.NewImage(width, height))
+	Draw(ctx, root, rendertest.NewCanvas(width, height))
 }
 
 func click(ctx *core.Ctx, posX, posY int) { ctx.In = core.Input{X: posX, Y: posY, Click: true} }
@@ -93,7 +94,7 @@ func (m *memClip) Write(content string) error { m.text = content; return nil }
 // viewport is a 600x400 code view at the origin of a context with a memory clipboard.
 func viewport(t *testing.T) (*CodeView, *core.Ctx, *memClip, core.Rect) {
 	t.Helper()
-	c, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
+	c, err := core.NewCtx(theming.Dark(), testDevice{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,4 +142,20 @@ func shiftKey(code *CodeView, ctx *core.Ctx, rect core.Rect, edit core.Edit) {
 func clickAt(code *CodeView, ctx *core.Ctx, rect core.Rect, line, col int) {
 	press(code, ctx, rect, colX(ctx, code, rect, col), rowY(ctx, code, rect, line), 1)
 	release(code, ctx, rect, 0, 0)
+}
+
+// testDevice is a device with no GPU: faces measured by render/text, and
+// offscreens and images that only record.
+type testDevice struct{}
+
+func (testDevice) NewFontSource(data []byte) (render.FontSource, error) {
+	return text.NewFontSource(data)
+}
+
+func (testDevice) NewOffscreen(width, height int) render.Offscreen {
+	return rendertest.NewOffscreen(width, height)
+}
+
+func (testDevice) NewImage(source image.Image) render.Image {
+	return &rendertest.Image{Rect: source.Bounds()}
 }

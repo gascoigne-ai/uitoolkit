@@ -3,7 +3,7 @@ package widget
 import (
 	"testing"
 
-	"github.com/hajimehoshi/ebiten/v2/vector"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 // An empty stroke-linecap resets the cap to butt; an empty stroke-linejoin
@@ -14,7 +14,7 @@ func TestEmptyLineCapResetsToButtAndEmptyLineJoinInherits(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if shape := icon.shapes[0]; shape.cap != vector.LineCapButt || shape.join != vector.LineJoinBevel {
+	if shape := icon.shapes[0]; shape.cap != render.LineCapButt || shape.join != render.LineJoinBevel {
 		t.Errorf("cap %v join %v, want butt and bevel", shape.cap, shape.join)
 	}
 }

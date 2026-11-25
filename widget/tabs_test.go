@@ -5,9 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render/rendertest"
 )
 
 // Regression: a tab in a monospace view (a raw body, a TextArea) was one
@@ -137,7 +136,7 @@ func TestDrawingManyMatchesOnALongLineIsFast(t *testing.T) {
 	line := strings.Repeat("key\tvalue ", 30000) // 300k runes
 	v.SetLines([]Line{{Spans: []Span{{Text: line, Style: core.Text}}}})
 	v.SetMatches(v.Find("e"), 0)
-	dst := ebiten.NewImage(r.W, r.H)
+	dst := rendertest.NewCanvas(r.W, r.H)
 	start := time.Now()
 	v.Draw(c, dst, r)
 	if elapsed := time.Since(start); elapsed > 2*time.Second {

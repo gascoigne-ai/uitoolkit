@@ -1,9 +1,8 @@
 package widget
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 // Mouse wheel steps of the monospace widgets: one notch scrolls this many
@@ -75,7 +74,7 @@ func (g monoGrid) selectionRect(scrollX, from, to, posY, height int) core.Rect {
 // TextArea, placed by column so rounding does not add up along the line. A
 // tab is drawn as the spaces up to its stop, counted along the whole line
 // (row.col), so a continuation row keeps the line's stops.
-func (g monoGrid) drawSpans(ctx *core.Ctx, dst *ebiten.Image, scrollX int, cell core.Rect, row visualRow, spans []Span) {
+func (g monoGrid) drawSpans(ctx *core.Ctx, dst render.Canvas, scrollX int, cell core.Rect, row visualRow, spans []Span) {
 	col := row.col
 	for _, sp := range spans {
 		next := monoColumns(g.adv).spanString(sp.Text, col)

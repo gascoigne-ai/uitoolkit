@@ -3,8 +3,6 @@ package view
 import (
 	"strings"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
 	"github.com/gascoigne-ai/uitoolkit/render"
 )
@@ -46,9 +44,7 @@ func (textB) Measure(element *El, ctx *core.Ctx, _ int) (int, int) {
 	return ctx.Width(face, element.text), ctx.LineH(face)
 }
 
-// Draw is called only on an ebiten canvas until task 005, so text records no
-// DrawText on another renderer's canvas yet.
-func (textB) Draw(element *El, ctx *core.Ctx, dst *ebiten.Image) {
+func (textB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	face := element.face(ctx)
 	s := element.text
 	if element.ellipsis {

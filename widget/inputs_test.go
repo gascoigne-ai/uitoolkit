@@ -5,10 +5,10 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/hajimehoshi/ebiten/v2"
 	"testing"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render/rendertest"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -579,7 +579,7 @@ func TestEditorsSurviveZeroSizeAndHostileText(t *testing.T) {
 		Layout(c, root, size[0], size[1])
 		c.In = core.Input{X: 1, Y: 1, Click: true, Held: true, Typed: []rune(hostile), Edits: []core.Edit{core.EditDown, core.EditEnd, core.EditBackspace}}
 		Update(c, root)
-		Draw(c, root, ebiten.NewImage(400, 300)) // the image is never empty; the layout may be
+		Draw(c, root, rendertest.NewCanvas(400, 300)) // the image is never empty; the layout may be
 	}
 	field.Insert(hostile)
 	area.Insert(hostile)

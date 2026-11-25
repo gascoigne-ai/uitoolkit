@@ -1,10 +1,10 @@
 package widget
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"testing"
 
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render/rendertest"
 )
 
 func TestCodeViewLayoutIsBuiltOnceWhileNothingChanges(t *testing.T) {
@@ -91,7 +91,7 @@ func TestCodeViewNumberDigitsFollowsWidestNumber(t *testing.T) {
 // for the widest number.
 func TestCodeViewScansLineNumbersOncePerContent(t *testing.T) {
 	v, c, _, r := viewport(t)
-	screen := ebiten.NewImage(r.W, r.H)
+	screen := rendertest.NewCanvas(r.W, r.H)
 	for range 3 {
 		v.Update(c, r)
 		v.Draw(c, screen, r)

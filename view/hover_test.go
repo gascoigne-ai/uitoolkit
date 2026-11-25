@@ -3,15 +3,14 @@ package view
 import (
 	"testing"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render/rendertest"
 )
 
 func drawn(t *testing.T, ctx *core.Ctx, root *El, width, height int) {
 	t.Helper()
 	Layout(ctx, root, width, height)
-	Draw(ctx, root, ebiten.NewImage(width, height))
+	Draw(ctx, root, rendertest.NewCanvas(width, height))
 }
 
 func TestHoverIsOnForElementsUnderThePointer(t *testing.T) {

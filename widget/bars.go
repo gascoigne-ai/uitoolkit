@@ -1,9 +1,8 @@
 package widget
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 // bars is the scrollbar layout of a view in r: the area left for content
@@ -92,7 +91,7 @@ func (d *barDrag) press(bar barKind, track, content, view, at int, scroll *int) 
 }
 
 // drawBars draws the scrollbars of b for content scrolled to sx, sy.
-func drawBars(ctx *core.Ctx, dst *ebiten.Image, sizes bars, drag barDrag, contentW, contentH, sx, sy int) {
+func drawBars(ctx *core.Ctx, dst render.Canvas, sizes bars, drag barDrag, contentW, contentH, sx, sy int) {
 	if sizes.vOK {
 		drawScrollbar(ctx, dst, sizes.vTrack, contentH, sizes.viewH, sy, drag.bar == barV || ctx.Hovered(sizes.vTrack))
 	}

@@ -1,9 +1,8 @@
 package widget
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
 // Scrollbar geometry shared by Scroll and HScroll: the track width and the
@@ -46,7 +45,7 @@ func posFromOffset(trackLen, contentLen, viewLen, off int) int {
 // drawScrollbar draws the thumb in track for the given scroll state; the
 // track is vertical or horizontal by its shape. active brightens it
 // (hover or drag). It draws nothing when everything fits.
-func drawScrollbar(ctx *core.Ctx, dst *ebiten.Image, track core.Rect, contentLen, viewLen, pos int, active bool) {
+func drawScrollbar(ctx *core.Ctx, dst render.Canvas, track core.Rect, contentLen, viewLen, pos int, active bool) {
 	vertical := track.H >= track.W
 	trackLen := track.W
 	if vertical {

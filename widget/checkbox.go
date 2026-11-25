@@ -1,9 +1,8 @@
 package widget
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -26,7 +25,7 @@ func (checkB) Update(element *El, ctx *core.Ctx) {
 	}
 }
 
-func (b checkB) Draw(element *El, ctx *core.Ctx, dst *ebiten.Image) {
+func (b checkB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	r := element.Rect()
 	side := ctx.Sizes.Checkbox
 	drawCheckbox(ctx, dst, core.Rect{X: r.X + (r.W-side)/2, Y: r.Y + (r.H-side)/2, W: side, H: side}, b.on, ctx.Hovered(r))
@@ -34,7 +33,7 @@ func (b checkB) Draw(element *El, ctx *core.Ctx, dst *ebiten.Image) {
 
 // drawCheckbox draws a 14px box: an accent square with a check in
 // AccentText when on, a plain outline when off (darker under the pointer).
-func drawCheckbox(ctx *core.Ctx, dst *ebiten.Image, box core.Rect, on, hover bool) {
+func drawCheckbox(ctx *core.Ctx, dst render.Canvas, box core.Rect, on, hover bool) {
 	if !on {
 		edge := core.Rule
 		if hover {

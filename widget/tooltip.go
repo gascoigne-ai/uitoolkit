@@ -1,9 +1,8 @@
 package widget
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
@@ -43,13 +42,13 @@ type tooltipB struct {
 	state *TooltipState
 }
 
-func (b tooltipB) Draw(element *El, ctx *core.Ctx, dst *ebiten.Image) {
+func (b tooltipB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	b.state.draw(ctx, dst, element.Rect())
 }
 
 // draw updates the delay bookkeeping for the tip of the element under the
 // pointer and, once it is due, draws it inside screen.
-func (s *TooltipState) draw(ctx *core.Ctx, dst *ebiten.Image, screen core.Rect) {
+func (s *TooltipState) draw(ctx *core.Ctx, dst render.Canvas, screen core.Rect) {
 	s.shown, s.waiting = false, false
 	if ctx.TipText == "" {
 		s.text = ""

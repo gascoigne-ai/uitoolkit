@@ -1,13 +1,13 @@
 package widget
 
 import (
+	"image"
+	"image/color"
 	"strconv"
 	"testing"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
-	"github.com/gascoigne-ai/uitoolkit/ebitenrender"
+	"github.com/gascoigne-ai/uitoolkit/render"
 	"github.com/gascoigne-ai/uitoolkit/theming"
 )
 
@@ -19,7 +19,7 @@ const benchLines = 40000
 
 func benchCodeView(b *testing.B, wrap bool) (*CodeView, *core.Ctx, core.Rect) {
 	b.Helper()
-	ctx, err := core.NewCtx(theming.Dark(), ebitenrender.NewDevice())
+	ctx, err := core.NewCtx(theming.Dark(), testDevice{})
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -56,10 +56,30 @@ func BenchmarkCodeViewDraw(b *testing.B) {
 	for _, wrap := range []bool{false, true} {
 		b.Run("wrap="+strconv.FormatBool(wrap), func(b *testing.B) {
 			view, ctx, rect := benchCodeView(b, wrap)
-			screen := ebiten.NewImage(rect.W, rect.H)
+			screen := nopCanvas{bounds: image.Rect(0, 0, rect.W, rect.H)}
 			for i := 0; i < b.N; i++ {
 				view.Draw(ctx, screen, rect)
 			}
 		})
 	}
 }
+
+// nopCanvas draws nothing and records nothing, so a benchmark times the
+// toolkit and not a recorder.
+type nopCanvas struct{ bounds image.Rectangle }
+
+func (c nopCanvas) Bounds() image.Rectangle { return c.bounds }
+func (c nopCanvas) Sub(clip image.Rectangle) render.Canvas {
+	return nopCanvas{bounds: c.bounds.Intersect(clip)}
+}
+func (nopCanvas) FillRect(render.Box, color.RGBA)                                           {}
+func (nopCanvas) FillRectGradient(render.Box, color.RGBA, color.RGBA)                       {}
+func (nopCanvas) FillRoundRect(render.Box, float32, render.Corners, color.RGBA, color.RGBA) {}
+func (nopCanvas) StrokeRect(render.Box, float32, color.RGBA)                                {}
+func (nopCanvas) StrokeRoundRect(render.Box, float32, float32, color.RGBA)                  {}
+func (nopCanvas) StrokeLine(float32, float32, float32, float32, float32, color.RGBA)        {}
+func (nopCanvas) FillPath(*render.Path, color.RGBA)                                         {}
+func (nopCanvas) StrokePath(*render.Path, render.Stroke, color.RGBA)                        {}
+func (nopCanvas) DrawImage(render.Image, float64, float64, float64, render.Filter)          {}
+func (nopCanvas) DrawMask(render.Image, float64, float64, color.RGBA)                       {}
+func (nopCanvas) DrawText(render.Face, string, float64, float64, color.RGBA)                {}

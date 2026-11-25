@@ -3,9 +3,9 @@ package view
 import (
 	"testing"
 
-	"github.com/hajimehoshi/ebiten/v2"
-
 	"github.com/gascoigne-ai/uitoolkit/core"
+	"github.com/gascoigne-ai/uitoolkit/render"
+	"github.com/gascoigne-ai/uitoolkit/render/rendertest"
 )
 
 // overPainter is a Behavior that paints over its children.
@@ -14,7 +14,7 @@ type overPainter struct {
 	painted *int
 }
 
-func (painter overPainter) DrawOver(*El, *core.Ctx, *ebiten.Image) { *painter.painted++ }
+func (painter overPainter) DrawOver(*El, *core.Ctx, render.Canvas) { *painter.painted++ }
 
 func overlay() *El { return Col(W(60), H(40), FloatAt(10, 10), Modal(), OnDismiss(func() {}), box()) }
 
@@ -66,7 +66,7 @@ func TestDrawBelowAndDrawFromDrawWhatDrawDraws(t *testing.T) {
 	ctx := testCtx(t)
 	root := layeredRoot()
 	Layout(ctx, root, 200, 100)
-	dst := ebiten.NewImage(200, 100)
+	dst := rendertest.NewCanvas(200, 100)
 	const layer = 2
 
 	whole := countedDraw(ctx, func() { Draw(ctx, root, dst) })
@@ -91,7 +91,7 @@ func TestTheTipComesOnlyFromThePartThatDrawsTheHoveredElement(t *testing.T) {
 	ctx := testCtx(t)
 	root := layeredRoot()
 	Layout(ctx, root, 200, 100)
-	dst := ebiten.NewImage(200, 100)
+	dst := rendertest.NewCanvas(200, 100)
 	ctx.In = core.Input{X: 30, Y: 30} // over the panel's child
 	DrawBelow(ctx, root, 2, dst)
 	if ctx.TipText != "" {
