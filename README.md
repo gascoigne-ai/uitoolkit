@@ -11,6 +11,6 @@ go get github.com/gascoigne-ai/uitoolkit/renderer/ebiten   # the Ebitengine rend
 
 Packages: `core` (tokens, colors, geometry, input, drawing calls), `view` (element tree, layout, runtime), `widget` (components), `markup` (templates), `theming`, `engine`, `desktop/*`, `render` (the renderer contract), `renderer/ebiten` (Ebitengine renderer module).
 
-Run the example: `go run ./examples/hello` (`examples` is a module of its own; `go.work` joins the three modules for local work). Tests: `make check` (needs a display or `xvfb-run -a`).
+Run the showcase, every widget in one window: `go run ./examples/showcase` (`examples` is a module of its own; `go.work` joins the three modules for local work). Tests: `make check` (needs a display or `xvfb-run -a`).
 
 Licensed under Apache 2.0.

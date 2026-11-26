@@ -5,7 +5,7 @@
 // It is the mechanics only. An application decides which themes exist
 // (a Catalog of built-in choices), keeps its own settings and maps them
 // to Prefs; the toolkit's dark and light palettes are Builtins.
-// Runnable examples: package uitoolkit/examples.
+// To see it in a window: go run ./examples/showcase.
 //
 // Themes are data, per control: colors, radii, gradients and outlines live
 // in embedded JSON theme files (themes/*.json), and an element names a

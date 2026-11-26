@@ -1,7 +1,7 @@
 // Package view builds widget UIs as a tree of elements, declaratively, in
 // plain Go. A view is a function that returns a tree; it is called every
 // frame, so the tree is always a pure function of the application state:
-// no diffing, no reactive system. Runnable examples: package uitoolkit/examples.
+// no diffing, no reactive system. To see it in a window: go run ./examples/showcase.
 //
 //	func view(a *App) view.Node {
 //		return view.Col(view.Grow(1), view.Pad(12), view.Gap(8), // options first, by convention

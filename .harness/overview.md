@@ -13,7 +13,7 @@
 | `desktop/*` | OS probes: display scale, key repeat, file chooser, system info, fonts |
 | `render`, `render/text`, `render/rendertest` | the renderer contract, a GPU-free font measurer, a recording fake |
 | `renderer/ebiten` | the Ebitengine renderer, its own module (package `ebitenrender`) |
-| `examples` | tested examples, the `hello` window and the widget `showcase`, its own module |
+| `examples` | the widget `showcase`, its own module |
 
 ```mermaid
 flowchart LR

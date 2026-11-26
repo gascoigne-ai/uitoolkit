@@ -212,7 +212,7 @@ The window's background work; the reasons are in the doc comments of the package
 ## Toolkit: API and templates
 
 The package map is `doc.go`; import and naming rules are `rules.md` (Layers, Toolkit API
-rules). `examples` are tested examples that use the exported API only.
+rules). `examples/showcase` uses the exported API only.
 
 - **Families stay whole.** An option family (`MinW`, `AlignStart`, `JustifyBetween`, `PadL`...) is
   exported even where the app uses part of it, since a half family breaks rule 1; helpers only the

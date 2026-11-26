@@ -4,7 +4,7 @@
 // splitting, text editing, sliders, tables) are elements built with
 // view.Custom. Either way they need nothing from the runtime beyond what
 // view exports. Like view, most callers dot-import it.
-// Runnable examples: package uitoolkit/examples.
+// To see it in a window: go run ./examples/showcase.
 //
 // # Finding your way
 //
