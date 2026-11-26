@@ -59,7 +59,7 @@ func textGo(s *Showcase, _ *core.Ctx) Node {
 				return SegmentChip(entry.Label, entry.Selected, W(caretChipW), OnClick(entry.Pick))
 			}),
 		)),
-		CheckRow(s.Caret.Blink, OnClick(flip(&s.Caret.Blink)), AlignItems(AlignCenter), Text("Blink")),
+		CheckRow(!s.Caret.Steady, OnClick(flip(&s.Caret.Steady)), AlignItems(AlignCenter), Text("Blink")),
 	)
 }
 
@@ -67,7 +67,7 @@ func textMarkup(s *Showcase, ctx *core.Ctx) Node {
 	state := &s.widgets
 	return fill(ctx, textTemplate, markup.Scope{
 		"page": &state.textPage, "name": &state.name, "secret": &state.secret, "search": &state.search, "notes": &state.notes,
-		"carets": s.caretChoices(), "blink": s.Caret.Blink, "flipBlink": flip(&s.Caret.Blink), "caretChipW": caretChipW,
+		"carets": s.caretChoices(), "blink": !s.Caret.Steady, "flipBlink": flip(&s.Caret.Steady), "caretChipW": caretChipW,
 		"labelW": formLabelW, "fieldW": formFieldW, "notesH": notesH, "searchHint": searchHint, "remark": notesRemark,
 	})
 }

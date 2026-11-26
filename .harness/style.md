@@ -153,7 +153,7 @@ An unknown token draws in `Text`, so a typo stays visible.
 
 **Buttons.** `Button`: `Sunken` fill, `ChipText` label, outlined, brightens on hover, label padded 10, ellipsized only when the row has no room. `PrimaryButton`: `Accent` fill, `AccentText` label, `AccentLine` outline. `SegmentChip`: a primary button when chosen, a button otherwise. `LinkButton`: `AccentLine` text on no fill, `Hover` under the pointer. Dialog buttons are `RowH` high and at least 80 wide.
 
-**Fields.** `Sunken`, `RowH` high (`CompactH` inline), `BorderStrong` outline, `AccentLine` when focused; variables in a field are green when resolved and red when not (`internal/feature/send/FEATURE.md`). The text caret of fields and text areas is `Accent`: by default a steady block with its character in `AccentText`; the app may choose a bar or an underline (`CaretW` thick, the character left as it is) and blinking (`Ctx.Caret`), which no theme sets.
+**Fields.** `Sunken`, `RowH` high (`CompactH` inline), `BorderStrong` outline, `AccentLine` when focused; variables in a field are green when resolved and red when not (`internal/feature/send/FEATURE.md`). The text caret of fields and text areas is `Accent`: by default a blinking block with its character in `AccentText`; the app may choose a bar or an underline (`CaretW` thick, the character left as it is) and a steady caret (`Ctx.Caret`), which no theme sets.
 
 **Menus.** `Bg` panel, `menu` control, shadow, inset `MenuPad` (4), 120 to 420 wide; rows `MenuRowH` (25) padded 10, the hot row `Selected`, others `Hover` on hover; shortcut and hint lines small and muted; separators 9 high.
 

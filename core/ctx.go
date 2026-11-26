@@ -119,8 +119,8 @@ type Ctx struct {
 	// when the blink last started over (RestartCaret).
 	Now        func() time.Time
 	CaretSince time.Time
-	// Caret is the shape of the text caret and whether it blinks; the zero
-	// value is a steady block.
+	// Caret is the shape of the text caret and whether it stays steady; the
+	// zero value is a blinking block.
 	Caret Caret
 	// CaretReads counts the CaretVisible calls made while the caret blinks: a
 	// drawing kept across frames shows the blink phase when the count moved
@@ -259,7 +259,7 @@ func (c *Ctx) RestartCaret() { c.CaretSince = c.now() }
 // steady, else in the shown phase of its blink. The phase follows the clock,
 // so it does not depend on how often the app updates or draws.
 func (c *Ctx) CaretVisible() bool {
-	if !c.Caret.Blink {
+	if c.Caret.Steady {
 		return true
 	}
 	c.CaretReads++

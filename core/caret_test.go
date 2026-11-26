@@ -13,7 +13,6 @@ func TestTheCaretBlinksOnAWallClockAndRestartsOnActivity(t *testing.T) {
 	}
 	now := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
 	ctx.Now = func() time.Time { return now }
-	ctx.Caret.Blink = true
 	ctx.RestartCaret()
 	steps := []struct {
 		after time.Duration
@@ -43,7 +42,6 @@ func TestTheBlinkRateDoesNotDependOnTheUpdateRate(t *testing.T) {
 	ctx, _ := NewCtx(testTheme(), testDevice{})
 	start := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
 	ctx.Now = func() time.Time { return start.Add(600 * time.Millisecond) }
-	ctx.Caret.Blink = true
 	ctx.CaretSince = start
 	ctx.Tick = 7
 	first := ctx.CaretVisible()
@@ -92,7 +90,6 @@ func TestCaretVisibleCountsReads(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctx.Caret.Blink = true
 	if ctx.CaretReads != 0 {
 		t.Fatalf("CaretReads = %d before any read", ctx.CaretReads)
 	}
@@ -104,22 +101,30 @@ func TestCaretVisibleCountsReads(t *testing.T) {
 	}
 }
 
-func TestAZeroCaretIsASteadyBlock(t *testing.T) {
+func TestAZeroCaretIsABlinkingBlock(t *testing.T) {
 	ctx, err := NewCtx(testTheme(), testDevice{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if ctx.Caret != (Caret{Shape: CaretBlock}) {
-		t.Fatalf("Caret = %+v, want a steady block", ctx.Caret)
+	if ctx.Caret != (Caret{}) {
+		t.Fatalf("Caret = %+v, want the zero value", ctx.Caret)
 	}
 	start := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
 	now := start
 	ctx.Now = func() time.Time { return now }
 	ctx.RestartCaret()
-	for _, after := range []time.Duration{0, 500 * time.Millisecond, 900 * time.Millisecond, 1500 * time.Millisecond} {
-		now = start.Add(after)
-		if !ctx.CaretVisible() {
-			t.Errorf("after %v: a steady caret is hidden", after)
+	steps := []struct {
+		after time.Duration
+		want  bool
+	}{
+		{0, true}, {499 * time.Millisecond, true},
+		{500 * time.Millisecond, false}, {900 * time.Millisecond, false},
+		{1000 * time.Millisecond, true}, {1500 * time.Millisecond, false},
+	}
+	for _, step := range steps {
+		now = start.Add(step.after)
+		if got := ctx.CaretVisible(); got != step.want {
+			t.Errorf("after %v: visible = %v, want %v", step.after, got, step.want)
 		}
 	}
 }
@@ -131,9 +136,18 @@ func TestASteadyCaretCountsNoReads(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	ctx.Caret.Steady = true
+	start := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
+	now := start
+	ctx.Now = func() time.Time { return now }
 	ctx.CaretVisible()
 	ctx.RestartCaret()
-	ctx.CaretVisible()
+	for _, after := range []time.Duration{0, 500 * time.Millisecond, 900 * time.Millisecond, 1500 * time.Millisecond} {
+		now = start.Add(after)
+		if !ctx.CaretVisible() {
+			t.Errorf("after %v: a steady caret is hidden", after)
+		}
+	}
 	if ctx.CaretReads != 0 {
 		t.Fatalf("CaretReads = %d for a steady caret, want 0", ctx.CaretReads)
 	}

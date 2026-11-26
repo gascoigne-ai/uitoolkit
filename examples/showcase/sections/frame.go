@@ -46,10 +46,10 @@ func (s *Showcase) Update(ctx *core.Ctx, width, height int) error {
 	return s.syncTheme(ctx) // a handler may have changed the theme
 }
 
-// syncCaret puts the chosen caret on the context. A blink that is turned on
-// starts in its shown phase.
+// syncCaret puts the chosen caret on the context. When Steady is turned off,
+// the blink starts in its shown phase.
 func (s *Showcase) syncCaret(ctx *core.Ctx) {
-	if s.Caret.Blink && !ctx.Caret.Blink {
+	if !s.Caret.Steady && ctx.Caret.Steady {
 		ctx.RestartCaret()
 	}
 	ctx.Caret = s.Caret

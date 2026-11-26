@@ -208,6 +208,7 @@ func TestASteadyCaretIsDrawnInTheOffPhase(t *testing.T) {
 	start := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
 	now := start
 	ctx.Now = func() time.Time { return now }
+	ctx.Caret.Steady = true
 	ctx.RestartCaret()
 	now = start.Add(700 * time.Millisecond) // hidden, were it blinking
 	area := NewTextArea("abc")

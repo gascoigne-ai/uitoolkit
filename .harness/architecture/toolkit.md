@@ -287,8 +287,8 @@ Each is also said in the doc comment of what breaks the rule; a new exception ad
   which `ebitenrender` draws from cached corner masks. `Ctx.Stats` counts those calls
   (`MaskFills`, `RingFills`) and the real measurements; `BenchmarkDrawStats` in
   `internal/ui/window` reports them.
-- **Caret blink** is off by default: `Ctx.Caret` (`core.Caret`: a shape, block, bar or
-  underline, and `Blink`) is zero for a steady block. A steady caret is always visible and
+- **Caret blink** is on by default: `Ctx.Caret` (`core.Caret`: a shape, block, bar or
+  underline, and `Steady`) is zero for a blinking block. A steady caret is always visible and
   `Ctx.CaretReads` does not move; it moves only while blinking. The blink follows the clock
   (`Ctx.CaretVisible`), not ticks, so its rate holds when the idle app drops from 60 to 30 updates,
   and it starts over only when the app calls `RestartCaret`. `engine.MinFPS` (10) draws at least
@@ -329,7 +329,7 @@ two packages.
   `ScaleSteps`, the theming preferences, the live theme text, and one struct of named widget states
   that outlives a section switch, and the chosen `core.Caret` (controls in the text section),
   which `Update` and `Draw` put on the context; `Update` restarts the blink on input
-  (`Input.RestartsCaret`) and when it is turned on. Nothing is saved. `Select` closes the popup menu and the dialog,
+  (`Input.RestartsCaret`) and when the blink is turned back on. Nothing is saved. `Select` closes the popup menu and the dialog,
   since the menu lives in `core.Ctx` and would cover the next section.
 - **Two forms.** Each `Sections` row builds its page in Go and from a markup template, and the Form
   control switches. `TestGoAndMarkupFormsDumpAlike` compares dump and painted ops, and

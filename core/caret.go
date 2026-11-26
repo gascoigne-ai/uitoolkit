@@ -12,12 +12,13 @@ const (
 )
 
 // Caret is how fields and text areas show where typing goes. The zero value
-// is a steady block. It is a choice of the app for all its widgets, held by
+// is a blinking block. It is a choice of the app for all its widgets, held by
 // Ctx.Caret: it is not part of a theme.
 type Caret struct {
 	Shape CaretShape
-	// Blink hides and shows the caret every CaretHalfPeriod, counted from the
-	// last RestartCaret. An app that never calls it gets a caret that does not
-	// blink: call it when Input.RestartsCaret and when turning Blink on.
-	Blink bool
+	// Steady keeps the caret shown. Otherwise it hides and shows every
+	// CaretHalfPeriod from the last RestartCaret; until the first
+	// RestartCaret it stays shown. Call RestartCaret when Input.RestartsCaret
+	// and when Steady is turned off.
+	Steady bool
 }
