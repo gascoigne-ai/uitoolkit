@@ -3,7 +3,7 @@ kind: feature
 commit: feat(theming): make the default text one pixel bigger
 scope: core/**,view/**,widget/**,markup/**,theming/**,renderer/ebiten/**,examples/showcase/**,.harness/architecture/toolkit.md,.harness/style.md,CHANGELOG.md
 not_before: 2026-11-26
-depends_on: 009f-showcase-all-widgets
+depends_on:
 
 # Bigger default fonts at 100% scale
 

@@ -3,7 +3,7 @@ kind: feature
 commit: feat(core): steady caret by default, with a style option
 scope: core/**,view/**,widget/**,engine/**,markup/**,theming/**,examples/showcase/**,.harness/architecture/toolkit.md,.harness/style.md,CHANGELOG.md
 not_before: 2026-11-26
-depends_on: 009f-showcase-all-widgets
+depends_on:
 
 # Caret: no blinking by default, selectable style
 
