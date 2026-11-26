@@ -17,6 +17,9 @@ Goal: The private pixel constants of widgets and views (button and field padding
 - Leading applies to the height classes, the bars built from them and the space between wrapped `Paragraph` lines. Single-line `Text` and the checkbox keep the measured line.
 - Carried from `009p`: code and text-area lines were left as they were until this task. Name their +4 as a size and ask the user whether leading applies to them. Name the switch inset (`Steps.Hair` today) and the tooltip, menu and mono-grid pixels.
 
+## Dialog limits (user, 2026-11-27)
+`dialogMargin` and `dialogMaxH` are theme sizes that no widget reads yet. The toolkit's `Dialog` applies them: it keeps the margin to the window edge and limits its height. The designer says what happens to content taller than the limit and to an app that gives a dialog its own size, and asks the user if that is not settled by the code. Goldens or dumps that change only because of this are shown to the user before they are updated; this is the one exception to the byte-identical rule below. `docs/ui-guidelines.md` is updated.
+
 ## Model
 The designer writes it, extending the theme's `metrics` block.
 
