@@ -9,6 +9,8 @@ depends_on: 012-wgpu-pipelines
 
 Goal: Textured quads, `Image` upload, `Offscreen` with `ReadPixels`. Paths: all 28 icons use strokes with caps and joins and `x/image/vector` only fills, so this task adds a stroker (**asks the user first** if it needs a new dependency) and rasterizes to a cached texture. Icon cache lives in the renderer.
 
+Decision (user, 2026-11-26): the stroker is decided when this task is reached: compare open-source options and propose three, then wait for the pick.
+
 ## Model
 Model: texture cache keyed by device; dropped on device loss.
 
