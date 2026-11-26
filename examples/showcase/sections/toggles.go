@@ -26,7 +26,7 @@ func flip(value *bool) func() { return func() { *value = !*value } }
 // switchRow is a switch and its label. Markup has no switch element, so both
 // forms take this node: the template puts it in with slot.
 func switchRow(label string, toggle *El) Node {
-	return Row(HOf(core.RowOf), Gap(core.LooseGap), AlignItems(AlignCenter), toggle, Text(label))
+	return Row(HOf(core.RowOf), GapOf(core.LooseGapOf), AlignItems(AlignCenter), toggle, Text(label))
 }
 
 func (s *Showcase) switches() (autosave, offline, disabled Node) {
@@ -47,11 +47,11 @@ func (s *Showcase) zoomText() string {
 func togglesGo(s *Showcase, _ *core.Ctx) Node {
 	state := &s.widgets
 	autosave, offline, disabled := s.switches()
-	return Scroll(&state.togglesPage, Pad(core.Gutter), Gap(core.Gutter),
+	return Scroll(&state.togglesPage, PadOf(core.GutterOf), GapOf(core.GutterOf),
 		Caption("Checkboxes"),
 		CheckRow(state.wrapLines, OnClick(flip(&state.wrapLines)), AlignItems(AlignCenter), Text("Wrap long lines")),
 		CheckRow(state.showHidden, OnClick(flip(&state.showHidden)), AlignItems(AlignCenter), Text("Show hidden files")),
-		Row(HOf(core.RowOf), Gap(core.LooseGap), AlignItems(AlignCenter),
+		Row(HOf(core.RowOf), GapOf(core.LooseGapOf), AlignItems(AlignCenter),
 			Checkbox(state.termsAgreed, OnChange(flip(&state.termsAgreed))),
 			Text("A checkbox on its own"),
 		),

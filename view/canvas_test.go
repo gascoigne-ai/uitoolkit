@@ -65,7 +65,7 @@ func drawOnCanvas(ctx *core.Ctx, root *El, width, height int, canvas *rendertest
 
 func TestDrawOnACanvasRecordsTheElementsLook(t *testing.T) {
 	full := image.Rect(0, 0, 400, 400)
-	shadow := float32(core.ShadowOffset)
+	shadow := float32(core.DefaultSizes().ShadowOffset)
 	tests := []struct {
 		name    string
 		scale   float64

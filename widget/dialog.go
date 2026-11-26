@@ -43,7 +43,7 @@ func DialogTitle(title string, items ...Item) *El {
 		CrossIcon(Grow(1), Color(core.HeroMuted)),
 	)
 	bar = Row(append(append([]Item{
-		HOf(core.DialogTitleOf), DragHandle(), PadX(core.DialogPad), Gap(core.LooseGap), AlignItems(AlignCenter),
+		HOf(core.DialogTitleOf), DragHandle(), PadXOf(core.DialogPadOf), GapOf(core.LooseGapOf), AlignItems(AlignCenter),
 		Bg(core.Hero), Control("hero"), RoundT("menu"), BorderB(core.Border), Text(title, Bold(), Color(core.HeroText)),
 	}, append(items, Spacer())...), closeButton)...)
 	return bar
@@ -61,7 +61,7 @@ func DialogSubtitle(text string) *El {
 // field, Save, a switch. Give it the controls; fields that should take the
 // free room get Grow(1).
 func DialogToolbar(items ...Item) *El {
-	return Row(append([]Item{HOf(core.DialogToolbarOf), PadX(core.DialogPad), Gap(core.LooseGap), AlignItems(AlignCenter), BorderB(core.BorderSoft)}, items...)...)
+	return Row(append([]Item{HOf(core.DialogToolbarOf), PadXOf(core.DialogPadOf), GapOf(core.LooseGapOf), AlignItems(AlignCenter), BorderB(core.BorderSoft)}, items...)...)
 }
 
 // DialogButton is a button of a message dialog; the primary one is lit and
@@ -91,9 +91,6 @@ func (state *DialogState) Default() {
 	}
 }
 
-// MessageDialogW is the width of a message dialog.
-const MessageDialogW = core.DialogW
-
 // MessageDialog shows state as a Dialog: a title bar with a close button,
 // then the body, any content items you add (a form, between the body and
 // the input), the input line and the buttons on the right. Options you give
@@ -114,17 +111,17 @@ func MessageDialog(state *DialogState, items ...Item) *El {
 		frag.Children()[1].Dismiss()
 	}
 	body := Col(append(append([]Item{
-		Pad(core.DialogPad), Gap(core.Gutter),
+		PadOf(core.DialogPadOf), GapOf(core.GutterOf),
 		If(state.Body != "", Lines(state.Body, core.Muted)),
 	}, content...),
 		If(state.Input != nil, Field(state.Input, HOf(core.RowOf), Bg(core.Sunken), OnEnter(state.Default), TextMenu(state.Input))),
-		Row(HOf(core.RowOf), Gap(core.LooseGap),
+		Row(HOf(core.RowOf), GapOf(core.LooseGapOf),
 			Spacer(),
 			For(state.Buttons, func(_ int, button DialogButton) Node {
-				return SegmentChip(button.Label, button.Primary, MinW(core.DialogButtonMinW), OnClick(button.Run))
+				return SegmentChip(button.Label, button.Primary, MinWOf(core.DialogButtonMinWOf), OnClick(button.Run))
 			}),
 		),
 	)...)
-	frag = Dialog(append([]Item{W(MessageDialogW), DialogTitle(state.Title, OnDismiss(dismiss)), body}, options...)...)
+	frag = Dialog(append([]Item{WOf(core.DialogWOf), DialogTitle(state.Title, OnDismiss(dismiss)), body}, options...)...)
 	return frag
 }

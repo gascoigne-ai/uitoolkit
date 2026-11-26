@@ -51,7 +51,7 @@ func TestAnEditorsWidthCountsTabsToTheirStops(t *testing.T) {
 	area := NewTextArea("\t\tx\nab")
 	r := core.Rect{W: 600, H: 200}
 	g := area.geometry(c, r)
-	if got, want := g.contentW(r), g.textX-r.X+g.colX(9)+core.Gutter; got != want {
+	if got, want := g.contentW(r), g.textX-r.X+g.colX(9)+core.DefaultSizes().Gutter; got != want {
 		t.Fatalf("contentW = %d, want %d (9 columns)", got, want)
 	}
 }
@@ -106,7 +106,7 @@ func TestACodeViewsWidthCountsTabsToTheirStops(t *testing.T) {
 	v, c, _, r := tabbedView(t)
 	g := v.geometry(c, r)
 	// "\tkey\tvalue": key at 4..7, the tab to 8, value at 8..13
-	if got, want := v.contentWidth(c, r), g.textX-r.X+g.colX(13)+core.Gutter; got != want {
+	if got, want := v.contentWidth(c, r), g.textX-r.X+g.colX(13)+core.DefaultSizes().Gutter; got != want {
 		t.Fatalf("contentWidth = %d, want %d (13 columns)", got, want)
 	}
 }

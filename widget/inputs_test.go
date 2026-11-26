@@ -535,8 +535,8 @@ func TestFieldTextInsetDefaultsAndCanBeReduced(t *testing.T) {
 	f := NewTextField("x")
 	plain := Field(&f)
 	tight := Field(&f, FieldPad(5))
-	plainInset := plain.Behavior().(*fieldB).textInset()
-	tightInset := tight.Behavior().(*fieldB).textInset()
+	plainInset := plain.Behavior().(*fieldB).textInset(core.DefaultSizes())
+	tightInset := tight.Behavior().(*fieldB).textInset(core.DefaultSizes())
 	if plainInset != fieldPad || tightInset != 5 {
 		t.Fatalf("insets %d %d", plainInset, tightInset)
 	}

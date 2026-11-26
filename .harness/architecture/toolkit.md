@@ -109,6 +109,19 @@ the draw calls are checked against `rendertest.Canvas`.
   `render/text` and `rendertest`.
 - **Theme and tokens**: the look, the tokens and the theme pipeline are in `docs/ui-guidelines.md`
   (Sizes, Color roles, Theming pipeline); the contributor rules for changing them in `style.md`.
+- **Sizes and theme metrics.** `Theme.Metrics` holds what a theme says about sizes: three knobs
+  (unit, extra leading, spacing steps) and pins of named sizes. A zero value is the default, so a
+  `Theme` literal has the default sizes. `Sizes` is a comparable struct of named pixels, resolved by
+  `SizesFor(line, small, metrics)` over one table, `sizeRules`: the name (template scope and theme
+  key), the field, the rule and the bounds of a pin. The table is in dependency order (a rule reads
+  only the knobs and the rows above it), so a pin moves what is derived from it, and `Scope` and
+  `Metrics.Pin` read their names from it. Chosen for the access pattern (a scan per resolve, a name
+  lookup only at parse); rejected a map by name, which loses the order. Revisit past 150 rows.
+  Pins are a `map` that only `Pin` writes, into a clone, so copies of a `Theme` never share a
+  change; revisit if `Metrics` has to be comparable. Knobs out of range are clamped in Go and are
+  errors in a theme file (`theming`, the `metrics` block, the wire types in `theming/metrics.go`).
+  A child theme inherits the base's metrics. `MinLine`, `MaxLine` and the knob bounds are fixed:
+  a theme file is untrusted.
 - **Input.** `Sampler.Sample` turns a `render.InputState` into the frame's `Input` and counts
   clicks (a renderer's input, `ebitenrender.ReadInput`, goes in as the `render.InputState`). The pure `inputFrom` derives
   presses, shortcuts and edit keys with their repeat; `modifiedEdit` is the per-platform table that
@@ -252,6 +265,9 @@ Each is also said in the doc comment of what breaks the rule; a new exception ad
 
 - Rule 1: `Round` is not a per-side family but the corner masks a panel needed (`RoundT`, `RoundB`,
   `RoundBL`); a mask is added with the panel that needs it, not ahead.
+- Rules 9 and 10: the options that follow `Ctx.Sizes` (`HOf`, `WOf`, `SeparatorOf`, `PadOf` and
+  its sides, `GapOf`, `MinWOf`, `FloatAtOf`) have no template attribute, since they take a Go func;
+  a template writes the scope name (`pad="{{gutter}}"`).
 - Rule 7: state types are values (`NewTextField`, `NewTextArea`, `NewMenu`); `OpenMenu` stores a
   pointer to its own copy.
 - Rule 11: `core.Ctx.Menu` is `any`, because `widget` owns `MenuState` and `core` cannot name it;
@@ -343,7 +359,7 @@ two packages.
   parts, resizable), `dialogViews` holds its two forms by kind and a `Forms` row picks one. Escape
   closes the menu first, then the dialog; a click outside leaves a dialog open, as the toolkit's
   dialogs do. The toasts are a `widget.ToastStack` that `Update` prunes by the showcase's clock;
-  they outlive a section switch and Escape. `widget.Toasts` places itself by the window size, so
+  they outlive a section switch and Escape. `widget.Toasts` places itself by the window size (a `gutter` off the right edge), so
   `View` and `layers` take it as arguments and the layers are direct children of the window's
   `Stack`. A resizable element's size is derived (the state's, else the default) once in Go, for
   both forms and the size text.

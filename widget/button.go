@@ -22,7 +22,7 @@ func Button(label string, opts ...Option) *El {
 // background, lit softly under the pointer. It sizes to its label.
 func LinkButton(label string, opts ...Option) *El {
 	return Row(With([]Item{
-		PadX(core.LooseGap), HoverBg(core.Hover),
+		PadXOf(core.LooseGapOf), HoverBg(core.Hover),
 		Text(label, TextCenter(), Color(core.AccentLine)),
 	}, opts)...)
 }

@@ -37,13 +37,13 @@ func proseNode() Node { return Paragraph(prose, MaxW(proseMaxW)) }
 
 func typographyGo(s *Showcase, ctx *core.Ctx) Node {
 	face := func(label string, opts ...Option) Node {
-		return Row(Gap(core.Gutter), AlignItems(AlignBaseline),
+		return Row(GapOf(core.GutterOf), AlignItems(AlignBaseline),
 			Text(label, W(faceLabelW), Small(), Muted()),
 			Text(sample, opts...),
 		)
 	}
 	posts := make([]int, postCount)
-	return Scroll(&s.widgets.typographyPage, Pad(core.Gutter), Gap(core.Gutter),
+	return Scroll(&s.widgets.typographyPage, PadOf(core.GutterOf), GapOf(core.GutterOf),
 		Caption("Faces"),
 		face("Interface"),
 		face("Small", Small()),

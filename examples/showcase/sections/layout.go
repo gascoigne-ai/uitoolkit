@@ -53,7 +53,7 @@ func (m meterB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 		if bar < lit {
 			token = core.Accent
 		}
-		ctx.Fill(dst, core.Rect{X: rect.X + bar*step, Y: rect.Y + rect.H - height, W: step - core.NearGap, H: height}, ctx.Color(token))
+		ctx.Fill(dst, core.Rect{X: rect.X + bar*step, Y: rect.Y + rect.H - height, W: step - ctx.Sizes.NearGap, H: height}, ctx.Color(token))
 	}
 }
 
@@ -89,27 +89,27 @@ func (s *Showcase) tagChoices() []choice {
 	return choices
 }
 
-func layoutGo(s *Showcase, _ *core.Ctx) Node {
-	rule := func() Node { return VRuleInset(core.TightGap, HOf(core.RowOf)) }
-	return Scroll(&s.widgets.layoutPage, Pad(core.Gutter), Gap(core.Gutter),
+func layoutGo(s *Showcase, ctx *core.Ctx) Node {
+	rule := func() Node { return VRuleInset(ctx.Sizes.TightGap, HOf(core.RowOf)) }
+	return Scroll(&s.widgets.layoutPage, PadOf(core.GutterOf), GapOf(core.GutterOf),
 		Caption("Stack"),
 		Stack(H(stackH), Bg(core.Sunken), Control("table"),
 			Text(stackHint, Muted(), TextCenter()),
-			Row(FloatTR(core.NearGap, core.NearGap), HOf(core.SlimOf), PadX(core.LabelPad), Bg(core.InfoSoft), Control("pill"),
+			Row(FloatTR(ctx.Sizes.NearGap, ctx.Sizes.NearGap), HOf(core.SlimOf), PadXOf(core.LabelPadOf), Bg(core.InfoSoft), Control("pill"),
 				Text(stackPill, Small(), Bold(), Color(core.Info))),
 		),
 		Caption("Horizontal scroll"),
-		HScroll(&s.widgets.tagStrip, HOf(core.RowOf), Gap(core.TightGap),
+		HScroll(&s.widgets.tagStrip, HOf(core.RowOf), GapOf(core.TightGapOf),
 			For(s.tagChoices(), func(_ int, entry choice) Node {
 				return SegmentChip(entry.Label, entry.Selected, W(tagW), OnClick(entry.Pick))
 			}),
 		),
 		Caption("Inset rules"),
-		Row(HOf(core.RowOf), Gap(core.LooseGap), AlignItems(AlignCenter),
+		Row(HOf(core.RowOf), GapOf(core.LooseGapOf), AlignItems(AlignCenter),
 			Text("Bold", Bold()), rule(), Text("Italic"), rule(), Text("Code", Mono()),
 		),
 		Caption("Lines and a custom element"),
-		Row(Gap(core.Gutter), AlignItems(AlignStart),
+		Row(GapOf(core.GutterOf), AlignItems(AlignStart),
 			Lines(linesSample, core.Muted),
 			s.meter(),
 		),

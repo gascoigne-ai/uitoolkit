@@ -3,10 +3,10 @@ package view
 import "github.com/gascoigne-ai/uitoolkit/core"
 
 // W fixes the width in pixels.
-func W(pixels int) Option { return func(element *El) { element.w, element.wOf = pixels, nil } }
+func W(pixels int) Option { return func(element *El) { element.w = pixels; element.literal(slotW) } }
 
 // H fixes the height in pixels.
-func H(pixels int) Option { return func(element *El) { element.h, element.hOf = pixels, nil } }
+func H(pixels int) Option { return func(element *El) { element.h = pixels; element.literal(slotH) } }
 
 // Grow makes the element take a share of the free space in its row or
 // column, proportional to weight.
@@ -36,6 +36,7 @@ func FitW() Option {
 			return
 		}
 		element.minW, element.w, element.shrink = element.w, 0, true
+		element.literal(slotMinW)
 	}
 }
 
@@ -43,33 +44,50 @@ func FitW() Option {
 func Pad(pixels int) Option {
 	return func(element *El) {
 		element.padL, element.padT, element.padR, element.padB = pixels, pixels, pixels, pixels
+		element.literal(slotPadL, slotPadT, slotPadR, slotPadB)
 	}
 }
 
 // PadX sets the left and right padding.
 func PadX(pixels int) Option {
-	return func(element *El) { element.padL, element.padR = pixels, pixels }
+	return func(element *El) {
+		element.padL, element.padR = pixels, pixels
+		element.literal(slotPadL, slotPadR)
+	}
 }
 
 // PadY sets the top and bottom padding.
 func PadY(pixels int) Option {
-	return func(element *El) { element.padT, element.padB = pixels, pixels }
+	return func(element *El) {
+		element.padT, element.padB = pixels, pixels
+		element.literal(slotPadT, slotPadB)
+	}
 }
 
 // PadL sets the left padding.
-func PadL(pixels int) Option { return func(element *El) { element.padL = pixels } }
+func PadL(pixels int) Option {
+	return func(element *El) { element.padL = pixels; element.literal(slotPadL) }
+}
 
 // PadT sets the top padding.
-func PadT(pixels int) Option { return func(element *El) { element.padT = pixels } }
+func PadT(pixels int) Option {
+	return func(element *El) { element.padT = pixels; element.literal(slotPadT) }
+}
 
 // PadR sets the right padding.
-func PadR(pixels int) Option { return func(element *El) { element.padR = pixels } }
+func PadR(pixels int) Option {
+	return func(element *El) { element.padR = pixels; element.literal(slotPadR) }
+}
 
 // PadB sets the bottom padding.
-func PadB(pixels int) Option { return func(element *El) { element.padB = pixels } }
+func PadB(pixels int) Option {
+	return func(element *El) { element.padB = pixels; element.literal(slotPadB) }
+}
 
 // Gap sets the space between children.
-func Gap(pixels int) Option { return func(element *El) { element.gap = pixels } }
+func Gap(pixels int) Option {
+	return func(element *El) { element.gap = pixels; element.literal(slotGap) }
+}
 
 // HOf is H for a height that follows the context's Sizes: HOf(core.RowOf).
 // Layout resolves it on every pass, so a row built once stays right when the
@@ -77,11 +95,11 @@ func Gap(pixels int) Option { return func(element *El) { element.gap = pixels } 
 // H replaces it, as a later H replaces an H. A template has no attribute
 // for it: it writes h="{{rowH}}" from the scope of Sizes.Scope.
 func HOf(height func(sizes core.Sizes) int) Option {
-	return func(element *El) { element.hOf, element.h = height, height(core.DefaultSizes()) }
+	return followOption(height, slotH)
 }
 
 // WOf is W for a width that follows the context's Sizes, as HOf is for a
 // height: WOf(core.IconBtnOf).
 func WOf(width func(sizes core.Sizes) int) Option {
-	return func(element *El) { element.wOf, element.w = width, width(core.DefaultSizes()) }
+	return followOption(width, slotW)
 }

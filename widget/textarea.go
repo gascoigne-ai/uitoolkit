@@ -61,7 +61,7 @@ func (a *TextArea) geometry(ctx *core.Ctx, rect core.Rect) areaGeometry {
 		off += n + 1
 	}
 	digits := len(strconv.Itoa(len(g.lines)))
-	g.textX = rect.X + core.Gutter + digits*g.charW + core.Gutter
+	g.textX = rect.X + g.gutter + digits*g.charW + g.gutter
 	g.wrapped = a.Wrap
 	g.layout = a.layout(g, rect)
 	return g
@@ -88,7 +88,7 @@ func (g areaGeometry) contentW(rect core.Rect) int {
 	if g.wrapped {
 		return 0
 	}
-	return g.textX - rect.X + g.colX(g.longest) + core.Gutter
+	return g.textX - rect.X + g.colX(g.longest) + g.gutter
 }
 
 // colAt is monoGrid.colAt, never negative.
@@ -300,7 +300,7 @@ func (a *TextArea) Draw(ctx *core.Ctx, dst render.Canvas, rect core.Rect) {
 			numClr = ctx.Color(core.Text)
 		}
 		num := strconv.Itoa(row.line + 1)
-		ctx.TextMid(area, ctx.F.Mono, num, g.textX-core.Gutter-len(num)*g.charW, cell, numClr)
+		ctx.TextMid(area, ctx.F.Mono, num, g.textX-g.gutter-len(num)*g.charW, cell, numClr)
 	}
 	if a.Focused && ctx.CaretVisible() {
 		row, offset := a.caretRow(g)

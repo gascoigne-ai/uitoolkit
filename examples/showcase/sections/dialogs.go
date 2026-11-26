@@ -107,7 +107,7 @@ func (s *Showcase) panelScopeChoices() []choice {
 
 func panelDialogGo(s *Showcase, _ *core.Ctx) Node {
 	state := &s.widgets
-	return Dialog(W(core.DialogW), OnDismiss(s.dismissDialog), Moved(&state.dialogMove),
+	return Dialog(WOf(core.DialogWOf), OnDismiss(s.dismissDialog), Moved(&state.dialogMove),
 		DialogTitle(panelTitle, OnDismiss(s.dismissDialog), DialogSubtitle(panelSubtitle)),
 		DialogToolbar(
 			Field(&state.panelSearch, HOf(core.RowOf), Grow(1), Bg(core.Sunken), Placeholder(panelSearchHint)),
@@ -115,7 +115,7 @@ func panelDialogGo(s *Showcase, _ *core.Ctx) Node {
 				return SegmentChip(entry.Label, entry.Selected, HOf(core.RowOf), OnClick(entry.Pick))
 			}),
 		),
-		Col(Pad(core.DialogPad), Gap(core.Gutter),
+		Col(PadOf(core.DialogPadOf), GapOf(core.GutterOf),
 			CheckRow(state.wrapLines, OnClick(flip(&state.wrapLines)), AlignItems(AlignCenter), Text("Wrap long lines")),
 			CheckRow(state.showHidden, OnClick(flip(&state.showHidden)), AlignItems(AlignCenter), Text("Show hidden files")),
 			CheckRow(state.autosave, OnClick(flip(&state.autosave)), AlignItems(AlignCenter), Text("Save automatically")),
@@ -126,7 +126,7 @@ func panelDialogGo(s *Showcase, _ *core.Ctx) Node {
 func panelDialogMarkup(s *Showcase, ctx *core.Ctx) Node {
 	state := &s.widgets
 	return fill(ctx, panelDialogTemplate, markup.Scope{
-		"width": core.DialogW, "dismiss": s.dismissDialog, "move": &state.dialogMove,
+		"width": ctx.Sizes.DialogW, "dismiss": s.dismissDialog, "move": &state.dialogMove,
 		"title": panelTitle, "subtitle": panelSubtitle, "search": &state.panelSearch, "searchHint": panelSearchHint,
 		"scopes":    s.panelScopeChoices(),
 		"wrapLines": state.wrapLines, "flipWrap": flip(&state.wrapLines),
@@ -164,7 +164,7 @@ func sizedDialogGo(s *Showcase, _ *core.Ctx) Node {
 	return ResizableDialog(&state.sized, sizedMinW, sizedMinH, sizedMaxW, sizedMaxH,
 		W(width), H(height), OnDismiss(s.dismissDialog), Moved(&state.dialogMove),
 		DialogTitle(sizedTitle, OnDismiss(s.dismissDialog)),
-		Scroll(&state.sizedBody, Grow(1), Pad(core.DialogPad), Gap(core.LooseGap),
+		Scroll(&state.sizedBody, Grow(1), PadOf(core.DialogPadOf), GapOf(core.LooseGapOf),
 			For(sizedNotes(), func(_ int, note string) Node { return Text(note, Muted()) }),
 		),
 	)

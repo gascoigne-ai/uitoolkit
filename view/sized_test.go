@@ -13,7 +13,7 @@ func TestSizeRolesFollowTheContextsSizes(t *testing.T) {
 	root := Col(boxed)
 	ctx := testCtx(t)
 
-	for _, sizes := range []core.Sizes{core.DefaultSizes(), core.SizesFor(20, 16)} {
+	for _, sizes := range []core.Sizes{core.DefaultSizes(), core.SizesFor(20, 16, core.Metrics{})} {
 		ctx.Sizes = sizes
 		Layout(ctx, root, 300, 300)
 		w, h := boxed.FixedSize()
@@ -31,7 +31,7 @@ func TestSizeRolesFollowTheContextsSizes(t *testing.T) {
 func TestFixedSizeAfterARoleReplacesIt(t *testing.T) {
 	boxed := box(HOf(core.RowOf), WOf(core.IconBtnOf), H(50), W(60))
 	ctx := testCtx(t)
-	ctx.Sizes = core.SizesFor(20, 16)
+	ctx.Sizes = core.SizesFor(20, 16, core.Metrics{})
 	Layout(ctx, Col(boxed), 300, 300)
 	if w, h := boxed.FixedSize(); w != 60 || h != 50 {
 		t.Errorf("fixed size = %dx%d, want 60x50", w, h)

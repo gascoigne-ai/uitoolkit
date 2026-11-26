@@ -19,7 +19,9 @@ var update = flag.Bool("update", false, "rewrite the pinned section dumps")
 
 // contentW and contentH are the room of a section beside the nav and under
 // the top bar.
-const contentW, contentH = 844, 720 - core.ToolbarH
+const contentW = 844
+
+var contentH = 720 - core.DefaultSizes().Toolbar
 
 func layoutDump(ctx *core.Ctx, node view.Node) string {
 	view.Layout(ctx, node, contentW, contentH)

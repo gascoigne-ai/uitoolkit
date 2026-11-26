@@ -16,24 +16,35 @@ func TestSizesForTable(t *testing.T) {
 		line, small int
 		want        Sizes
 	}{
-		{"default", 17, 15, Sizes{17, 15, 29, 25, 21, 23, 19, 37, 41, 45, 41, 33, 45, 15}},
-		{"line 16 (the old default)", 16, 14, Sizes{16, 14, 28, 24, 20, 22, 18, 36, 40, 44, 40, 32, 44, 14}},
-		{"small text", 13, 11, Sizes{13, 11, 25, 21, 17, 19, 15, 33, 37, 41, 37, 29, 41, 11}},
-		{"line 15", 15, 13, Sizes{15, 13, 27, 23, 19, 21, 17, 35, 39, 43, 39, 31, 43, 13}},
-		{"line 19", 19, 15, Sizes{19, 15, 31, 27, 23, 25, 19, 39, 43, 47, 43, 35, 47, 15}},
-		{"a large line is not clamped", 27, 25, Sizes{27, 25, 39, 35, 31, 33, 29, 47, 51, 55, 51, 43, 55, 25}},
-		{"line clamped high", 40, 20, Sizes{28, 20, 40, 36, 32, 34, 24, 48, 52, 56, 52, 44, 56, 20}},
-		{"line clamped low, small clamped to line", 5, 4, Sizes{13, 4, 25, 21, 17, 19, 8, 33, 37, 41, 37, 29, 41, 4}},
-		{"small clamped to line", 14, 30, Sizes{14, 14, 26, 22, 18, 20, 18, 34, 38, 42, 38, 30, 42, 14}},
+		{"default", 17, 15, Sizes{Line: 17, SmallLine: 15, Row: 29, Compact: 25, Slim: 21, Label: 23, Note: 19, Toolbar: 37, TabBar: 41, DialogTitle: 45, DialogToolbar: 41, IconBtnW: 33, WordBtnW: 45, Checkbox: 15}},
+		{"line 16 (the old default)", 16, 14, Sizes{Line: 16, SmallLine: 14, Row: 28, Compact: 24, Slim: 20, Label: 22, Note: 18, Toolbar: 36, TabBar: 40, DialogTitle: 44, DialogToolbar: 40, IconBtnW: 32, WordBtnW: 44, Checkbox: 14}},
+		{"small text", 13, 11, Sizes{Line: 13, SmallLine: 11, Row: 25, Compact: 21, Slim: 17, Label: 19, Note: 15, Toolbar: 33, TabBar: 37, DialogTitle: 41, DialogToolbar: 37, IconBtnW: 29, WordBtnW: 41, Checkbox: 11}},
+		{"line 15", 15, 13, Sizes{Line: 15, SmallLine: 13, Row: 27, Compact: 23, Slim: 19, Label: 21, Note: 17, Toolbar: 35, TabBar: 39, DialogTitle: 43, DialogToolbar: 39, IconBtnW: 31, WordBtnW: 43, Checkbox: 13}},
+		{"line 19", 19, 15, Sizes{Line: 19, SmallLine: 15, Row: 31, Compact: 27, Slim: 23, Label: 25, Note: 19, Toolbar: 39, TabBar: 43, DialogTitle: 47, DialogToolbar: 43, IconBtnW: 35, WordBtnW: 47, Checkbox: 15}},
+		{"a large line is not clamped", 27, 25, Sizes{Line: 27, SmallLine: 25, Row: 39, Compact: 35, Slim: 31, Label: 33, Note: 29, Toolbar: 47, TabBar: 51, DialogTitle: 55, DialogToolbar: 51, IconBtnW: 43, WordBtnW: 55, Checkbox: 25}},
+		{"line clamped high", 40, 20, Sizes{Line: 28, SmallLine: 20, Row: 40, Compact: 36, Slim: 32, Label: 34, Note: 24, Toolbar: 48, TabBar: 52, DialogTitle: 56, DialogToolbar: 52, IconBtnW: 44, WordBtnW: 56, Checkbox: 20}},
+		{"line clamped low, small clamped to line", 5, 4, Sizes{Line: 13, SmallLine: 4, Row: 25, Compact: 21, Slim: 17, Label: 19, Note: 8, Toolbar: 33, TabBar: 37, DialogTitle: 41, DialogToolbar: 37, IconBtnW: 29, WordBtnW: 41, Checkbox: 4}},
+		{"small clamped to line", 14, 30, Sizes{Line: 14, SmallLine: 14, Row: 26, Compact: 22, Slim: 18, Label: 20, Note: 18, Toolbar: 34, TabBar: 38, DialogTitle: 42, DialogToolbar: 38, IconBtnW: 30, WordBtnW: 42, Checkbox: 14}},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := SizesFor(test.line, test.small)
-			if got != test.want {
+			got := SizesFor(test.line, test.small, Metrics{})
+			if heights := fontSizes(got); heights != test.want {
 				t.Fatalf("SizesFor(%d, %d) = %+v, want %+v", test.line, test.small, got, test.want)
 			}
 			checkSizeInvariants(t, got)
 		})
+	}
+}
+
+// fontSizes keeps the fields that follow the line heights; the rest are
+// pinned by TestDefaultSizesKeepTodaysValues.
+func fontSizes(sizes Sizes) Sizes {
+	return Sizes{
+		Line: sizes.Line, SmallLine: sizes.SmallLine,
+		Row: sizes.Row, Compact: sizes.Compact, Slim: sizes.Slim, Label: sizes.Label, Note: sizes.Note,
+		Toolbar: sizes.Toolbar, TabBar: sizes.TabBar, DialogTitle: sizes.DialogTitle, DialogToolbar: sizes.DialogToolbar,
+		IconBtnW: sizes.IconBtnW, WordBtnW: sizes.WordBtnW, Checkbox: sizes.Checkbox,
 	}
 }
 
@@ -65,12 +76,13 @@ func TestSizesScopeNames(t *testing.T) {
 		"tabLead": 2, "edgeW": 2, "nearGap": 4, "shadowOffset": 4, "tightGap": 6, "tabGap": 6,
 		"ruleInset": 6, "edgeGrab": 6, "looseGap": 8, "cellPad": 8, "labelPad": 10, "tabSepInset": 10,
 		"gutter": 12, "dialogPad": 16,
+		"caretW": 2, "dialogW": 380, "dialogButtonMinW": 80, "dialogMargin": 40, "dialogMaxH": 560,
 	}
 	if got := DefaultSizes().Scope(); !reflect.DeepEqual(got, want) {
 		t.Fatalf("Scope() = %v, want %v", got, want)
 	}
 
-	big := SizesFor(20, 16).Scope()
+	big := SizesFor(20, 16, Metrics{}).Scope()
 	if big["rowH"] != 32 || big["gutter"] != 12 || big["tightGap"] != 6 {
 		t.Fatalf("a larger line moves heights only: rowH %v gutter %v tightGap %v", big["rowH"], big["gutter"], big["tightGap"])
 	}
@@ -93,10 +105,10 @@ func TestCtxSetThemeUpdatesSizes(t *testing.T) {
 	if err := ctx.SetTheme(large); err != nil {
 		t.Fatal(err)
 	}
-	if ctx.Sizes.Line <= BaseLine || ctx.Sizes.Row <= RowH || ctx.Sizes.SmallLine <= BaseSmallLine {
+	if ctx.Sizes.Line <= DefaultSizes().Line || ctx.Sizes.Row <= DefaultSizes().Row || ctx.Sizes.SmallLine <= DefaultSizes().SmallLine {
 		t.Fatalf("Sizes did not grow with the theme: %+v", ctx.Sizes)
 	}
-	want := SizesFor(ctx.LineH(ctx.F.UI), ctx.LineH(ctx.F.Small))
+	want := SizesFor(ctx.LineH(ctx.F.UI), ctx.LineH(ctx.F.Small), Metrics{})
 	if ctx.Sizes != want {
 		t.Fatalf("Sizes = %+v, want %+v", ctx.Sizes, want)
 	}
@@ -111,7 +123,7 @@ func TestCtxSetFontsUpdatesSizes(t *testing.T) {
 	if err := ctx.SetFonts(FontData{Regular: gomono.TTF, Bold: gomonobold.TTF}, FontData{}); err != nil {
 		t.Fatal(err)
 	}
-	want := SizesFor(ctx.LineH(ctx.F.UI), ctx.LineH(ctx.F.Small))
+	want := SizesFor(ctx.LineH(ctx.F.UI), ctx.LineH(ctx.F.Small), Metrics{})
 	if ctx.Sizes != want || ctx.Sizes == DefaultSizes() {
 		t.Fatalf("Sizes = %+v, want %+v from the new faces", ctx.Sizes, want)
 	}

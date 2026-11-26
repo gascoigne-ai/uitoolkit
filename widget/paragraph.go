@@ -49,7 +49,7 @@ func (p paragraphB) Measure(element *El, ctx *core.Ctx, maxW int) (int, int) {
 	for _, line := range lines {
 		widest = max(widest, ctx.Width(face, line))
 	}
-	return min(widest, max(maxW, 1)), len(lines) * ctx.LineH(face)
+	return min(widest, max(maxW, 1)), len(lines)*ctx.LineH(face) + max(len(lines)-1, 0)*ctx.Sizes.Leading
 }
 
 func (p paragraphB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
@@ -57,11 +57,12 @@ func (p paragraphB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	rect := element.Rect()
 	clr := ctx.Color(core.Muted)
 	for i, line := range wrapParagraph(ctx, face, p.content, rect.W) {
-		ctx.Text(dst, face, line, rect.X, rect.Y+i*ctx.LineH(face), clr)
+		ctx.Text(dst, face, line, rect.X, rect.Y+i*(ctx.LineH(face)+ctx.Sizes.Leading), clr)
 	}
 }
 
-// Paragraph is muted small text that wraps at the width it is laid out in.
+// Paragraph is muted small text that wraps at the width it is laid out in,
+// the theme's leading between its lines.
 func Paragraph(content string, opts ...Option) *El {
 	return Custom(paragraphB{content: content}, With(nil, opts)...)
 }

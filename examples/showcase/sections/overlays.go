@@ -24,7 +24,7 @@ var overlaysPoses = []Pose{
 			return OffCanvas
 		}
 		anchor := s.widgets.menuButton.Rect()
-		s.openMenu(ctx, anchor.X, anchor.Y+anchor.H+core.NearGap)
+		s.openMenu(ctx, anchor.X, anchor.Y+anchor.H+ctx.Sizes.NearGap)
 		return OffCanvas
 	}},
 	{Name: "tooltip", Apply: func(s *Showcase, _ *core.Ctx) image.Point {
@@ -91,31 +91,31 @@ func overlaysGo(s *Showcase, ctx *core.Ctx) Node {
 	state := &s.widgets
 	state.menuButton = PrimaryButton("Open menu", W(overlayBtnW), OnClickAt(func(posX, posY int) { s.openMenu(ctx, posX, posY) }))
 	state.tooltipAnchor = Button("Hover me", W(overlayBtnW), Tooltip(hoverTip))
-	return Scroll(&state.overlaysPage, Pad(core.Gutter), Gap(core.Gutter),
+	return Scroll(&state.overlaysPage, PadOf(core.GutterOf), GapOf(core.GutterOf),
 		Caption("Popup menus"),
-		Row(HOf(core.RowOf), Gap(core.LooseGap), state.menuButton, Text("Last pick: "+state.lastPick, Muted())),
+		Row(HOf(core.RowOf), GapOf(core.LooseGapOf), state.menuButton, Text("Last pick: "+state.lastPick, Muted())),
 		Row(H(dropPanelH), Bg(core.Sunken), Control("table"), OnRightClick(func(posX, posY int) { s.openMenu(ctx, posX, posY) }),
 			Text(dropHint, Muted(), TextCenter(), Grow(1)),
 		),
 		Caption("Tooltips"),
-		Row(HOf(core.RowOf), Gap(core.LooseGap),
+		Row(HOf(core.RowOf), GapOf(core.LooseGapOf),
 			state.tooltipAnchor,
 			IconButton(Icon("gear", Grow(1)), WOf(core.IconBtnOf), Tooltip(settingsTip)),
 		),
 		Caption("Modal dialog"),
-		Row(HOf(core.RowOf), Gap(core.LooseGap),
+		Row(HOf(core.RowOf), GapOf(core.LooseGapOf),
 			Button("Open dialog", W(overlayBtnW), OnClick(s.openDialog)),
 			Text("Last answer: "+state.lastAnswer, Muted()),
 		),
 		Caption("Dialog parts"),
 		Row(HOf(core.RowOf), Button("Open preferences", W(overlayBtnW), OnClick(s.openPanel))),
 		Caption("Resizable dialog"),
-		Row(HOf(core.RowOf), Gap(core.LooseGap),
+		Row(HOf(core.RowOf), GapOf(core.LooseGapOf),
 			Button("Open resizable", W(overlayBtnW), OnClick(s.openSized)),
 			Text(s.sizedText(), Muted()),
 		),
 		Caption("Toasts"),
-		Row(HOf(core.RowOf), Gap(core.LooseGap),
+		Row(HOf(core.RowOf), GapOf(core.LooseGapOf),
 			Button("Info toast", W(overlayBtnW), OnClick(func() { s.postToast(infoToast, ToastInfo) })),
 			Button("Error toast", W(overlayBtnW), OnClick(func() { s.postToast(errorToast, ToastError) })),
 			Text(s.toastCount(), Muted()),

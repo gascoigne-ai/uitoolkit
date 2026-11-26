@@ -13,8 +13,8 @@ const drawOverflow = 4
 
 // drawReach is how far in device pixels a child's drawing may go past its
 // rect: the shadow offset, the overflow and one pixel of anti-aliasing.
-func drawReach(scale float64) int {
-	return int(math.Ceil((core.ShadowOffset+drawOverflow)*scale)) + 1
+func drawReach(scale float64, shadow int) int {
+	return int(math.Ceil(float64(shadow+drawOverflow)*scale)) + 1
 }
 
 // reaches reports whether drawing rect, scaled to device pixels and grown by

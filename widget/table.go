@@ -112,13 +112,12 @@ type TableEdit struct {
 
 const tableActionW = 36
 
-// An edit field is inset in its cell by cellFieldInset, with cellFieldPad
-// inside the field, so the two add up to CellPad, the inset of a shown
-// cell, and the text does not move when editing starts.
-const (
-	cellFieldInset = core.TightGap / 2
-	cellFieldPad   = core.CellPad - cellFieldInset
-)
+// An edit field is inset in its cell by cellFieldInsetOf, with cellFieldPadOf
+// inside it, so its text starts where the cell's did: both add up to the
+// CellPad. The inset is half the TightGap, and never more than the CellPad.
+func cellFieldInsetOf(sizes core.Sizes) int { return min(sizes.TightGap/2, sizes.CellPad) }
+
+func cellFieldPadOf(sizes core.Sizes) int { return sizes.CellPad - cellFieldInsetOf(sizes) }
 
 // headerSeparatorInset keeps the line between header cells to the height of
 // the small caption: half of what a row has above and below it.
@@ -152,7 +151,7 @@ func tableHeader(tableSpec TableSpec) Node {
 		If(tableSpec.Editable, headerCheck(tableSpec)),
 		If(tableSpec.RowLead != nil, Row(W(tableActionW))),
 		For(tableSpec.Columns, func(index int, name string) Node {
-			return Row(Grow(tableSpec.weight(index)), PadX(core.CellPad), When(index > 0, SeparatorOf(headerSeparatorInset)),
+			return Row(Grow(tableSpec.weight(index)), PadXOf(core.CellPadOf), When(index > 0, SeparatorOf(headerSeparatorInset)),
 				Text(strings.ToUpper(name), Small(), Bold(), Muted(), Grow(1)))
 		}),
 		If(tableSpec.Editable, Row(W(tableActionW))),
@@ -258,8 +257,8 @@ func gripCell(spec TableSpec, index int, placeholder bool) Node {
 func tableCell(spec TableSpec, row, col int, text string, clr core.Token) Node {
 	if e := spec.Editing; e != nil && e.Row == row && e.Col == col {
 		// The field is inset in its cell so its rounded outline and focus ring have room.
-		return Row(Grow(spec.weight(col)), PadX(cellFieldInset), PadY(cellFieldInset), When(col > 0, Separator(0)),
-			Field(e.Field, Grow(1), Bg(core.Sunken), FieldPad(cellFieldPad), OnEnter(e.OnEnter), OnTab(e.OnTab), When(e.Options != nil, e.Options)),
+		return Row(Grow(spec.weight(col)), PadOf(cellFieldInsetOf), When(col > 0, Separator(0)),
+			Field(e.Field, Grow(1), Bg(core.Sunken), fieldPadOf(cellFieldPadOf), OnEnter(e.OnEnter), OnTab(e.OnTab), When(e.Options != nil, e.Options)),
 		)
 	}
 	var label Node = Text(text, Ellipsis(), Color(clr), Grow(1))
@@ -283,7 +282,7 @@ func tableCell(spec TableSpec, row, col int, text string, clr core.Token) Node {
 			label = Row(parts...)
 		}
 	}
-	items := []Item{Grow(spec.weight(col)), PadX(core.CellPad), Clip(), label, When(col > 0, Separator(0))}
+	items := []Item{Grow(spec.weight(col)), PadXOf(core.CellPadOf), Clip(), label, When(col > 0, Separator(0))}
 	if spec.Editable && spec.OnEditCell != nil {
 		items = append(items, OnClick(func() { spec.OnEditCell(row, col) }))
 	}

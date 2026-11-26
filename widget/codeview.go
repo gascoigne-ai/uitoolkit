@@ -359,7 +359,7 @@ type codeGeometry struct {
 func (v *CodeView) geometry(ctx *core.Ctx, rect core.Rect) codeGeometry {
 	g := codeGeometry{monoGrid: newMonoGrid(ctx)}
 	g.numW = g.charW * v.numberDigits()
-	g.textX = rect.X + core.Gutter + g.numW + foldColW + 8
+	g.textX = rect.X + g.gutter + g.numW + foldColW + 8
 	return g
 }
 
@@ -467,7 +467,7 @@ func (v *CodeView) updatePointer(ctx *core.Ctx, rect core.Rect, geometry codeGeo
 	if !in.Click || sizes.vTrack.Contains(in.X, in.Y) || sizes.hTrack.Contains(in.X, in.Y) {
 		return
 	}
-	foldCol := core.Rect{X: rect.X + core.Gutter + geometry.numW + 4, Y: rect.Y, W: foldColW, H: rect.H}
+	foldCol := core.Rect{X: rect.X + geometry.gutter + geometry.numW + 4, Y: rect.Y, W: foldColW, H: rect.H}
 	switch {
 	case foldCol.Contains(in.X, in.Y):
 		v.ToggleFold(layout.rows[v.rowAt(in.Y, rect, geometry, layout)].line)
@@ -552,13 +552,13 @@ func (v *CodeView) Draw(ctx *core.Ctx, dst render.Canvas, rect core.Rect) {
 			continue
 		}
 		num := strconv.Itoa(v.LineNumber(idx))
-		ctx.TextMid(area, ctx.F.Mono, num, rect.X+core.Gutter+g.numW-len(num)*g.charW, cell, muted)
+		ctx.TextMid(area, ctx.F.Mono, num, rect.X+g.gutter+g.numW-len(num)*g.charW, cell, muted)
 		if line.Foldable {
 			arrow := "triangle-down"
 			if v.Folded[idx] {
 				arrow = "triangle-right"
 			}
-			cx := rect.X + core.Gutter + g.numW + 4 + foldColW/2
+			cx := rect.X + g.gutter + g.numW + 4 + foldColW/2
 			drawIconAt(ctx, area, arrow, core.Rect{X: cx - foldColW/2, Y: y, W: foldColW, H: g.lineH}, core.Muted)
 		}
 	}
@@ -571,7 +571,7 @@ func (v *CodeView) contentWidthOf(geometry codeGeometry, rect core.Rect) int {
 	if v.Wrap {
 		return 0 // wrapped text fits the width
 	}
-	return geometry.textX - rect.X + geometry.colX(v.maxCols) + core.Gutter
+	return geometry.textX - rect.X + geometry.colX(v.maxCols) + geometry.gutter
 }
 
 func (v *CodeView) bars(rect core.Rect, geometry codeGeometry, contentW, visible int) bars {

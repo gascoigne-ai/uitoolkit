@@ -14,10 +14,9 @@ const (
 	MenuMinW = 120
 	MenuMaxW = 420
 
-	// MenuRowH, MenuSepH and MenuPad are the height of a plain row, of a
-	// separator and the inset around the rows, for callers that position
-	// things by the rows of a menu.
-	MenuRowH = core.CompactH // the default face's value; MenuRowHeight follows the context
+	// MenuSepH and MenuPad are the height of a separator and the inset around
+	// the rows, for callers that position things by the rows of a menu. The
+	// height of a plain row is MenuRowHeight.
 	MenuSepH = 9
 	MenuPad  = 4
 
@@ -108,7 +107,7 @@ func menuRow(ctx *core.Ctx, state *MenuState, index int, item MenuItem, pick fun
 	if item.Separator {
 		// The Row centres the 1px line. Width is its main axis, where a rule
 		// with no width of its own is 0 wide unless it grows.
-		return Row(H(MenuSepH), PadX(core.RuleInset), HRule(Grow(1)))
+		return Row(H(MenuSepH), PadXOf(core.RuleInsetOf), HRule(Grow(1)))
 	}
 	color := core.Text
 	if item.Disabled {
@@ -139,7 +138,7 @@ func menuRow(ctx *core.Ctx, state *MenuState, index int, item MenuItem, pick fun
 		label = Col(parts...)
 		height += menuHintH * len(lines)
 	}
-	return Row(H(height), PadX(menuRowPadX), Gap(core.LooseGap), AlignItems(AlignCenter), Control("row"), look, OnClick(func() { pick(index) }),
+	return Row(H(height), PadX(menuRowPadX), GapOf(core.LooseGapOf), AlignItems(AlignCenter), Control("row"), look, OnClick(func() { pick(index) }),
 		icon,
 		label,
 		If(item.Shortcut != "", Text(core.PlatformKeyText(ctx.HostOS, item.Shortcut), Small(), Muted())),
@@ -156,7 +155,7 @@ func menuHasIcons(items []MenuItem) bool {
 }
 
 // MenuRowHeight is the height of a plain row of a menu drawn with ctx: the
-// compact height of its text size. Positioning code uses it, not MenuRowH.
+// compact height of its text size.
 func MenuRowHeight(ctx *core.Ctx) int { return ctx.Sizes.Compact }
 
 // MenuWidth is the width of a menu of items: its widest row within

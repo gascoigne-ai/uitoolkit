@@ -14,9 +14,8 @@ import (
 
 // Fixed widths of the frame, one per role.
 const (
-	navW       = 180
-	overlayW   = 160
-	overlayTop = core.ToolbarH + core.LooseGap // under the top bar
+	navW     = 180
+	overlayW = 160
 )
 
 // Update runs one tick in a window of width by height logical pixels: the
@@ -92,13 +91,13 @@ func (s *Showcase) beginFrame(ctx *core.Ctx) {
 func (s *Showcase) View(ctx *core.Ctx, width, height int) Node {
 	return Stack(
 		Col(Bg(core.Bg),
-			s.topBar(),
+			s.topBar(ctx),
 			Row(Grow(1),
 				s.Nav(ctx),
 				Col(Grow(1), Clip(), s.SectionView(ctx)),
 			),
 		),
-		If(s.Overlay, s.statsPanel()),
+		If(s.Overlay, s.statsPanel(ctx)),
 		s.layers(ctx, width, height),
 		TooltipLayer(&s.widgets.tooltip),
 	)
@@ -130,32 +129,32 @@ func (s *Showcase) layers(ctx *core.Ctx, width, height int) Node {
 // Nav lists the sections down the left side.
 func (s *Showcase) Nav(ctx *core.Ctx) Node {
 	rows := For(Sections, func(index int, section Section) Node {
-		return ListRow(index == s.Section, HOf(core.RowOf), PadX(core.Gutter), AlignItems(AlignCenter),
+		return ListRow(index == s.Section, HOf(core.RowOf), PadXOf(core.GutterOf), AlignItems(AlignCenter),
 			OnClick(func() { s.Select(ctx, index) }),
 			Text(section.Label, Grow(1), Ellipsis()),
 		)
 	})
-	return Col(W(navW), Bg(core.Sunken), BorderR(core.Border), PadY(core.LooseGap), Clip(), rows)
+	return Col(W(navW), Bg(core.Sunken), BorderR(core.Border), PadYOf(core.LooseGapOf), Clip(), rows)
 }
 
 // topBar holds the controls of the whole window. It scrolls sideways, so no
 // control is out of reach in a narrow window.
-func (s *Showcase) topBar() Node {
+func (s *Showcase) topBar(ctx *core.Ctx) Node {
 	return HScroll(&s.widgets.topBar, HOf(core.ToolbarOf), Bg(core.Frame), BorderB(core.Border),
-		PadX(core.Gutter), Gap(core.TightGap), AlignItems(AlignCenter),
+		PadXOf(core.GutterOf), GapOf(core.TightGapOf), AlignItems(AlignCenter),
 		Caption("Theme"),
 		For(s.catalog.All(), func(_ int, choice theming.ThemeChoice) Node {
 			return barChip(choice.Label, s.Prefs.Theme == choice.ID, func() { s.SetThemeID(choice.ID) })
 		}),
-		Caption("Contrast", MarginL(core.Gutter)),
+		Caption("Contrast", MarginL(ctx.Sizes.Gutter)),
 		For(theming.ContrastChoices(), func(_ int, choice theming.ContrastChoice) Node {
 			return barChip(choice.Label, s.Prefs.Contrast == choice.ID, func() { s.SetContrast(choice.ID) })
 		}),
-		Caption("Scale", MarginL(core.Gutter)),
+		Caption("Scale", MarginL(ctx.Sizes.Gutter)),
 		For(ScaleSteps, func(index int, step float64) Node {
 			return barChip(percent(step), s.Scale == index, func() { s.SetScale(index) })
 		}),
-		Caption("Form", MarginL(core.Gutter)),
+		Caption("Form", MarginL(ctx.Sizes.Gutter)),
 		For(Forms, func(index int, form Form) Node {
 			return barChip(form.Label, s.Form == index, func() { s.SetForm(index) })
 		}),
@@ -171,7 +170,7 @@ func percent(step float64) string {
 }
 
 // statsPanel is the overlay in the top right corner.
-func (s *Showcase) statsPanel() Node {
+func (s *Showcase) statsPanel(ctx *core.Ctx) Node {
 	lines := []string{
 		fmt.Sprintf("frame %.1f ms", float64(s.frameTime)/float64(time.Millisecond)),
 		fmt.Sprintf("elements %d", s.stats.Elements),
@@ -180,7 +179,7 @@ func (s *Showcase) statsPanel() Node {
 		fmt.Sprintf("widths %d", s.stats.Widths),
 		fmt.Sprintf("advances %d", s.stats.Advances),
 	}
-	return Col(FloatTR(overlayTop, core.Gutter), W(overlayW), Pad(core.LooseGap), Bg(core.Panel), Control("menu"), Shadow(),
+	return Col(FloatTR(ctx.Sizes.Toolbar+ctx.Sizes.LooseGap, ctx.Sizes.Gutter), W(overlayW), PadOf(core.LooseGapOf), Bg(core.Panel), Control("menu"), Shadow(),
 		For(lines, func(_ int, line string) Node { return Text(line, Mono(), HOf(core.NoteOf)) }),
 	)
 }

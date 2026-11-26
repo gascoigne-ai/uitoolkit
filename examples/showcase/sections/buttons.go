@@ -23,7 +23,7 @@ var keyCombos = []string{"Ctrl+Shift+P", "Ctrl+,", "Ctrl++"}
 // keyRow is a Go node in both forms: markup has no element for
 // widget.KeyChips.
 func keyRow() Node {
-	return Row(HOf(core.CompactOf), Gap(core.Gutter),
+	return Row(HOf(core.CompactOf), GapOf(core.GutterOf),
 		For(keyCombos, func(_ int, combo string) Node { return KeyChips(combo) }),
 	)
 }
@@ -69,9 +69,9 @@ func (s *Showcase) clickedText() string { return fmt.Sprintf("Clicked %d times",
 
 func buttonsGo(s *Showcase, _ *core.Ctx) Node {
 	count := func() { s.widgets.clicks++ }
-	return Scroll(&s.widgets.buttonsPage, Pad(core.Gutter), Gap(core.Gutter),
+	return Scroll(&s.widgets.buttonsPage, PadOf(core.GutterOf), GapOf(core.GutterOf),
 		Caption("Buttons"),
-		Row(HOf(core.RowOf), Gap(core.LooseGap),
+		Row(HOf(core.RowOf), GapOf(core.LooseGapOf),
 			Button("Button", W(buttonW), OnClick(count)),
 			PrimaryButton("Primary", W(buttonW), OnClick(count)),
 			LinkButton("Link button", OnClick(count)),
@@ -80,20 +80,20 @@ func buttonsGo(s *Showcase, _ *core.Ctx) Node {
 		),
 		Text(s.clickedText(), Muted()),
 		Caption(chipHeading),
-		Row(HOf(core.RowOf), Gap(core.TightGap),
+		Row(HOf(core.RowOf), GapOf(core.TightGapOf),
 			For(s.sizeChoices(), func(_ int, entry choice) Node {
 				return SegmentChip(entry.Label, entry.Selected, W(chipW), OnClick(entry.Pick))
 			}),
 		),
-		Row(HOf(core.CompactOf), Gap(core.TightGap),
+		Row(HOf(core.CompactOf), GapOf(core.TightGapOf),
 			For(s.viewChoices(), func(_ int, entry choice) Node {
 				return SegmentIconChip(entry.Icon, entry.Selected, W(modeChipW), Tooltip(entry.Tip), OnClick(entry.Pick))
 			}),
 		),
 		Caption("Status pills"),
-		Row(HOf(core.SlimOf), Gap(core.LooseGap),
+		Row(HOf(core.SlimOf), GapOf(core.LooseGapOf),
 			For(pills, func(_ int, entry pill) Node {
-				return Row(PadX(core.LabelPad), Bg(entry.Fill), Control("pill"),
+				return Row(PadXOf(core.LabelPadOf), Bg(entry.Fill), Control("pill"),
 					Text(entry.Label, Small(), Bold(), Color(entry.Color)))
 			}),
 		),

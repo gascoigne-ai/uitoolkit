@@ -18,12 +18,16 @@ const (
 func FloatAt(posX, posY int) Option {
 	return func(element *El) {
 		element.fl.on, element.fl.mode, element.fl.x, element.fl.y = true, floatPoint, posX, posY
+		element.literal(slotFloatX, slotFloatY)
 	}
 }
 
 // FloatCenter takes the element out of its Stack's layout and centers it.
 func FloatCenter() Option {
-	return func(element *El) { element.fl.on, element.fl.mode = true, floatMiddle }
+	return func(element *El) {
+		element.fl.on, element.fl.mode = true, floatMiddle
+		element.literal(slotFloatX, slotFloatY)
+	}
 }
 
 // MoveState is where the user dragged a centered floating element: its
@@ -47,10 +51,6 @@ func Moved(state *MoveState) Option {
 // FocusScope makes Tab cycle only through the focusable elements inside
 // this one while it exists, as a dialog needs.
 func FocusScope() Option { return func(element *El) { element.focusScope = true } }
-
-// dragEdge is how far from the border of a Moved element, inside it, a
-// press does not start a drag: the edge is the resize grab, not the handle.
-const dragEdge = core.EdgeGrab
 
 // RoundT rounds the top corners of the element's background to the corner
 // radius of the named control (the panel it sits at the top of, such as

@@ -57,6 +57,8 @@ type themeFile struct {
 	Variables  map[string]string      `json:"variables"`
 	Colors     map[string]string      `json:"colors"`
 	Controls   map[string]controlFile `json:"controls"`
+	// Metrics are the size rules, see core.Metrics. The block is optional.
+	Metrics *metricsFile `json:"metrics"`
 }
 
 // themeExtends is the name of the built-in theme a file says it builds on
@@ -117,6 +119,14 @@ func ParseTheme(data []byte, base *core.Theme) (core.Theme, error) {
 	}
 	if f.IconStroke > 0 {
 		th.IconStroke = f.IconStroke
+	}
+
+	if f.Metrics != nil {
+		metrics, err := f.Metrics.apply(th.Metrics)
+		if err != nil {
+			return core.Theme{}, fmt.Errorf("theme file: metrics: %w", err)
+		}
+		th.Metrics = metrics
 	}
 
 	vars := map[string]color.RGBA{}

@@ -305,7 +305,8 @@ func (e *El) drawSelf(ctx *core.Ctx, canvas render.Canvas) {
 	style := ctx.Th.Style(e.control)
 	if e.shadow {
 		sh := ctx.Color(core.Shadow)
-		ctx.FillStyled(canvas, core.Rect{X: r.X + core.ShadowOffset, Y: r.Y + core.ShadowOffset, W: r.W, H: r.H}, sh, sh, style.Radius)
+		offset := ctx.Sizes.ShadowOffset
+		ctx.FillStyled(canvas, core.Rect{X: r.X + offset, Y: r.Y + offset, W: r.W, H: r.H}, sh, sh, style.Radius)
 	}
 	over := ctx.Hovered(r)
 	e.hover = over
@@ -358,7 +359,7 @@ func (e *El) drawKids(ctx *core.Ctx, kidsDst render.Canvas, kids []*El) {
 	if bounds.Empty() { // a clip off the canvas is empty, and an empty box "reaches" a child near the origin
 		return
 	}
-	reach := drawReach(ctx.Scale)
+	reach := drawReach(ctx.Scale, ctx.Sizes.ShadowOffset)
 	for _, k := range kids {
 		if reaches(bounds, k.rect, ctx.Scale, reach) {
 			k.draw(ctx, kidsDst)
@@ -384,18 +385,18 @@ func (e *El) drawAfter(ctx *core.Ctx, canvas render.Canvas) {
 	}
 
 	if e.edgeTok != "" { // the open tab's outline: top, left and right, bottom left open unless EdgeB asks
-		col := ctx.Color(e.edgeTok)
+		col, edge := ctx.Color(e.edgeTok), ctx.Sizes.EdgeW
 		if e.edgeTop {
-			ctx.Fill(canvas, core.Rect{X: r.X, Y: r.Y, W: r.W, H: core.EdgeW}, col)
+			ctx.Fill(canvas, core.Rect{X: r.X, Y: r.Y, W: r.W, H: edge}, col)
 		}
 		if e.edgeLeft {
-			ctx.Fill(canvas, core.Rect{X: r.X, Y: r.Y, W: core.EdgeW, H: r.H}, col)
+			ctx.Fill(canvas, core.Rect{X: r.X, Y: r.Y, W: edge, H: r.H}, col)
 		}
 		if e.edgeRight {
-			ctx.Fill(canvas, core.Rect{X: r.X + r.W - core.EdgeW, Y: r.Y, W: core.EdgeW, H: r.H}, col)
+			ctx.Fill(canvas, core.Rect{X: r.X + r.W - edge, Y: r.Y, W: edge, H: r.H}, col)
 		}
 		if e.edgeBottom {
-			ctx.Fill(canvas, core.Rect{X: r.X, Y: r.Y + r.H - core.EdgeW, W: r.W, H: core.EdgeW}, col)
+			ctx.Fill(canvas, core.Rect{X: r.X, Y: r.Y + r.H - edge, W: r.W, H: edge}, col)
 		}
 	}
 }
@@ -436,7 +437,7 @@ func (e *El) dragByHandle(ctx *core.Ctx) {
 		m.X, m.Y = m.fromX+ctx.In.X-m.startX, m.fromY+ctx.In.Y-m.startY
 		return
 	}
-	if !e.rect.Contains(ctx.In.X, ctx.In.Y) || e.onBorder(ctx.In.X, ctx.In.Y) || !e.onHandle(ctx.In.X, ctx.In.Y) {
+	if !e.rect.Contains(ctx.In.X, ctx.In.Y) || e.onBorder(ctx.In.X, ctx.In.Y, ctx.Sizes.EdgeGrab) || !e.onHandle(ctx.In.X, ctx.In.Y) {
 		return
 	}
 	if !ctx.In.Click {
@@ -488,23 +489,21 @@ func (e *El) nearRect(posX, posY int) bool {
 	return m > 0 && posX >= e.rect.X-m && posX < e.rect.X+e.rect.W+m && posY >= e.rect.Y-m && posY < e.rect.Y+e.rect.H+m
 }
 
-// onBorder reports whether the point is within dragEdge of e's border.
-func (e *El) onBorder(posX, posY int) bool {
+// onBorder reports whether the point is within edge of e's border. A press
+// there on a Moved element does not start a drag: the edge is the resize
+// grab, not the handle.
+func (e *El) onBorder(posX, posY, edge int) bool {
 	r := e.rect
-	return posX < r.X+dragEdge || posX >= r.X+r.W-dragEdge || posY < r.Y+dragEdge || posY >= r.Y+r.H-dragEdge
+	return posX < r.X+edge || posX >= r.X+r.W-edge || posY < r.Y+edge || posY >= r.Y+r.H-edge
 }
 
-// applySized resolves the size roles of the tree (HOf, WOf, SeparatorOf)
+// applySized resolves the size roles of the tree (HOf, PadOf and the like)
 // against sizes, before anything is measured.
 func applySized(element *El, sizes core.Sizes) {
-	if element.hOf != nil {
-		element.h = element.hOf(sizes)
-	}
-	if element.wOf != nil {
-		element.w = element.wOf(sizes)
-	}
-	if element.insetOf != nil {
-		element.borderInset = element.insetOf(sizes)
+	for slot, size := range element.sized {
+		if size != nil {
+			*slotFields[slot](element) = size(sizes)
+		}
 	}
 	for _, kid := range element.kids {
 		applySized(kid, sizes)

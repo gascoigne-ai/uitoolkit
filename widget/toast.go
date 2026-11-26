@@ -86,13 +86,16 @@ func Toasts(stack *ToastStack, width, height, bottomInset int) *El {
 	}
 	total := len(*stack)*toastH + (len(*stack)-1)*toastGap
 	return Col(W(toastW), Gap(toastGap),
-		FloatAt(width-core.Gutter-toastW, height-bottomInset-toastMargin-total),
+		FloatAtOf(
+			func(sizes core.Sizes) int { return width - sizes.Gutter - toastW },
+			func(core.Sizes) int { return height - bottomInset - toastMargin - total },
+		),
 		For(*stack, func(index int, toast Toast) Node {
 			border, color := core.Border, core.Text
 			if toast.Kind == ToastError {
 				border, color = core.Error, core.Error
 			}
-			return Row(H(toastH), PadX(core.Gutter), Bg(core.Panel), Border(border), Shadow(), OnClick(func() { stack.Dismiss(index) }),
+			return Row(H(toastH), PadXOf(core.GutterOf), Bg(core.Panel), Border(border), Shadow(), OnClick(func() { stack.Dismiss(index) }),
 				Text(toast.Text, Ellipsis(), Color(color), Grow(1)),
 			)
 		}),

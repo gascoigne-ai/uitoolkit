@@ -119,7 +119,7 @@ func TestRowDetailSitsUnderItsRow(t *testing.T) {
 	ctx := testCtx(t)
 	Layout(ctx, root, 400, 400)
 	rows := rowsOf(table)
-	if got, want := rows[2].Rect().Y-rows[1].Rect().Y, 2*core.RowH; got != want {
+	if got, want := rows[2].Rect().Y-rows[1].Rect().Y, 2*core.DefaultSizes().Row; got != want {
 		t.Fatalf("the row after a detailed row is %dpx below it, want %d (row plus detail)", got, want)
 	}
 }
@@ -133,9 +133,9 @@ func TestDividerHandlesCountTheLeadColumn(t *testing.T) {
 	ctx := testCtx(t)
 	Layout(ctx, root, 400, 400)
 	boundary := tableActionW + (400-tableActionW)/2
-	ctx.In = core.Input{X: boundary, Y: core.RowH / 2, Click: true, Held: true}
+	ctx.In = core.Input{X: boundary, Y: core.DefaultSizes().Row / 2, Click: true, Held: true}
 	Update(ctx, root)
-	ctx.In = core.Input{X: boundary + 40, Y: core.RowH / 2, Held: true}
+	ctx.In = core.Input{X: boundary + 40, Y: core.DefaultSizes().Row / 2, Held: true}
 	Update(ctx, root)
 	if len(spec.State.Weights) != 2 || spec.State.Weights[0] <= spec.State.Weights[1] {
 		t.Fatalf("weights after dragging the divider right = %v, want the first column wider", spec.State.Weights)

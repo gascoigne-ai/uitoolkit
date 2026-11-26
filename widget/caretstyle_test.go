@@ -30,13 +30,13 @@ func TestCaretRectPerShape(t *testing.T) {
 			want  core.Rect
 		}{
 			{"block", core.CaretBlock, block},
-			{"bar", core.CaretBar, core.Rect{X: 30, Y: block.Y, W: core.CaretW, H: block.H}},
-			{"underline", core.CaretUnderline, core.Rect{X: 30, Y: block.Y + block.H - core.CaretW, W: glyphW, H: core.CaretW}},
+			{"bar", core.CaretBar, core.Rect{X: 30, Y: block.Y, W: core.DefaultSizes().CaretW, H: block.H}},
+			{"underline", core.CaretUnderline, core.Rect{X: 30, Y: block.Y + block.H - core.DefaultSizes().CaretW, W: glyphW, H: core.DefaultSizes().CaretW}},
 			{"no such shape draws the block", core.CaretShape(7), block},
 		}
 		for _, shape := range shapes {
 			t.Run(row.name+"/"+shape.name, func(t *testing.T) {
-				got := styleOf(shape.shape).rect(caretBlock(row.row, 30, glyphW, lineH), glyphW)
+				got := styleOf(shape.shape).rect(caretBlock(row.row, 30, glyphW, lineH), glyphW, core.DefaultSizes().CaretW)
 				if got != shape.want {
 					t.Fatalf("rect = %+v, want %+v", got, shape.want)
 				}
@@ -191,11 +191,11 @@ func TestTheAreaCaretStandsWhereCaretAtSays(t *testing.T) {
 				return box
 			}
 			width := ctx.Width(ctx.F.Mono, glyph)
-			wantUnder := render.Box{X0: float32(x), Y0: float32(bottom - core.CaretW), X1: float32(x + width), Y1: float32(bottom)}
+			wantUnder := render.Box{X0: float32(x), Y0: float32(bottom - core.DefaultSizes().CaretW), X1: float32(x + width), Y1: float32(bottom)}
 			if got := draw(core.CaretUnderline); got != wantUnder {
 				t.Errorf("underline = %+v, want %+v", got, wantUnder)
 			}
-			wantBar := render.Box{X0: float32(x), Y0: float32(bottom - ctx.LineH(ctx.F.Mono)), X1: float32(x + core.CaretW), Y1: float32(bottom)}
+			wantBar := render.Box{X0: float32(x), Y0: float32(bottom - ctx.LineH(ctx.F.Mono)), X1: float32(x + core.DefaultSizes().CaretW), Y1: float32(bottom)}
 			if got := draw(core.CaretBar); got != wantBar {
 				t.Errorf("bar = %+v, want %+v", got, wantBar)
 			}

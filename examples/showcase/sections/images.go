@@ -62,18 +62,18 @@ func iconRows() [][]string { return slices.Collect(slices.Chunk(IconNames(), ico
 
 func imagesGo(s *Showcase, ctx *core.Ctx) Node {
 	picture := s.picture(ctx)
-	return Scroll(&s.widgets.imagesPage, Pad(core.Gutter), Gap(core.Gutter),
+	return Scroll(&s.widgets.imagesPage, PadOf(core.GutterOf), GapOf(core.GutterOf),
 		Caption("One picture, scaled to fit"),
-		Row(H(largeH), Gap(core.Gutter), AlignItems(AlignStart),
+		Row(H(largeH), GapOf(core.GutterOf), AlignItems(AlignStart),
 			Image(picture, W(largeW), H(largeH)),
 			Image(picture, W(mediumW), H(mediumH)),
 			Image(picture, W(smallW), H(smallH)),
 		),
 		Caption("Icons"),
 		For(iconRows(), func(_ int, names []string) Node {
-			return Row(Gap(core.LooseGap),
+			return Row(GapOf(core.LooseGapOf),
 				For(names, func(_ int, name string) Node {
-					return Col(W(iconCellW), Gap(core.NearGap), AlignItems(AlignCenter),
+					return Col(W(iconCellW), GapOf(core.NearGapOf), AlignItems(AlignCenter),
 						Icon(name, W(iconSide), H(iconSide), Color(core.Text)),
 						Text(name, Small(), Muted()),
 					)

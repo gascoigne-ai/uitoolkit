@@ -45,8 +45,8 @@ func TestSwitchSizeFollowsTheSizeRules(t *testing.T) {
 	c := testCtx(t)
 	Layout(c, Row(AlignItems(AlignStart), toggle), 200, 40)
 	rect := toggle.Rect()
-	if rect.W != c.Sizes.IconBtnW || rect.H != c.Sizes.Checkbox+2*core.StepHair {
-		t.Fatalf("size %dx%d, want %dx%d", rect.W, rect.H, c.Sizes.IconBtnW, c.Sizes.Checkbox+2*core.StepHair)
+	if rect.W != c.Sizes.IconBtnW || rect.H != c.Sizes.Checkbox+2*core.DefaultSizes().Steps.Hair {
+		t.Fatalf("size %dx%d, want %dx%d", rect.W, rect.H, c.Sizes.IconBtnW, c.Sizes.Checkbox+2*core.DefaultSizes().Steps.Hair)
 	}
 }
 

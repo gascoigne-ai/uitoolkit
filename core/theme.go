@@ -52,92 +52,6 @@ const (
 	HeroMuted    Token = "hero-muted" // icons on the banner
 )
 
-// Size rules shared by every component, in logical pixels. Every size is a
-// rule over three bases, so a component picks a class and a step, never a
-// number (style.md, Sizes). A height is a line of text plus padding on
-// both sides, line + 2*pad, so text centers on whole pixels. Spacing comes
-// in named steps, whole multiples of Unit.
-//
-// The constants below are the sizes of the default faces. The sizes that
-// follow the faces really in use are Ctx.Sizes (SizesFor); the constants
-// stay as the documented default until every consumer reads Ctx.Sizes.
-const (
-	BaseLine      = 17 // line height of the default UI face (Go regular at 15 px)
-	BaseSmallLine = 15 // line height of the default small face (Go regular at 13 px)
-	Unit          = 2  // the grid every padding and gap is a multiple of
-)
-
-// Spacing steps, from tight to wide. Each role constant below is one of
-// them, so two roles on the same step stay equal when the step moves.
-const (
-	StepHair   = 1 * Unit
-	StepNear   = 2 * Unit
-	StepTight  = 3 * Unit
-	StepLoose  = 4 * Unit
-	StepLabel  = 5 * Unit
-	StepGutter = 6 * Unit
-	StepDialog = 8 * Unit
-)
-
-// Height classes, so neighbours line up: RowH for list and table rows and
-// standard controls, CompactH for chips, icon buttons and inline fields
-// that sit in a row of that height, LabelH and NoteH for section captions
-// and one-line notes.
-const (
-	RowH     = BaseLine + 6*Unit
-	CompactH = BaseLine + 4*Unit
-	SlimH    = BaseLine + 2*Unit      // a pill, and a button in the status bar: the step below CompactH
-	LabelH   = BaseLine + 3*Unit      // a section caption
-	NoteH    = BaseSmallLine + 2*Unit // a one-line note in the small face
-)
-
-// Spacing roles. Gutter is the inset between a container and its content,
-// and the gap between its sections. Gaps between neighbours come in three
-// steps: NearGap for items that read as one, TightGap for controls side by
-// side (a field and its button, a row of chips), LooseGap for the blocks
-// of a pane stacked in a column and for rows whose items need more air.
-const (
-	TabLead      = StepHair   // room before the first tab of a strip
-	EdgeW        = StepHair   // the width of an open tab's outline
-	CaretW       = StepHair   // the thickness of a bar or underline caret
-	NearGap      = StepNear   // between items that read as one: a label and its count, a heading and its lines
-	ShadowOffset = StepNear   // how far a shadow is shifted down and right
-	TightGap     = StepTight  // controls side by side
-	TabGap       = StepTight  // space above tabs, so their outline never touches the banner or bar above
-	RuleInset    = StepTight  // how far a menu's separator line stays off the menu's sides
-	EdgeGrab     = StepTight  // how far inside its border a press grabs an edge (resize, or no drag)
-	LooseGap     = StepLoose  // blocks of a pane stacked in a column
-	CellPad      = StepLoose  // the inset of a table cell and of a header cell
-	LabelPad     = StepLabel  // the side inset of the label of a pill or a tab, as of a button
-	TabSepInset  = StepLabel  // how far the line between two tabs stays off the strip's top and bottom
-	Gutter       = StepGutter // the inset between a container and its content; the gap between its sections
-	DialogPad    = StepDialog // the inset of a dialog's title bar, toolbar, footer and message body
-)
-
-// Bars and fixed-shape controls, built from a height class and a step.
-const (
-	ToolbarH       = RowH + 2*NearGap      // a bar of controls over a pane
-	DialogToolbarH = RowH + 2*TightGap     // the row of controls under a dialog's title
-	TabBarH        = RowH + 2*TightGap     // a strip of tabs, with TabGap above them
-	DialogTitleH   = RowH + 2*LooseGap     // the title bar of a dialog
-	IconBtnW       = CompactH + 2*NearGap  // an icon button: square room around a compact control
-	WordBtnW       = IconBtnW + StepGutter // a button that holds one short word (Log, Raw, Reset)
-	CheckboxSize   = BaseSmallLine         // the side of a checkbox: one small line
-)
-
-// Dialog widths, counted in Units and steps like every other size.
-const (
-	DialogW          = 190 * Unit     // a message dialog: wide enough for a sentence and two buttons
-	DialogButtonMinW = 5 * StepDialog // the least width of a dialog button, so Yes and No match
-)
-
-// Fixed geometry: limits on how a dialog sits in the window, not sizes of
-// content, so they follow no line or step.
-const (
-	DialogMargin = 40  // kept free between a dialog and the window's edge
-	DialogMaxH   = 560 // the tallest a dialog grows by itself
-)
-
 // Theme holds the colors and font sizes the widgets draw with.
 type Theme struct {
 	Colors                        map[Token]color.RGBA
@@ -159,6 +73,10 @@ type Theme struct {
 
 	// NoGradients turns every gradient into a flat fill.
 	NoGradients bool
+
+	// Metrics are the theme's size rules; the zero value is the default
+	// sizes.
+	Metrics Metrics
 }
 
 // Color returns the color of tok, or the text color for unknown tokens

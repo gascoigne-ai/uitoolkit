@@ -45,7 +45,7 @@ func textGo(s *Showcase, _ *core.Ctx) Node {
 	row := func(label string, field *TextField, opts ...Option) Node {
 		return FormRow(label, formLabelW, Field(field, append([]Option{W(formFieldW), Bg(core.Sunken)}, opts...)...))
 	}
-	return Scroll(&state.textPage, Pad(core.Gutter), Gap(core.Gutter),
+	return Scroll(&state.textPage, PadOf(core.GutterOf), GapOf(core.GutterOf),
 		Caption("Text fields"),
 		row("Name", &state.name, TextMenu(&state.name)),
 		row("Password", &state.secret),
@@ -54,7 +54,7 @@ func textGo(s *Showcase, _ *core.Ctx) Node {
 		Area(&state.notes, H(notesH), Bg(core.Sunken), Control("field")),
 		Text(notesRemark, Small(), Muted()),
 		Caption("Caret"),
-		FormRow("Shape", formLabelW, Row(Gap(core.TightGap),
+		FormRow("Shape", formLabelW, Row(GapOf(core.TightGapOf),
 			For(s.caretChoices(), func(_ int, entry choice) Node {
 				return SegmentChip(entry.Label, entry.Selected, W(caretChipW), OnClick(entry.Pick))
 			}),

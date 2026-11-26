@@ -71,8 +71,8 @@ func TestToastsStackAboveTheInsetAndAClickDismissesOne(t *testing.T) {
 	Layout(c, root, 800, 600)
 
 	first, second := view.Children()[0].Rect(), view.Children()[1].Rect()
-	if view.Rect().X+view.Rect().W != 800-core.Gutter {
-		t.Errorf("toasts end at x=%d, want the gutter %d from the right edge", view.Rect().X+view.Rect().W, core.Gutter)
+	if view.Rect().X+view.Rect().W != 800-core.DefaultSizes().Gutter {
+		t.Errorf("toasts end at x=%d, want the gutter %d from the right edge", view.Rect().X+view.Rect().W, core.DefaultSizes().Gutter)
 	}
 	if second.Y+second.H > 600-28 || first.Y >= second.Y {
 		t.Errorf("rows at %d and %d, want oldest on top and the stack above the inset", first.Y, second.Y)

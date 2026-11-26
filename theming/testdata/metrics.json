@@ -1,0 +1,10 @@
+{
+  "name": "Roomy",
+  "extends": "dark",
+  "metrics": {
+    "unit": 3,
+    "leading": 2,
+    "steps": { "hair": 1, "near": 2, "tight": 4, "loose": 4, "label": 5, "gutter": 6, "dialog": 8 },
+    "sizes": { "gutter": 14, "rowH": 32 }
+  }
+}

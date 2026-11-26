@@ -25,10 +25,10 @@ func TestTableHeightAndEditHandlers(t *testing.T) {
 	Layout(c, root, 400, 400)
 
 	// header + 2 rows + placeholder
-	if got, want := tbl.Rect().H, 4*core.RowH; got != want {
+	if got, want := tbl.Rect().H, 4*core.DefaultSizes().Row; got != want {
 		t.Fatalf("table height = %d, want %d", got, want)
 	}
-	rowY := func(index int) int { return (index+1)*core.RowH + core.RowH/2 }
+	rowY := func(index int) int { return (index+1)*core.DefaultSizes().Row + core.DefaultSizes().Row/2 }
 	click(c, 10, rowY(1))
 	Update(c, root)
 	click(c, 395, rowY(0))
@@ -54,7 +54,7 @@ func editableSpec() TableSpec {
 	}
 }
 
-func cellY(row int) int { return (row+1)*core.RowH + core.RowH/2 }
+func cellY(row int) int { return (row+1)*core.DefaultSizes().Row + core.DefaultSizes().Row/2 }
 
 func TestClickingACellStartsEditingIt(t *testing.T) {
 	var got [][2]int

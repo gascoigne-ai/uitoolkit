@@ -156,11 +156,11 @@ func (a *app) content() Node {
 			IconButton(GearIcon(), WOf(core.IconBtnOf), HOf(core.CompactOf), Tooltip("Theme"),
 				OnClickAt(func(posX, posY int) { a.themeMenu(posX, posY) })),
 		),
-		Col(Grow(1), Pad(core.Gutter), Gap(core.LooseGap),
+		Col(Grow(1), PadOf(core.GutterOf), GapOf(core.LooseGapOf),
 			FormRow("Name", 80,
 				Field(&a.name, Grow(1), Bg(core.Sunken), Placeholder("Your name"), OnEnter(a.greet), TextMenu(&a.name)),
 			),
-			Row(HOf(core.RowOf), Gap(core.TightGap),
+			Row(HOf(core.RowOf), GapOf(core.TightGapOf),
 				Spacer(),
 				Button("Ask", HOf(core.RowOf), OnClick(a.ask)),
 				PrimaryButton("Greet", HOf(core.RowOf), OnClick(a.greet)),
@@ -227,8 +227,8 @@ The toolkit draws and lays out. These stay with the app:
 
 ## Rules
 
-- **Tokens, never literals.** Colors come from `core` tokens (`core.Bg`, `core.Muted`, ...), sizes and spacing from the constants and `Sizes` roles in this page. A size no role fits is a new named constant with its reason, never a bare number in a view.
-- **Sizes that follow the text.** Write heights and widths of controls as roles (`HOf(core.RowOf)`, `WOf(core.IconBtnOf)`), not the constants (`core.RowH`), so a larger text size grows them. The constants are the values at the default text size.
+- **Tokens, never literals.** Colors come from `core` tokens (`core.Bg`, `core.Muted`, ...), sizes and spacing from the `Sizes` roles in this page. A size no role fits is a new row in the core size table with its reason, never a bare number in a view.
+- **Sizes that follow the text and the theme.** Write sizes as roles (`HOf(core.RowOf)`, `WOf(core.IconBtnOf)`, `PadOf(core.GutterOf)`, `GapOf(core.LooseGapOf)`), so a larger text size and a theme's `metrics` reach them. Code that has a `Ctx`, such as a `Draw` method, reads `ctx.Sizes`. `core.DefaultSizes()` holds the values at the default text size and theme; a number taken from it does not follow either.
 - **Corners through the theme.** A component takes its fill, radius and outline from a control style (`Control("button")`) or `ctx.Radius(name)`, so the user's corner setting reaches it. A square fill inside a rounded panel needs `RoundT`, `RoundB` or `RoundBL` with the panel's control name.
 - **Icon-only controls have a tooltip** (`Tooltip("...")`); name the shortcut in it when there is one, as the dialog's close button says "Close (Esc)".
 - **One primary action per place.** `PrimaryButton` (or `DialogButton.Primary`) marks the action Enter runs; everything else is a `Button`.
@@ -237,57 +237,73 @@ The toolkit draws and lays out. These stay with the app:
 
 ## Sizes
 
-All sizes are rules over three bases in `core` (`theme.go`), never free numbers:
+Every shared size is a rule in one table in `core` (`sizes.go`), never a free number. Each has one name in three places: the Go role (`core.GutterOf`), the template scope (`{{gutter}}`) and the theme file (`"gutter"`); the field of `ctx.Sizes` is `Gutter`. The rules start from the line heights of the faces and from the theme's knobs (`core.Metrics`):
 
-| Base | Value | What it is |
-|---|---|---|
-| `BaseLine` | 17 | line height of the default UI face (Go regular at 15 px) |
-| `BaseSmallLine` | 15 | line height of the default small face (Go regular at 13 px) |
-| `Unit` | 2 | the grid every padding and gap sits on |
-
-**Height classes** are a line plus padding on both sides, so text sits on whole pixels:
-
-| Constant | Role | Rule | Default | Use |
-|---|---|---|---|---|
-| `RowH` | `RowOf` | line + 6 units | 29 | list and table rows, buttons, fields, form rows |
-| `CompactH` | `CompactOf` | line + 4 units | 25 | icon buttons, chips, inline fields, menu rows, sliders |
-| `LabelH` | `LabelOf` | line + 3 units | 23 | captions; each line of `Lines` |
-| `SlimH` | `SlimOf` | line + 2 units | 21 | pills, the smallest buttons |
-| `NoteH` | `NoteOf` | small line + 2 units | 19 | one-line notes (`Note`), small `Lines` |
-
-**Spacing steps** are named multiples of `Unit`; each spacing constant is one step:
-
-| Step | Value | Constants and where they go |
-|---|---|---|
-| `StepHair` | 2 | `TabLead` (room before the first tab), `EdgeW` (open tab outline), `CaretW` (bar or underline caret) |
-| `StepNear` | 4 | `NearGap` (items that read as one: a label and its count), `ShadowOffset` |
-| `StepTight` | 6 | `TightGap` (controls side by side), `TabGap` (room above tabs), `RuleInset` (menu separator), `EdgeGrab` (resize grab inside a border) |
-| `StepLoose` | 8 | `LooseGap` (blocks stacked in a pane), `CellPad` (table cells) |
-| `StepLabel` | 10 | `LabelPad` (side inset of a tab or pill label), `TabSepInset` (line between tabs) |
-| `StepGutter` | 12 | `Gutter` (inset between a container and its content; gap between its sections) |
-| `StepDialog` | 16 | `DialogPad` (inset of a dialog's title bar, toolbar and body) |
-
-**Bars and fixed shapes** are a class plus a step:
-
-| Constant | Role | Rule | Default |
+| Knob | Default | Range | What it is |
 |---|---|---|---|
-| `ToolbarH` | `ToolbarOf` | `RowH` + 2 `NearGap` | 37 |
-| `TabBarH` | `TabBarOf` | `RowH` + 2 `TightGap` | 41 |
-| `DialogToolbarH` | `DialogToolbarOf` | `RowH` + 2 `TightGap` | 41 |
-| `DialogTitleH` | `DialogTitleOf` | `RowH` + 2 `LooseGap` | 45 |
-| `IconBtnW` | `IconBtnOf` | `CompactH` + 2 `NearGap` | 33 |
-| `WordBtnW` | `WordBtnOf` | `IconBtnW` + `StepGutter` | 45 (a button with one short word) |
-| `CheckboxSize` | `CheckboxOf` | `BaseSmallLine` | 15 |
-| `DialogW` | | 190 units | 380 (a message dialog) |
-| `DialogButtonMinW` | | 5 `StepDialog` | 80 (least width of a dialog button) |
+| line | 17 | 13..28 | line height of the UI face (17 is Go regular at 15 px); measured, not a theme value |
+| small line | 15 | 1..line | line height of the small face (15 is Go regular at 13 px); measured |
+| `unit` | 2 | 1..4 | the grid in pixels every derived padding and gap sits on |
+| `leading` | 0 | 0..8 | extra pixels of leading on the line and the small line |
+| `steps` | 1, 2, 3, 4, 5, 6, 8 | 1..16 each | the spacing steps, in units |
 
-`DialogMargin` (40, room around a dialog) and `DialogMaxH` (560, tallest default dialog) are fixed limits for app layouts; no toolkit widget applies them.
+**Leading** is added to the height classes, the bars built from them, and between the wrapped lines of `Paragraph`. A single-line `Text` and the checkbox keep the measured line, and the lines of `Code` and `Area` keep their own spacing.
 
-**Sizes follow the faces.** `ctx.Sizes` is `core.SizesFor(line, small)` for the line heights of the faces the context really draws with. `NewCtx`, `SetTheme` and `SetFonts` recompute it; `SetScale` does not, since the scale multiplies at draw time. The UI line is clamped to 13..28 (`MinLine`, `MaxLine`) and the small line to 1..UI line; spacing steps never move. `DefaultSizes()` equals the constants.
+**Height classes** are a line plus leading plus padding on both sides, so text sits on whole pixels (with an odd leading or unit, a pixel can be left over):
 
-**In templates** the same names come from `ctx.SizesScope()`: `rowH`, `compactH`, `slimH`, `labelH`, `noteH`, `toolbarH`, `tabBarH`, `dialogToolbarH`, `dialogTitleH`, `iconBtnW`, `wordBtnW`, `checkboxSize`, and the spacing names `tabLead`, `edgeW`, `nearGap`, `shadowOffset`, `tightGap`, `tabGap`, `ruleInset`, `edgeGrab`, `looseGap`, `cellPad`, `labelPad`, `tabSepInset`, `gutter`, `dialogPad`. Pass it as a fallback scope: `tpl.MustBuild(scope, ctx.SizesScope())`, then write `h="{{rowH}}"`.
+| Name | Role | Rule | Default | Pin range | Use |
+|---|---|---|---|---|---|
+| `rowH` | `RowOf` | line + leading + 6 units | 29 | 8..160 | list and table rows, buttons, fields, form rows |
+| `compactH` | `CompactOf` | line + leading + 4 units | 25 | 8..160 | icon buttons, chips, inline fields, menu rows, sliders |
+| `labelH` | `LabelOf` | line + leading + 3 units | 23 | 8..160 | captions; each line of `Lines` |
+| `slimH` | `SlimOf` | line + leading + 2 units | 21 | 8..160 | pills, the smallest buttons |
+| `noteH` | `NoteOf` | small line + leading + 2 units | 19 | 8..160 | one-line notes (`Note`), small `Lines` |
 
-**A new component** picks a height class and a spacing step. A size that fits no class or step is a new rule in `core/theme.go` with its reason.
+**Spacing roles** are each one step. The defaults are the step in pixels, `units * unit`:
+
+| Step (default px) | Name | Role | Pin range | Where it goes |
+|---|---|---|---|---|
+| `hair` (2) | `tabLead` | `TabLeadOf` | 0..32 | room before the first tab |
+| | `edgeW` | `EdgeWOf` | 1..8 | open tab outline |
+| | `caretW` | `CaretWOf` | 1..8 | bar or underline caret |
+| `near` (4) | `nearGap` | `NearGapOf` | 0..64 | items that read as one: a label and its count |
+| | `shadowOffset` | `ShadowOffsetOf` | 0..16 | how far a shadow is shifted |
+| `tight` (6) | `tightGap` | `TightGapOf` | 0..64 | controls side by side |
+| | `tabGap` | `TabGapOf` | 0..64 | room above tabs |
+| | `ruleInset` | `RuleInsetOf` | 0..64 | menu separator |
+| | `edgeGrab` | `EdgeGrabOf` | 1..32 | resize grab inside a border |
+| `loose` (8) | `looseGap` | `LooseGapOf` | 0..64 | blocks stacked in a pane |
+| | `cellPad` | `CellPadOf` | 0..64 | table cells |
+| `label` (10) | `labelPad` | `LabelPadOf` | 0..64 | side inset of a tab or pill label |
+| | `tabSepInset` | `TabSepInsetOf` | 0..64 | line between tabs |
+| `gutter` (12) | `gutter` | `GutterOf` | 0..64 | inset between a container and its content; gap between its sections |
+| `dialog` (16) | `dialogPad` | `DialogPadOf` | 0..64 | inset of a dialog's title bar, toolbar and body |
+
+`ctx.Sizes.Steps` holds the steps in pixels. The switch's track is inset by the `hair` step.
+
+**Bars, fixed shapes and dialogs:**
+
+| Name | Role | Rule | Default | Pin range |
+|---|---|---|---|---|
+| `toolbarH` | `ToolbarOf` | `rowH` + 2 `nearGap` | 37 | 8..320 |
+| `tabBarH` | `TabBarOf` | `rowH` + 2 `tabGap` | 41 | 8..320 |
+| `dialogToolbarH` | `DialogToolbarOf` | `rowH` + 2 `tightGap` | 41 | 8..320 |
+| `dialogTitleH` | `DialogTitleOf` | `rowH` + 2 `looseGap` | 45 | 8..320 |
+| `iconBtnW` | `IconBtnOf` | `compactH` + 2 `nearGap` | 33 | 8..320 |
+| `wordBtnW` | `WordBtnOf` | `iconBtnW` + `gutter` | 45 (a button with one short word) | 8..320 |
+| `checkboxSize` | `CheckboxOf` | small line | 15 | 4..64 |
+| `dialogW` | `DialogWOf` | 190 units | 380 (a message dialog) | 120..1600 |
+| `dialogButtonMinW` | `DialogButtonMinWOf` | 5 `dialog` steps | 80 (least width of a dialog button) | 0..400 |
+| `dialogMargin` | `DialogMarginOf` | 40 | 40 | 0..200 |
+| `dialogMaxH` | `DialogMaxHOf` | 560 | 560 | 120..4000 |
+
+`dialogMargin` (room around a dialog) and `dialogMaxH` (tallest default dialog) are for app layouts; no toolkit widget applies them, so a theme that sets them changes only a layout that reads them.
+
+**Sizes follow the faces and the theme.** `ctx.Sizes` is `core.SizesFor(line, small, ctx.Th.Metrics)` for the line heights of the faces the context really draws with. `NewCtx`, `SetTheme` and `SetFonts` recompute it; `SetScale` does not, since the scale multiplies at draw time. The UI line is clamped to 13..28 (`MinLine`, `MaxLine`) and the small line to 1..UI line; spacing does not move with the text size. `DefaultSizes()` is the result for lines 17 and 15 with the default knobs.
+
+**In templates** the names in the tables come from `ctx.SizesScope()`. Pass it as a fallback scope: `tpl.MustBuild(scope, ctx.SizesScope())`, then write `h="{{rowH}}"` or `pad="{{gutter}}"`.
+
+**A new component** picks a height class and a spacing role. A size that fits no class or role is a new row in the size table in `core/sizes.go` with its reason.
 
 ## Color roles
 
@@ -349,9 +365,9 @@ The built-in themes give these control styles. `Control(name)` on any element ap
 - `Switch` and the slider track are pills while corners are soft or round, and square when corners are square.
 - Toasts and tabs take no control, so they stay square under every corner setting.
 - Borders are one-pixel hairlines in a token, drawn `ctx.LineWidth()` device pixels thick (the scale rounded, at least 1). Edges snap to device pixels, so neighbours share an edge.
-- The open tab's outline is the separate 2 px `Edge` family (`EdgeT`, `EdgeL`, `EdgeR`, `EdgeB`).
+- The open tab's outline is the separate `Edge` family, `edgeW` (2 px) thick (`EdgeT`, `EdgeL`, `EdgeR`, `EdgeB`).
 - Bars are separated by `Border`, never `Rule`.
-- Floating panels (dialogs, menus, toasts) cast a `Shadow` shifted by `ShadowOffset` (4), not blurred.
+- Floating panels (dialogs, menus, toasts) cast a `Shadow` shifted by `shadowOffset` (4), not blurred.
 
 ## Icons
 
@@ -419,12 +435,12 @@ All of them take `OnChange` (or `OnClick`) and leave the value to the app: the a
 |---|---|
 | `ListRow` | a row of a list; `Selected` when chosen, `Hover` otherwise |
 | `FormRow` | a label in a fixed column and its controls; rows with the same label width line up |
-| `Toolbar` | a bar of controls over a pane: `ToolbarH`, `Gutter` inset, `Border` under it |
+| `Toolbar` | a bar of controls over a pane: `toolbarH`, `gutter` inset, `Border` under it |
 | `Note` | a one-line message under a control: `core.Error` for a problem, `core.Muted` for a hint |
-| `Table` | rows with columns: uppercase small bold muted header on `Panel`, rows `RowH` on `Sunken`, a `BorderSoft` hairline between rows, the row under the pointer lit, cells padded `CellPad`. Opt-ins: `Zebra`, draggable column dividers (`State`, columns at least `MinColumnPx` 56), editable cells, a lead column, a detail under a row, row drag handles. |
+| `Table` | rows with columns: uppercase small bold muted header on `Panel`, rows `rowH` on `Sunken`, a `BorderSoft` hairline between rows, the row under the pointer lit, cells padded `cellPad`. Opt-ins: `Zebra`, draggable column dividers (`State`, columns at least `MinColumnPx` 56), editable cells, a lead column, a detail under a row, row drag handles. |
 | `KeyChips` | a key combination such as `Ctrl+Shift+Tab`, one chip per key |
 
-**Tabs.** `TabBar` holds `Tabs` (or `ScrollTabs` when the labels may not fit). The bar is `TabBarH` with `TabGap` above the tabs and a `Border` line under the inactive ones; inactive labels are `Muted`. The open tab has the pane color `Bg`, its label in `Text` and a 2 px `AccentLine` outline on top, left and right, open at the bottom so it runs into its pane. `ActiveTab()` gives a hand-built tab the same look. No tab label is bold.
+**Tabs.** `TabBar` holds `Tabs` (or `ScrollTabs` when the labels may not fit). The bar is `tabBarH` with `tabGap` above the tabs and a `Border` line under the inactive ones; inactive labels are `Muted`. The open tab has the pane color `Bg`, its label in `Text` and a 2 px `AccentLine` outline on top, left and right, open at the bottom so it runs into its pane. `ActiveTab()` gives a hand-built tab the same look. No tab label is bold.
 
 **Containers.**
 
@@ -437,10 +453,10 @@ All of them take `OnChange` (or `OnClick`) and leave the value to the app: the a
 
 **Dialogs.** A dialog is a modal panel inside the window: `Dialog` or `ResizableDialog`, centered over a `Shadow` scrim.
 
-- **Title bar** (`DialogTitle`): `DialogTitleH`, padded `DialogPad`, the `hero` gradient with its top corners rounded to the panel, a `Border` line under it. From the left: the bold title in `HeroText` (a short noun), an optional `DialogSubtitle` (small, `HeroMuted`, gives way first), free room, then the close button (`CrossIcon`, tooltip "Close (Esc)"). No other controls in the bar.
-- **Toolbar** (`DialogToolbar`): `DialogToolbarH`, padded `DialogPad`, gap `LooseGap`, a `BorderSoft` line under it. A field that should take the room gets `Grow(1)`.
-- **Body**: padded `DialogPad`.
-- **Message dialog** (`MessageDialog`): `DialogW` wide; the body text in `Muted`, any form you add, an optional input line, then the buttons on the right (gap `LooseGap`, at least `DialogButtonMinW` wide, the primary one lit). Enter in the input runs the primary button.
+- **Title bar** (`DialogTitle`): `dialogTitleH`, padded `dialogPad`, the `hero` gradient with its top corners rounded to the panel, a `Border` line under it. From the left: the bold title in `HeroText` (a short noun), an optional `DialogSubtitle` (small, `HeroMuted`, gives way first), free room, then the close button (`CrossIcon`, tooltip "Close (Esc)"). No other controls in the bar.
+- **Toolbar** (`DialogToolbar`): `dialogToolbarH`, padded `dialogPad`, gap `looseGap`, a `BorderSoft` line under it. A field that should take the room gets `Grow(1)`.
+- **Body**: padded `dialogPad`.
+- **Message dialog** (`MessageDialog`): `dialogW` wide; the body text in `Muted`, any form you add, an optional input line, then the buttons on the right (gap `looseGap`, at least `dialogButtonMinW` wide, the primary one lit). Enter in the input runs the primary button.
 - **Closing.** The close button runs `OnDismiss`. A click outside a dialog is swallowed and leaves it open (`KeepOnOutsideClick`), so a stray click cannot throw away the user's work. Escape is the app's to wire (see [What the app owns](#what-the-app-owns)); make it do what the close button does.
 - **Moving.** Pass `Moved(&state)` to let the user drag the dialog by its title bar; a double click on the bar centers it again. Without `Moved` the bar does not drag.
 
@@ -448,9 +464,9 @@ All of them take `OnChange` (or `OnClick`) and leave the value to the app: the a
 
 **Tooltips.** `view.Tooltip(text)` on any element; `TooltipLayer` shows the innermost one after the pointer rests 30 ticks (half a second at 60 ticks a second). The box is `Frame` with the `tooltip` outline and small `Text`, 16 px below and right of the pointer, kept inside the window, and above the pointer when there is no room below.
 
-**Menus.** `OpenMenu(ctx, x, y, items)` opens the popup menu; mount `PopupMenuLayer(ctx)` once and call `PopupMenuKeys` each tick. The menu is a `Bg` panel with the `menu` style and a shadow, inset `MenuPad` (4), as wide as its widest row within `MenuMinW` 120 and `MenuMaxW` 420, kept inside the window. Rows are `CompactH` high, padded 10; the keyboard's row is `Selected`, others `Hover` under the pointer. `MenuItem` has `Shortcut` (shown small and muted, "Ctrl" written "Cmd" on macOS), `Hint` (muted lines under the label), `Icon`, `Disabled` and `Separator` (9 high). A pick or a click outside closes it.
+**Menus.** `OpenMenu(ctx, x, y, items)` opens the popup menu; mount `PopupMenuLayer(ctx)` once and call `PopupMenuKeys` each tick. The menu is a `Bg` panel with the `menu` style and a shadow, inset `MenuPad` (4), as wide as its widest row within `MenuMinW` 120 and `MenuMaxW` 420, kept inside the window. Rows are `compactH` high, padded 10; the keyboard's row is `Selected`, others `Hover` under the pointer. `MenuItem` has `Shortcut` (shown small and muted, "Ctrl" written "Cmd" on macOS), `Hint` (muted lines under the label), `Icon`, `Disabled` and `Separator` (9 high). A pick or a click outside closes it.
 
-**Other.** `Image` draws a `render.Image` scaled to fit. `Paragraph` wraps small muted text. `view.HRule`, `view.VRule` and `view.Separator` draw dividers.
+**Other.** `Image` draws a `render.Image` scaled to fit. `Paragraph` wraps small muted text, with the theme's `leading` between its lines. `view.HRule`, `view.VRule` and `view.Separator` draw dividers.
 
 ## Keyboard and focus
 
@@ -470,7 +486,7 @@ All of them take `OnChange` (or `OnClick`) and leave the value to the app: the a
 - **Wheel.** The innermost scroller under the pointer whose content overflows takes the wheel; an enclosing one does not move too.
 - **Modal.** While a modal layer is visible, nothing under it gets clicks, wheel or hover.
 - **Cursor.** Split dividers and resizable edges show resize cursors; a drag shows `CursorMove` only from press to release; an idle drag handle shows the default cursor, so it reads as a label, not a control.
-- **Resizing.** A resizable box is grabbed within `EdgeGrab` (6) inside or 4 outside its border.
+- **Resizing.** A resizable box is grabbed within `edgeGrab` (6) inside or 4 outside its border.
 - **Drags** follow the pointer while the button is held. A drag that starts inside a clipping parent and leaves it does not yet follow the pointer outside (see [Known limitations](#known-limitations)).
 
 ## Layers
@@ -500,7 +516,22 @@ The window's root is a `Stack`; children later in it are drawn over earlier ones
 
 A `theming.Catalog` holds the built-in themes (`theming.Builtins()`) and the user's theme files; `Catalog.Theme(prefs)` builds the `core.Theme` for the preferences, and `ctx.SetTheme` applies it.
 
-- **Theme files** are JSON: `name`, `extends` (`dark` or `light`), `variables` (colors referred to as `"$name"`), a flat `colors` table of token to `#rrggbb` or `#rrggbbaa`, `iconStroke`, and `controls` (per control: `radius`, `gradient` as a strength 0..0.5 or `[top, bottom]`, `border` token). `theming.ParseTheme` merges a file over a base; unknown fields and variables, trailing data, a negative radius and a border token with no color are errors.
+- **Theme files** are JSON: `name`, `extends` (`dark` or `light`), `variables` (colors referred to as `"$name"`), a flat `colors` table of token to `#rrggbb` or `#rrggbbaa`, `iconStroke`, `metrics` (see below), and `controls` (per control: `radius`, `gradient` as a strength 0..0.5 or `[top, bottom]`, `border` token). `theming.ParseTheme` merges a file over a base; unknown fields and variables, trailing data, a negative radius and a border token with no color are errors.
+- **Sizes.** The optional `metrics` block sets the knobs and pins named sizes; the names, defaults and ranges are in [Sizes](#sizes). Font sizes stay the user's.
+
+  ```json
+  {
+    "extends": "dark",
+    "metrics": {
+      "unit": 3,
+      "leading": 2,
+      "steps": { "hair": 1, "near": 2, "tight": 4, "loose": 4, "label": 5, "gutter": 6, "dialog": 8 },
+      "sizes": { "gutter": 14, "rowH": 32 }
+    }
+  }
+  ```
+
+  Every key is optional. The knobs feed the rules; a size under `sizes` is fixed at those pixels whatever the knobs and the text size say, and the sizes derived from it follow it (a pinned `rowH` moves `toolbarH` and the other bars). Over a base theme, a knob the file states replaces the base's and pins merge by name, the file's winning; a base pin survives a change of a knob, and no syntax removes it. A key out of range (an explicit 0 unit or step included), an unknown key or size name, a `null` size and a number that is not an integer are errors. In Go the same is `core.Theme.Metrics` and `Metrics.Pin`.
 - **User themes.** `Catalog.LoadUser(dir)` reads every `*.json` in a folder: the file name is the id, `name` the label. A file that does not parse is skipped and reported; a missing folder is no problem. `Catalog.SetUser` lists them after the built-ins.
 - **Preferences** (`theming.Prefs`), applied in this order by `Catalog.Theme`: the theme (an unknown id falls back to the first built-in) and the three font sizes; the corner factor and Flat; with `Contrast: "high"`, the four customizable colors moved to 7:1 against their text, and text, muted text, `Error`, `OK`, the accent line, borders, rules and row fills moved in their own hue until each reaches its ratio on the surfaces it is drawn on (`Bg`, `Sunken` and `Frame` for text and lines, `Sunken` for `Selected` and `Hover`, `Bg` for `Chip`): text 17:1, muted 12:1, `Error` and `OK` 8:1, accent line 6:1, `Border` and `Rule` 7:1, `BorderSoft` 3:1; surfaces unchanged; then the user's color overrides for that theme (Selection, Find match, Active match, Accent), each ignored unless it parses and reaches `RequiredRatio` against its text (4.5, or 7 with high contrast).
 - **Controls draw from their style**, so a theme restyles any control without code.
@@ -522,7 +553,7 @@ What it does not give, and an app must not claim: no screen reader support and n
 
 1. **Start from the state.** Put every value the screen shows and every widget state (`TextField`, `ScrollState`, `SplitState`, ...) in the app's struct.
 2. **Pick the frame.** A `Col` on `Bg`: a `Toolbar` or `TabBar` at the top, then the body with `Grow(1)`. Use `Split` for side-by-side panes, `Scroll` for anything that can grow.
-3. **Inset and space.** Inset a pane by `Gutter`, space its blocks by `LooseGap`, controls in a row by `TightGap`, items that read as one by `NearGap`.
+3. **Inset and space.** Inset a pane by `gutter`, space its blocks by `looseGap`, controls in a row by `tightGap`, items that read as one by `nearGap`.
 4. **Size the rows.** Rows, buttons and fields `HOf(core.RowOf)`; icon buttons and toolbar controls `CompactOf`; one-line notes `Note`.
 5. **Choose widgets** from [the tables above](#widgets-when-to-use-which): one `PrimaryButton` per place, tooltips on icon buttons, `Note` for a refusal under its field.
 6. **Mount the layers** in the root `Stack` in the order of [Layers](#layers), and wire Escape, the caret and the menu keys in `Update`.

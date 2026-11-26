@@ -34,7 +34,10 @@ func OnDragOver(callback func()) Option { return func(element *El) { element.onD
 // FloatTR takes the element out of the layout of its Stack and pins it
 // top and right, this many pixels from those edges.
 func FloatTR(top, right int) Option {
-	return func(element *El) { element.fl.on, element.fl.top, element.fl.right = true, top, right }
+	return func(element *El) {
+		element.fl.on, element.fl.top, element.fl.right = true, top, right
+		element.literal(slotFloatX, slotFloatY)
+	}
 }
 
 // Modal makes a floating element swallow every click; a click outside it

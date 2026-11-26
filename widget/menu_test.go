@@ -131,7 +131,7 @@ func TestMenuSeparatorRuleSpansTheRow(t *testing.T) {
 	Layout(c, Stack(menu), 400, 300)
 	separator := menu.Children()[1]
 	row, rule := separator.Rect(), separator.Children()[0].Rect()
-	want := core.Rect{X: row.X + core.RuleInset, Y: row.Y + (MenuSepH-1)/2, W: row.W - 2*core.RuleInset, H: 1}
+	want := core.Rect{X: row.X + core.DefaultSizes().RuleInset, Y: row.Y + (MenuSepH-1)/2, W: row.W - 2*core.DefaultSizes().RuleInset, H: 1}
 	if rule != want {
 		t.Fatalf("the separator rule is %+v in the row %+v, want %+v", rule, row, want)
 	}

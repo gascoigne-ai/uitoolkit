@@ -23,8 +23,9 @@
 //
 // The names follow a few rules, so a guess is usually right:
 //
-//	Size       W H WOf HOf FitW MinW MaxW MinH MaxH Grow Shrink Optional Clip
+//	Size       W H WOf HOf FitW MinW MinWOf MaxW MinH MaxH Grow Shrink Optional Clip
 //	Spacing    Pad PadX PadY PadL PadT PadR PadB   Margin MarginX MarginY MarginL MarginT MarginR MarginB   Gap
+//	Sized      PadOf PadXOf PadYOf PadLOf PadTOf PadROf PadBOf GapOf   (follow the context's Sizes)
 //	Layout     Row Col Stack Spacer HRule VRule VRuleInset   AlignItems AlignSelf JustifyContent
 //	Look       Bg Border BorderX BorderY BorderL BorderT BorderR BorderB HoverBg BorderInset Shadow Control EdgeT EdgeL EdgeR EdgeB HoverColor Lighten
 //	Text       Text Caption Lines   Color Muted Bold Small Mono FontSource Ellipsis TextCenter
@@ -34,7 +35,7 @@
 //	Flow       If When For Frag With
 //	Extend     Behavior Base Linear Custom Describer PreUpdater OverDrawer Scroller Focusable Focuser Linear.LayoutIn (El.Inner El.InFlow El.KeepsInView El.Behavior El.Place El.FixedSize El.ColorToken El.HoverColorToken)   a component outside this package is an element through these
 //	Layers     ModalLayer DrawBelow DrawFrom   (draw the window under the first modal once, the rest every frame)
-//	Overlay    FloatTR FloatAt FloatCenter Moved MoveState DragHandle DismissMargin RoundT RoundB RoundBL Modal KeepOnOutsideClick OnDismiss FocusScope
+//	Overlay    FloatTR FloatAt FloatAtOf FloatCenter Moved MoveState DragHandle DismissMargin RoundT RoundB RoundBL Modal KeepOnOutsideClick OnDismiss FocusScope
 //
 // A side is a letter suffix (PadL, PadT, PadR, PadB) and an axis is X or
 // Y (PadX is left and right). The same options are the attributes of a
@@ -63,14 +64,14 @@ type El struct {
 	memo   measureMemo // what the behavior measured in the current Layout pass
 	hover  bool        // the pointer was over this element at the last draw, and hover was not blocked
 
-	w, h              int                        // fixed size; 0 = content size
-	hOf, wOf, insetOf func(sizes core.Sizes) int // set by HOf, WOf, SeparatorOf; Layout resolves them into h, w, borderInset
-	grow              float64
-	optional, hidden  bool // optional elements are dropped when the row is too narrow
-	shrink            bool // gives up width to an overflowing row, down to its MinW
-	padL, padT        int
-	padR, padB        int
-	gap               int
+	w, h             int                                   // fixed size; 0 = content size
+	sized            [slotCount]func(sizes core.Sizes) int // set by HOf, PadOf and the like; Layout resolves them
+	grow             float64
+	optional, hidden bool // optional elements are dropped when the row is too narrow
+	shrink           bool // gives up width to an overflowing row, down to its MinW
+	padL, padT       int
+	padR, padB       int
+	gap              int
 
 	bg, border, borderT, borderB, borderL, borderR core.Token
 	borderInset                                    int // BorderL and BorderR stop this far from the top and bottom

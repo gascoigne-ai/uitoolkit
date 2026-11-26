@@ -93,7 +93,7 @@ func TextCenter() Option { return func(element *El) { element.ctr = true } }
 
 // Lines stacks the lines of text, one Text each, in the given color. The
 // options set the column; Small among them makes every line a small text
-// NoteH high, as a Note is, so a longer help takes little room.
+// noteH high, as a Note is, so a longer help takes little room.
 func Lines(content string, clr core.Token, opts ...Option) *El {
 	col := Col(With(nil, opts)...)
 	lineOpts := []Option{Color(clr), HOf(core.LabelOf)}

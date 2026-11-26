@@ -25,7 +25,7 @@ func caretBlock(row core.Rect, posX, width, lineH int) core.Rect {
 // caretStyle is how one shape is drawn: the part of the block it fills, and
 // whether the character is drawn again on top of it.
 type caretStyle struct {
-	rect  func(block core.Rect, glyphW int) core.Rect
+	rect  func(block core.Rect, glyphW, thickness int) core.Rect
 	glyph bool
 }
 
@@ -36,14 +36,14 @@ var caretStyles = [...]caretStyle{
 	core.CaretUnderline: {rect: underlineOf},
 }
 
-func wholeBlock(block core.Rect, _ int) core.Rect { return block }
+func wholeBlock(block core.Rect, _, _ int) core.Rect { return block }
 
-func barOf(block core.Rect, _ int) core.Rect {
-	return core.Rect{X: block.X, Y: block.Y, W: core.CaretW, H: block.H}
+func barOf(block core.Rect, _, thickness int) core.Rect {
+	return core.Rect{X: block.X, Y: block.Y, W: thickness, H: block.H}
 }
 
-func underlineOf(block core.Rect, glyphW int) core.Rect {
-	return core.Rect{X: block.X, Y: block.Y + block.H - core.CaretW, W: glyphW, H: core.CaretW}
+func underlineOf(block core.Rect, glyphW, thickness int) core.Rect {
+	return core.Rect{X: block.X, Y: block.Y + block.H - thickness, W: glyphW, H: thickness}
 }
 
 // styleOf is the one lookup of caretStyles.
@@ -59,7 +59,7 @@ func styleOf(shape core.CaretShape) caretStyle {
 func drawCaret(ctx *core.Ctx, dst render.Canvas, face render.Face, glyph string, posX int, row core.Rect) {
 	glyphW := ctx.Width(face, glyph)
 	style := styleOf(ctx.Caret.Shape)
-	ctx.Fill(dst, style.rect(caretBlock(row, posX, glyphW, ctx.LineH(face)), glyphW), ctx.Color(core.Accent))
+	ctx.Fill(dst, style.rect(caretBlock(row, posX, glyphW, ctx.LineH(face)), glyphW, ctx.Sizes.CaretW), ctx.Color(core.Accent))
 	if style.glyph {
 		ctx.TextMid(dst, face, glyph, posX, row, ctx.Color(core.AccentText))
 	}

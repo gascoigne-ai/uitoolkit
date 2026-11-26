@@ -78,11 +78,11 @@ func listsGo(s *Showcase, _ *core.Ctx) Node {
 		Split(&state.split, listW, Grow(1), MinFirst(listMinW), MinSecond(detailMinW),
 			Scroll(&state.list, Bg(core.Sunken),
 				For(s.entries(), func(_ int, row entry) Node {
-					return ListRow(row.Selected, HOf(core.RowOf), PadX(core.Gutter), Gap(core.LooseGap), AlignItems(AlignCenter),
+					return ListRow(row.Selected, HOf(core.RowOf), PadXOf(core.GutterOf), GapOf(core.LooseGapOf), AlignItems(AlignCenter),
 						OnClick(row.Pick), Text(row.Name, Grow(1)), Text(row.Meta, Small(), Muted()))
 				}),
 			),
-			Scroll(&state.detail, Pad(core.Gutter), Gap(core.Gutter),
+			Scroll(&state.detail, PadOf(core.GutterOf), GapOf(core.GutterOf),
 				Text(s.detailTitle(), Bold()),
 				Text("Drag the divider to resize the panes, or a column edge in the table.", Small(), Muted(), Ellipsis()),
 				Table(s.detailTable()),

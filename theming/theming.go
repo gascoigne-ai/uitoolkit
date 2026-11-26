@@ -7,12 +7,12 @@
 // to Prefs; the toolkit's dark and light palettes are Builtins.
 // To see it in a window: go run ./examples/showcase.
 //
-// Themes are data, per control: colors, radii, gradients and outlines live
-// in embedded JSON theme files (themes/*.json), and an element names a
-// control style (core.ControlStyle) rather than a gradient, so the look
-// changes without touching a widget. The format is our own small JSON,
-// because it carries radii and gradients and its parser stays in the
-// standard library.
+// Themes are data: colors, per-control radii, gradients and outlines, and
+// optionally the size rules (core.Metrics). They live in JSON theme files
+// (the built-in ones embedded, themes/*.json), and an element names a control
+// style (core.ControlStyle) rather than a gradient, so the look changes
+// without touching a widget. The format is our own small JSON, because it
+// carries radii and gradients and its parser stays in the standard library.
 package theming
 
 import (

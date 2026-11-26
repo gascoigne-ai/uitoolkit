@@ -2,57 +2,22 @@ package core
 
 import "testing"
 
-// Each size keeps its pinned value (the golden scenes depend on it) and
-// equals its rule: a height is a base line plus padding on both sides, a
-// spacing is a whole number of Units, a bar is a class plus a step.
-func TestSizeConstantsFollowTheRules(t *testing.T) {
-	tests := []struct {
-		name      string
-		got, rule int
-		want      int
-		units     int // the step in Units, for spacings; 0 for the rest
-	}{
-		{"RowH", RowH, BaseLine + 2*(3*Unit), 29, 0},
-		{"CompactH", CompactH, BaseLine + 2*(2*Unit), 25, 0},
-		{"SlimH", SlimH, BaseLine + 2*(1*Unit), 21, 0},
-		{"LabelH", LabelH, BaseLine + 3*Unit, 23, 0},
-		{"NoteH", NoteH, BaseSmallLine + 2*(1*Unit), 19, 0},
-		{"TabLead", TabLead, StepHair, 2, 1},
-		{"EdgeW", EdgeW, StepHair, 2, 1},
-		{"CaretW", CaretW, StepHair, 2, 1},
-		{"NearGap", NearGap, StepNear, 4, 2},
-		{"ShadowOffset", ShadowOffset, StepNear, 4, 2},
-		{"TightGap", TightGap, StepTight, 6, 3},
-		{"TabGap", TabGap, StepTight, 6, 3},
-		{"RuleInset", RuleInset, StepTight, 6, 3},
-		{"EdgeGrab", EdgeGrab, StepTight, 6, 3},
-		{"LooseGap", LooseGap, StepLoose, 8, 4},
-		{"CellPad", CellPad, StepLoose, 8, 4},
-		{"LabelPad", LabelPad, StepLabel, 10, 5},
-		{"TabSepInset", TabSepInset, StepLabel, 10, 5},
-		{"Gutter", Gutter, StepGutter, 12, 6},
-		{"DialogPad", DialogPad, StepDialog, 16, 8},
-		{"ToolbarH", ToolbarH, RowH + 2*NearGap, 37, 0},
-		{"DialogToolbarH", DialogToolbarH, RowH + 2*TightGap, 41, 0},
-		{"TabBarH", TabBarH, RowH + 2*TightGap, 41, 0},
-		{"DialogTitleH", DialogTitleH, RowH + 2*LooseGap, 45, 0},
-		{"IconBtnW", IconBtnW, CompactH + 2*NearGap, 33, 0},
-		{"WordBtnW", WordBtnW, IconBtnW + Gutter, 45, 0},
-		{"CheckboxSize", CheckboxSize, BaseSmallLine, 15, 0},
-		{"DialogMargin", DialogMargin, 40, 40, 0},
-		{"DialogMaxH", DialogMaxH, 560, 560, 0},
+// Every size keeps the value it had before themes could set it: the golden
+// scenes and the layout dumps depend on each one.
+func TestDefaultSizesKeepTodaysValues(t *testing.T) {
+	want := Sizes{
+		Line: 17, SmallLine: 15,
+		Row: 29, Compact: 25, Slim: 21, Label: 23, Note: 19,
+		Toolbar: 37, TabBar: 41, DialogToolbar: 41, DialogTitle: 45,
+		IconBtnW: 33, WordBtnW: 45, Checkbox: 15,
+		Leading: 0,
+		Steps:   Steps{Hair: 2, Near: 4, Tight: 6, Loose: 8, Label: 10, Gutter: 12, Dialog: 16},
+		TabLead: 2, EdgeW: 2, CaretW: 2, NearGap: 4, ShadowOffset: 4,
+		TightGap: 6, TabGap: 6, RuleInset: 6, EdgeGrab: 6,
+		LooseGap: 8, CellPad: 8, LabelPad: 10, TabSepInset: 10, Gutter: 12, DialogPad: 16,
+		DialogW: 380, DialogButtonMinW: 80, DialogMargin: 40, DialogMaxH: 560,
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			if test.got != test.want {
-				t.Errorf("%s = %d, want %d, the pinned value (the golden scenes depend on it)", test.name, test.got, test.want)
-			}
-			if test.got != test.rule {
-				t.Errorf("%s = %d, its rule gives %d", test.name, test.got, test.rule)
-			}
-			if test.units > 0 && test.got != test.units*Unit {
-				t.Errorf("%s = %d, not step %d of Unit %d", test.name, test.got, test.units, Unit)
-			}
-		})
+	if got := DefaultSizes(); got != want {
+		t.Fatalf("DefaultSizes() =\n%+v, want\n%+v", got, want)
 	}
 }

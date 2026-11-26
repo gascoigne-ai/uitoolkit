@@ -35,12 +35,12 @@ func (s *Showcase) sampleSwitch() Node {
 
 func themingGo(s *Showcase, _ *core.Ctx) Node {
 	state := &s.widgets
-	return Scroll(&state.themingPage, Pad(core.Gutter), Gap(core.Gutter),
+	return Scroll(&state.themingPage, PadOf(core.GutterOf), GapOf(core.GutterOf),
 		Caption("Colors"),
 		For(swatchRows(), func(_ int, tokens []core.Token) Node {
-			return Row(Gap(core.LooseGap),
+			return Row(GapOf(core.LooseGapOf),
 				For(tokens, func(_ int, token core.Token) Node {
-					return Col(W(swatchW), Gap(core.NearGap),
+					return Col(W(swatchW), GapOf(core.NearGapOf),
 						Row(H(swatchH), Bg(token), Control("swatch")),
 						Text(string(token), Small(), Muted()),
 					)
@@ -48,7 +48,7 @@ func themingGo(s *Showcase, _ *core.Ctx) Node {
 			)
 		}),
 		Caption("Widgets"),
-		Row(HOf(core.RowOf), Gap(core.LooseGap), AlignItems(AlignCenter),
+		Row(HOf(core.RowOf), GapOf(core.LooseGapOf), AlignItems(AlignCenter),
 			Button("Button", HOf(core.RowOf)),
 			PrimaryButton("Primary", HOf(core.RowOf)),
 			LinkButton("Link", HOf(core.RowOf)),

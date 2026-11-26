@@ -11,7 +11,16 @@ const fieldPad = 10
 // FieldPad sets a field's inner padding, for fields inset in a box that
 // already has padding of its own, so text lines up with its neighbours.
 func FieldPad(pixels int) Option {
-	return func(element *El) { behaviorOf[*fieldB](element, "FieldPad").inset = pixels }
+	return func(element *El) {
+		field := behaviorOf[*fieldB](element, "FieldPad")
+		field.inset, field.insetOf = pixels, nil
+	}
+}
+
+// fieldPadOf is FieldPad for a padding that follows the context's Sizes. It
+// may be 0, unlike FieldPad, where 0 is the default.
+func fieldPadOf(pad func(sizes core.Sizes) int) Option {
+	return func(element *El) { behaviorOf[*fieldB](element, "FieldPad").insetOf = pad }
 }
 
 // fieldB is a single-line text input editing a TextField.
@@ -22,12 +31,16 @@ type fieldB struct {
 	segments    Styler
 	onEnter     func()
 	onTab       func(back bool)
-	inset       int // FieldPad, 0 for the default
+	inset       int                        // FieldPad, 0 for the default
+	insetOf     func(sizes core.Sizes) int // fieldPadOf; wins over inset while set
 }
 
 // textInset is the space between a field's edge and its text: fieldPad,
-// or what FieldPad set.
-func (b *fieldB) textInset() int {
+// or what FieldPad or fieldPadOf set.
+func (b *fieldB) textInset(sizes core.Sizes) int {
+	if b.insetOf != nil {
+		return b.insetOf(sizes)
+	}
 	if b.inset > 0 {
 		return b.inset
 	}
@@ -41,7 +54,7 @@ func (b *fieldB) KeepsTab() bool { return b.onTab != nil }
 
 func (b *fieldB) Update(element *El, ctx *core.Ctx) {
 	f, in, r := b.field, ctx.In, element.Rect()
-	at := func() int { return ctx.CursorAt(f.Display(), in.X-(r.X+b.textInset())+f.ScrollX) }
+	at := func() int { return ctx.CursorAt(f.Display(), in.X-(r.X+b.textInset(ctx.Sizes))+f.ScrollX) }
 	if in.Click {
 		f.Focused = r.Contains(in.X, in.Y)
 		if f.Focused {
@@ -79,13 +92,13 @@ func (b *fieldB) Update(element *El, ctx *core.Ctx) {
 		b.onTab(in.Shift)
 	}
 	f.Cursor = f.clamp(f.Cursor) // OnChange may have replaced the text
-	f.Reveal(ctx.Width(ctx.F.UI, string([]rune(f.Display())[:f.Cursor])), r.W-2*b.textInset())
+	f.Reveal(ctx.Width(ctx.F.UI, string([]rune(f.Display())[:f.Cursor])), r.W-2*b.textInset(ctx.Sizes))
 }
 
 func (b *fieldB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	f, r := b.field, element.Rect()
 	dst = ctx.Clip(dst, r)
-	x := r.X + b.textInset() - f.ScrollX
+	x := r.X + b.textInset(ctx.Sizes) - f.ScrollX
 	if lo, hi, ok := f.Selection(); ok {
 		runes := []rune(f.Display())
 		x0 := x + ctx.Width(ctx.F.UI, string(runes[:lo]))
@@ -101,11 +114,11 @@ func (b *fieldB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 		x += ctx.Width(ctx.F.UI, s.Text)
 	}
 	if f.Text == "" {
-		ctx.TextMid(dst, ctx.F.UI, b.placeholder, r.X+b.textInset(), r, ctx.Color(core.Muted))
+		ctx.TextMid(dst, ctx.F.UI, b.placeholder, r.X+b.textInset(ctx.Sizes), r, ctx.Color(core.Muted))
 	}
 	if f.Focused && ctx.CaretVisible() {
 		shown, cursor := []rune(f.Display()), f.clamp(f.Cursor)
-		cx := r.X + b.textInset() - f.ScrollX + ctx.Width(ctx.F.UI, string(shown[:cursor]))
+		cx := r.X + b.textInset(ctx.Sizes) - f.ScrollX + ctx.Width(ctx.F.UI, string(shown[:cursor]))
 		drawCaret(ctx, dst, ctx.F.UI, caretGlyph(shown, cursor), cx, r)
 	}
 }

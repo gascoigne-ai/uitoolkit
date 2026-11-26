@@ -20,7 +20,7 @@ Code comments and `architecture/toolkit.md` cite sections of this file by name. 
 ## Rules for changing the look
 
 - **The guidelines change with the look.** A change to a token, size, control style or widget look updates `docs/ui-guidelines.md` in the same commit. A behavior the code does not have is not written there; a known bug goes under its Known limitations until it is fixed.
-- **Tokens in widget code.** A widget takes colors from `core` tokens and sizes from `core/theme.go` and `ctx.Sizes`. A size no class or step fits is a new named constant in `core/theme.go` with its reason, and a row in the guidelines' Sizes tables.
+- **Tokens in widget code.** A widget takes colors from `core` tokens and sizes from `ctx.Sizes` through the roles (`HOf(core.RowOf)`, `PadOf(core.GutterOf)`). A size no class or role fits is a new row in the core size table (`core/sizes.go`) with its reason, and a row in the guidelines' Sizes tables.
 - **Corners through the theme.** A widget takes its radius from a control style (`view.Control`, `Ctx.Radius`), so the corner setting reaches it. A square fill in a rounded panel is a bug; round it with `RoundT`, `RoundB` or `RoundBL`.
 - **Both themes list the same controls and tokens** (`TestBuiltinThemesListTheSameControlsAndTokens`). A new token or control goes into `theming/themes/dark.json` and `light.json` together.
 - **Contrast is tested.** `theming/palette_test.go` holds the ratios: `TestThemesAreReadable` for text, `TestNonTextElementsAreVisible` for borders, rules, icons and row states, and `theming/highcontrast_test.go` for high contrast. A color change that breaks them is a change of these rules, agreed with the user, not of a test.

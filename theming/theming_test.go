@@ -201,11 +201,11 @@ func TestBaseLineIsTheDefaultFaceLineHeight(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := ctx.LineH(ctx.F.UI); got != core.BaseLine {
-		t.Errorf("UI face line height = %d, BaseLine = %d", got, core.BaseLine)
+	if got := ctx.LineH(ctx.F.UI); got != core.DefaultSizes().Line {
+		t.Errorf("UI face line height = %d, default line = %d", got, core.DefaultSizes().Line)
 	}
-	if got := ctx.LineH(ctx.F.Small); got != core.BaseSmallLine {
-		t.Errorf("small face line height = %d, BaseSmallLine = %d", got, core.BaseSmallLine)
+	if got := ctx.LineH(ctx.F.Small); got != core.DefaultSizes().SmallLine {
+		t.Errorf("small face line height = %d, default small line = %d", got, core.DefaultSizes().SmallLine)
 	}
 	if ctx.Sizes != core.DefaultSizes() {
 		t.Errorf("sizes of the default faces = %+v, DefaultSizes() = %+v", ctx.Sizes, core.DefaultSizes())

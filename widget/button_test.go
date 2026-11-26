@@ -156,7 +156,7 @@ func TestListRowLooksSelectedOrHoverable(t *testing.T) {
 	hasProps(t, ListRow(false, H(28)), "control=row", "hoverBg=hover", "h=28")
 }
 
-// A note is one line of small text in the given color, NoteH high, that
+// A note is one line of small text in the given color, noteH high, that
 // shortens with an ellipsis instead of wrapping.
 func TestNoteIsOneColoredLineOfSmallText(t *testing.T) {
 	note := Note("Port must be a number", core.Error)
@@ -178,8 +178,8 @@ func TestFormRowKeepsTheLabelColumnAligned(t *testing.T) {
 	long := FormRow("A much longer label", 160, Field(&longField, W(80)))
 	Layout(c, Col(short, long), 600, 100)
 	for _, row := range []*El{short, long} {
-		if row.Rect().H != core.RowH {
-			t.Errorf("row height = %d, want RowH %d", row.Rect().H, core.RowH)
+		if row.Rect().H != core.DefaultSizes().Row {
+			t.Errorf("row height = %d, want rowH %d", row.Rect().H, core.DefaultSizes().Row)
 		}
 		if row.Children()[0].Rect().W != 160 {
 			t.Errorf("label width = %d, want 160", row.Children()[0].Rect().W)
@@ -197,8 +197,8 @@ func TestCheckRowClicksAnywhere(t *testing.T) {
 	toggled := 0
 	row := CheckRow(true, OnClick(func() { toggled++ }), Text("Follow redirects"))
 	Layout(c, Row(row), 400, 40)
-	if row.Rect().H != core.RowH || len(row.Children()) != 2 {
-		t.Fatalf("row height %d with %d kids, want RowH and checkbox + label", row.Rect().H, len(row.Children()))
+	if row.Rect().H != core.DefaultSizes().Row || len(row.Children()) != 2 {
+		t.Fatalf("row height %d with %d kids, want rowH and checkbox + label", row.Rect().H, len(row.Children()))
 	}
 	rect := row.Rect()
 	click(c, rect.X+rect.W-2, rect.Y+rect.H/2)
@@ -211,11 +211,11 @@ func TestCheckRowClicksAnywhere(t *testing.T) {
 // A toolbar is a row of controls, vertically centered, with a line under it.
 func TestToolbarCentersItsControlsAndLinesTheBottom(t *testing.T) {
 	c := testCtx(t)
-	bar := Toolbar(Button("Save", W(56), H(core.CompactH)))
+	bar := Toolbar(Button("Save", W(56), HOf(core.CompactOf)))
 	Layout(c, Col(W(400), H(100), bar), 400, 100)
 	hasProps(t, bar, "borderB=border")
-	if bar.Rect().H != core.ToolbarH {
-		t.Errorf("height = %d, want ToolbarH %d", bar.Rect().H, core.ToolbarH)
+	if bar.Rect().H != core.DefaultSizes().Toolbar {
+		t.Errorf("height = %d, want toolbarH %d", bar.Rect().H, core.DefaultSizes().Toolbar)
 	}
 	button, box := bar.Children()[0].Rect(), bar.Rect()
 	if want := box.Y + (box.H-button.H)/2; button.Y != want {
@@ -231,11 +231,11 @@ func TestTabBarLeavesRoomAboveTheTabs(t *testing.T) {
 	bar := TabBar(tabs)
 	Layout(c, Col(W(400), H(100), bar), 400, 100)
 	hasProps(t, bar, "borderB=border")
-	if bar.Rect().H != core.TabBarH {
-		t.Errorf("height = %d, want TabBarH %d", bar.Rect().H, core.TabBarH)
+	if bar.Rect().H != core.DefaultSizes().TabBar {
+		t.Errorf("height = %d, want tabBarH %d", bar.Rect().H, core.DefaultSizes().TabBar)
 	}
-	if tabs.Rect().Y != bar.Rect().Y+core.TabGap {
-		t.Errorf("tabs start at %d, want %d below the top", tabs.Rect().Y-bar.Rect().Y, core.TabGap)
+	if tabs.Rect().Y != bar.Rect().Y+core.DefaultSizes().TabGap {
+		t.Errorf("tabs start at %d, want %d below the top", tabs.Rect().Y-bar.Rect().Y, core.DefaultSizes().TabGap)
 	}
 }
 

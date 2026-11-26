@@ -40,7 +40,9 @@ func JustifyContent(justify Justify) Option {
 
 // MinW, MaxW, MinH and MaxH bound an element's size, whatever its
 // content or its share of the free space would give.
-func MinW(pixels int) Option { return func(element *El) { element.minW = pixels } }
+func MinW(pixels int) Option {
+	return func(element *El) { element.minW = pixels; element.literal(slotMinW) }
+}
 
 // MaxW is the widest the element may be.
 func MaxW(pixels int) Option { return func(element *El) { element.maxW = pixels } }

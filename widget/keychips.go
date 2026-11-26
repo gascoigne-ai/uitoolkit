@@ -16,9 +16,9 @@ func KeyChips(text string, opts ...Option) *El {
 		keys = append(strings.Split(strings.TrimSuffix(text, "++"), "+"), "+")
 	}
 	return Row(With([]Item{
-		Gap(core.NearGap), AlignItems(AlignCenter),
+		GapOf(core.NearGapOf), AlignItems(AlignCenter),
 		For(keys, func(_ int, key string) Node {
-			return Row(Bg(core.Chip), Control("button"), PadX(core.NearGap), HOf(core.CompactOf),
+			return Row(Bg(core.Chip), Control("button"), PadXOf(core.NearGapOf), HOf(core.CompactOf),
 				Text(key, Small(), Color(core.ChipText)))
 		}),
 	}, opts)...)

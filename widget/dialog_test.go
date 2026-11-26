@@ -42,15 +42,15 @@ func TestResizableDialogKeepsTheDialogLook(t *testing.T) {
 	hasProps(t, panel.Children()[1], "modal=true", "control=menu")
 }
 
-// The title bar is DialogTitleH high: the title, the caller's controls, and
+// The title bar is dialogTitleH high: the title, the caller's controls, and
 // a close button that dismisses the dialog.
 func TestDialogTitleHasTheCloseButton(t *testing.T) {
 	c := testCtx(t)
 	closed := 0
 	bar := DialogTitle("Log", Spacer(Grow(1)), OnDismiss(func() { closed++ }))
 	Layout(c, Row(W(600), H(100), bar), 600, 100)
-	if bar.Rect().H != core.DialogTitleH {
-		t.Errorf("height = %d, want DialogTitleH %d", bar.Rect().H, core.DialogTitleH)
+	if bar.Rect().H != core.DefaultSizes().DialogTitle {
+		t.Errorf("height = %d, want dialogTitleH %d", bar.Rect().H, core.DefaultSizes().DialogTitle)
 	}
 	closeButton := bar.Children()[len(bar.Children())-1].Rect()
 	click(c, closeButton.X+closeButton.W/2, closeButton.Y+closeButton.H/2)
@@ -85,8 +85,8 @@ func TestDialogToolbarIsARowOfControlsUnderTheTitle(t *testing.T) {
 	c := testCtx(t)
 	bar := DialogToolbar(Spacer(), Row(W(30)))
 	Layout(c, Col(W(400), H(100), bar), 400, 100)
-	if bar.Rect().H != core.DialogToolbarH {
-		t.Fatalf("height = %d, want DialogToolbarH %d", bar.Rect().H, core.DialogToolbarH)
+	if bar.Rect().H != core.DefaultSizes().DialogToolbar {
+		t.Fatalf("height = %d, want dialogToolbarH %d", bar.Rect().H, core.DefaultSizes().DialogToolbar)
 	}
 	kids := bar.Children()
 	if kids[0].Rect().X != 16 || kids[1].Rect().X+kids[1].Rect().W != 400-16 {
@@ -166,8 +166,8 @@ func TestAMessageDialogHasATitleBarWhoseCloseButtonDismissesIt(t *testing.T) {
 	Layout(c, root, 800, 600)
 	panel := frag.Children()[1]
 	bar := panel.Children()[0]
-	if bar.Rect().H != core.DialogTitleH || bar.Rect().Y != panel.Rect().Y {
-		t.Fatalf("title bar %+v in panel %+v, want it flush at the top, DialogTitleH high", bar.Rect(), panel.Rect())
+	if bar.Rect().H != core.DefaultSizes().DialogTitle || bar.Rect().Y != panel.Rect().Y {
+		t.Fatalf("title bar %+v in panel %+v, want it flush at the top, dialogTitleH high", bar.Rect(), panel.Rect())
 	}
 	cb := bar.Children()[len(bar.Children())-1].Rect()
 	click(c, cb.X+cb.W/2, cb.Y+cb.H/2)

@@ -69,14 +69,14 @@ func facesOf(th Theme, sources fontSources, scale float64) Fonts {
 	}
 }
 
-// sizesOf measures the line heights of the theme's UI and small faces at
+// sizesOf applies the theme's Metrics to the line heights of its UI and small faces, measured at
 // scale 1, as LineH does, so the sizes never depend on the device scale.
 func sizesOf(th Theme, regular render.FontSource) Sizes {
 	line := func(size float64) int {
 		metrics := regular.Metrics(size)
 		return int(metrics.Ascent + metrics.Descent + 0.5)
 	}
-	return SizesFor(line(th.FontSize), line(th.SmallSize))
+	return SizesFor(line(th.FontSize), line(th.SmallSize), th.Metrics)
 }
 
 // FontChoice is the fonts picked for the interface and for code.

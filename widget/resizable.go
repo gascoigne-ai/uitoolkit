@@ -5,9 +5,6 @@ import (
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
-// edgeSlop is how far from the border, inside it, a press grabs the edge.
-const edgeSlop = core.EdgeGrab
-
 // edgeOut is how far outside the border a press still grabs the edge; the
 // element does not dismiss there (view.DismissMargin).
 const edgeOut = 4
@@ -45,12 +42,12 @@ func Resizable(state *ResizeState, minW, minH, maxW, maxH int, items ...Item) *E
 // edges reports which edges of r the point is on, if it is on the border.
 // The border reaches edgeOut outside r, where a modal element does not
 // dismiss either.
-func edges(rect core.Rect, posX, posY int) (left, right, top, bottom bool) {
+func edges(rect core.Rect, posX, posY, grab int) (left, right, top, bottom bool) {
 	if posX < rect.X-edgeOut || posX >= rect.X+rect.W+edgeOut || posY < rect.Y-edgeOut || posY >= rect.Y+rect.H+edgeOut {
 		return
 	}
-	left, right = posX < rect.X+edgeSlop, posX >= rect.X+rect.W-edgeSlop
-	top, bottom = posY < rect.Y+edgeSlop, posY >= rect.Y+rect.H-edgeSlop
+	left, right = posX < rect.X+grab, posX >= rect.X+rect.W-grab
+	top, bottom = posY < rect.Y+grab, posY >= rect.Y+rect.H-grab
 	return
 }
 
@@ -93,7 +90,7 @@ func (b *resizableB) Update(element *El, ctx *core.Ctx) {
 		ctx.Fired++ // the app builds the dialog at its state's size
 		return
 	}
-	left, right, top, bottom := edges(element.Rect(), in.X, in.Y)
+	left, right, top, bottom := edges(element.Rect(), in.X, in.Y, ctx.Sizes.EdgeGrab)
 	if !(left || right || top || bottom) {
 		return
 	}
