@@ -107,7 +107,8 @@ the draw calls are checked against `rendertest.Canvas`.
   to a logical rect (device pixels, cut to the canvas). No file of `core`, a test included, imports
   Ebitengine or `ebitenrender` (`TestCoreImportsNoEbiten`); its tests use a `testDevice` built on
   `render/text` and `rendertest`.
-- **Theme and tokens**: the look, the tokens and the theme pipeline are in `style.md`.
+- **Theme and tokens**: the look, the tokens and the theme pipeline are in `docs/ui-guidelines.md`
+  (Sizes, Color roles, Theming pipeline); the contributor rules for changing them in `style.md`.
 - **Input.** `Sampler.Sample` turns a `render.InputState` into the frame's `Input` and counts
   clicks (a renderer's input, `ebitenrender.ReadInput`, goes in as the `render.InputState`). The pure `inputFrom` derives
   presses, shortcuts and edit keys with their repeat; `modifiedEdit` is the per-platform table that
@@ -223,7 +224,7 @@ rules). `examples/showcase` uses the exported API only.
 - **Mistakes fail loudly.** A component option on the wrong kind of element panics, naming the
   option and the element's control (`behaviorOf`). A template error names the file and line,
   suggests the nearest name and lists the valid ones.
-- **Theme pipeline**: in `style.md`, Theming pipeline. `core`'s tests build a small `testTheme`,
+- **Theme pipeline**: in `docs/ui-guidelines.md`, Theming pipeline. `core`'s tests build a small `testTheme`,
   since `theming` imports `core` and never the reverse.
 - **Templates** (`markup`; format and why in its package doc). The app writes each view as a
   template in a `const` at the end of its Go file, parsed once with `markup.Must`. A template has
@@ -273,8 +274,8 @@ Each is also said in the doc comment of what breaks the rule; a new exception ad
   tab strips (`ScrollTabs`) use it too.
 - **Tooltips.** `view.Tooltip(text)` on any element; `view.Draw` records the innermost hovered tip
   in `Ctx.TipText`, and `widget.TooltipLayer`, mounted last in the window's Stack, shows it after a
-  rest. While a tip waits the app keeps drawing (`TooltipState.Waiting`). Their look is in `style.md`.
-- **Icons** (look and sources: `style.md`, Icons). The SVG subset is in `svg.go`; `RegisterIcons(fs)`
+  rest. While a tip waits the app keeps drawing (`TooltipState.Waiting`). Their look is in `docs/ui-guidelines.md`, Widgets.
+- **Icons** (look and sources: `docs/ui-guidelines.md`, Icons). The SVG subset is in `svg.go`; `RegisterIcons(fs)`
   adds or replaces icons from a folder; one-color icons are white masks kept by the `core.Ctx` (`Ctx.Mask`, at most 512, dropped whole and
   released when full, and on `SetScale` and `SetTheme`) and tinted with `DrawMask`; icons with token
   paints are drawn as `render.Path`s every frame. The package keeps no GPU cache.

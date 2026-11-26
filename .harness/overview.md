@@ -37,3 +37,4 @@ No package of the root module imports Ebitengine: `core`, `view`, `widget`, `mar
 | a widget | `widget`: a composition of `view` elements, or a `view.Custom` behavior; options, tests, the package doc index and the markup tables (`CLAUDE.md`, API rules) |
 | a primitive (color, geometry, drawing call) | `core` |
 | a template attribute | `markup` (rule 9) |
+| the look (a token, size, control style, widget look) | the code, `docs/ui-guidelines.md` in the same commit, and the goldens (`style.md`) |
