@@ -1,0 +1,92 @@
+scrollB padL=12 padT=12 padR=12 padB=12 gap=12 grow=1 clip=true rect=0,0,844,684
+  textB text="COLORS" fg=muted small=true rect=12,12,820,14
+  flow gap=8 rect=12,38,820,46
+    flow w=96 gap=4 rect=12,38,96,46
+      flow h=28 bg=frame control=swatch rect=12,38,96,28
+      textB text="frame" fg=muted small=true rect=12,70,96,14
+    flow w=96 gap=4 rect=116,38,96,46
+      flow h=28 bg=bg control=swatch rect=116,38,96,28
+      textB text="bg" fg=muted small=true rect=116,70,96,14
+    flow w=96 gap=4 rect=220,38,96,46
+      flow h=28 bg=panel control=swatch rect=220,38,96,28
+      textB text="panel" fg=muted small=true rect=220,70,96,14
+    flow w=96 gap=4 rect=324,38,96,46
+      flow h=28 bg=sunken control=swatch rect=324,38,96,28
+      textB text="sunken" fg=muted small=true rect=324,70,96,14
+    flow w=96 gap=4 rect=428,38,96,46
+      flow h=28 bg=hover control=swatch rect=428,38,96,28
+      textB text="hover" fg=muted small=true rect=428,70,96,14
+    flow w=96 gap=4 rect=532,38,96,46
+      flow h=28 bg=selected control=swatch rect=532,38,96,28
+      textB text="selected" fg=muted small=true rect=532,70,96,14
+    flow w=96 gap=4 rect=636,38,96,46
+      flow h=28 bg=chip control=swatch rect=636,38,96,28
+      textB text="chip" fg=muted small=true rect=636,70,96,14
+    flow w=96 gap=4 rect=740,38,96,46
+      flow h=28 bg=track control=swatch rect=740,38,96,28
+      textB text="track" fg=muted small=true rect=740,70,96,14
+  flow gap=8 rect=12,96,820,46
+    flow w=96 gap=4 rect=12,96,96,46
+      flow h=28 bg=border control=swatch rect=12,96,96,28
+      textB text="border" fg=muted small=true rect=12,128,96,14
+    flow w=96 gap=4 rect=116,96,96,46
+      flow h=28 bg=border-strong control=swatch rect=116,96,96,28
+      textB text="border-strong" fg=muted small=true rect=116,128,96,14
+    flow w=96 gap=4 rect=220,96,96,46
+      flow h=28 bg=border-soft control=swatch rect=220,96,96,28
+      textB text="border-soft" fg=muted small=true rect=220,128,96,14
+    flow w=96 gap=4 rect=324,96,96,46
+      flow h=28 bg=rule control=swatch rect=324,96,96,28
+      textB text="rule" fg=muted small=true rect=324,128,96,14
+    flow w=96 gap=4 rect=428,96,96,46
+      flow h=28 bg=text control=swatch rect=428,96,96,28
+      textB text="text" fg=muted small=true rect=428,128,96,14
+    flow w=96 gap=4 rect=532,96,96,46
+      flow h=28 bg=muted control=swatch rect=532,96,96,28
+      textB text="muted" fg=muted small=true rect=532,128,96,14
+    flow w=96 gap=4 rect=636,96,96,46
+      flow h=28 bg=faint control=swatch rect=636,96,96,28
+      textB text="faint" fg=muted small=true rect=636,128,96,14
+    flow w=96 gap=4 rect=740,96,96,46
+      flow h=28 bg=accent control=swatch rect=740,96,96,28
+      textB text="accent" fg=muted small=true rect=740,128,96,14
+  flow gap=8 rect=12,154,820,46
+    flow w=96 gap=4 rect=12,154,96,46
+      flow h=28 bg=accent-line control=swatch rect=12,154,96,28
+      textB text="accent-line" fg=muted small=true rect=12,186,96,14
+    flow w=96 gap=4 rect=116,154,96,46
+      flow h=28 bg=accent-soft control=swatch rect=116,154,96,28
+      textB text="accent-soft" fg=muted small=true rect=116,186,96,14
+    flow w=96 gap=4 rect=220,154,96,46
+      flow h=28 bg=ok control=swatch rect=220,154,96,28
+      textB text="ok" fg=muted small=true rect=220,186,96,14
+    flow w=96 gap=4 rect=324,154,96,46
+      flow h=28 bg=warn control=swatch rect=324,154,96,28
+      textB text="warn" fg=muted small=true rect=324,186,96,14
+    flow w=96 gap=4 rect=428,154,96,46
+      flow h=28 bg=error control=swatch rect=428,154,96,28
+      textB text="error" fg=muted small=true rect=428,186,96,14
+    flow w=96 gap=4 rect=532,154,96,46
+      flow h=28 bg=info control=swatch rect=532,154,96,28
+      textB text="info" fg=muted small=true rect=532,186,96,14
+    flow w=96 gap=4 rect=636,154,96,46
+      flow h=28 bg=selection control=swatch rect=636,154,96,28
+      textB text="selection" fg=muted small=true rect=636,186,96,14
+    flow w=96 gap=4 rect=740,154,96,46
+      flow h=28 bg=find-match control=swatch rect=740,154,96,28
+      textB text="find-match" fg=muted small=true rect=740,186,96,14
+  textB text="WIDGETS" fg=muted small=true rect=12,212,820,14
+  flow h=28 gap=8 alignItems=2 rect=12,238,820,28
+    flow h=28 padL=10 padR=10 bg=sunken control=button lighten=true rect=12,238,61,28
+      textB text="Button" grow=1 fg=chip-text ellipsis=true center=true rect=22,238,41,28
+    flow h=28 padL=10 padR=10 bg=accent control=primary lighten=true rect=81,238,69,28
+      textB text="Primary" grow=1 fg=accent-text ellipsis=true center=true rect=91,238,49,28
+    flow h=28 padL=8 padR=8 hoverBg=hover rect=158,238,42,28
+      textB text="Link" fg=accent-line center=true rect=166,238,26,28
+    checkB onChange=true rect=208,245,14,14
+    switchB onChange=true rect=230,243,32,18
+    fieldB w=160 h=28 bg=sunken control=field rect=270,238,160,28
+    textB text="Muted text" fg=muted rect=438,244,66,16
+  textB text="LIVE THEME (JSON)" fg=muted small=true rect=12,278,820,14
+  textB text="A theme file laid over the chosen theme, for example {\"colors\": {\"accent\": \"#7ab8ff\"}}" fg=muted small=true ellipsis=true rect=12,304,820,14
+  areaB h=150 bg=sunken control=field onChange=true rect=12,330,820,150

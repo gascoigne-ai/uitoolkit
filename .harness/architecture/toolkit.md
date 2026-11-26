@@ -313,6 +313,35 @@ Each is also said in the doc comment of what breaks the rule; a new exception ad
   each row's start column, so drawing, the caret, selection, matches, clicks, wrapping and the
   horizontal extent all count it the same way. The text keeps the real tab (display only).
 
+## examples/showcase: every widget in one window
+
+`go run ./examples/showcase -renderer=ebiten`. F3 shows the frame time and `core.DrawStats`. It has
+two packages.
+
+- **`sections`** is the whole UI and imports no renderer (`TestSectionsImportNoEbiten`), so it runs
+  on a fake device. `Showcase` is the state: indexes into the tables `Sections`, `Forms` and
+  `ScaleSteps`, the theming preferences, the live theme text, and one struct of named widget states
+  that outlives a section switch. Nothing is saved. `Select` closes the popup menu and the dialog,
+  since the menu lives in `core.Ctx` and would cover the next section.
+- **Two forms.** Each `Sections` row builds its page in Go and from a markup template, and the Form
+  control switches. `TestGoAndMarkupFormsDumpAlike` compares dump and painted ops. Widgets with no
+  markup element (switch, disabled switch, paragraph) are `<slot>` nodes, listed in that test.
+  A popup menu is opened in Go (`widget.OpenMenu`); both forms can show it.
+- **Live theme.** The editor's text is a theme file laid over the chosen theme, after contrast.
+  A text that cannot be read, or is over 64 KiB, shows the error and keeps the theme in effect;
+  a change of theme or contrast then shows the new theme without the edit. Parsing is
+  `theming.ParseTheme`, which has its fuzz target.
+- **Renderers.** `main` holds the `renderers` table: a name and how to open a backend (device,
+  input, window loop, golden tolerance). `wgpu` says it is not built. `host` is the `render.Host`:
+  the canvas is the window in device pixels and the context's scale is the display factor times the
+  chosen step.
+- **Pinned output.** `sections/testdata/dump` holds a `view.Dump` per section and
+  `testdata/golden` the screenshots (`go test ./examples/showcase/... -update` rewrites both; look at
+  every changed PNG). Goldens are every section in each of its poses in the dark theme, theming in
+  light and high contrast, and typography on a scale-2 display; Ebitengine's tolerance is zero.
+  They need the run loop, so the package has its own sandboxed `TestMain`. A failing shot writes
+  `testdata/failed/` (ignored by git).
+
 ## Modules and releases
 
 The repo holds three modules; `go.work` (committed, for development only: consumers ignore it) joins them.

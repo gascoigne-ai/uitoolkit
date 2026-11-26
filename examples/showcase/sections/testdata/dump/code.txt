@@ -1,0 +1,8 @@
+flow grow=1 rect=0,0,844,684
+  flow h=36 padL=12 padR=12 gap=6 borderB=border alignItems=2 rect=0,0,844,36
+    textB text="3522 lines" fg=muted rect=12,10,65,16
+    plain grow=1 rect=83,18,623,0
+    flow h=28 gap=8 alignItems=2 onClick=true rect=712,4,120,28
+      checkB rect=712,11,14,14
+      textB text="Wrap long lines" rect=734,10,98,16
+  codeB grow=1 bg=sunken rect=0,36,844,648

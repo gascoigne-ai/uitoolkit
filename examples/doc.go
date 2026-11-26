@@ -7,5 +7,6 @@
 // inputs, Example_markupView, Example_markupParse and
 // Example_markupParseErrors show templates, Example_theming and
 // Example_themeColor show themes. Package hello is a small program with
-// a window: go run ./examples/hello.
+// a window: go run ./examples/hello. Command showcase shows every widget,
+// built in Go and from markup: go run ./examples/showcase.
 package examples

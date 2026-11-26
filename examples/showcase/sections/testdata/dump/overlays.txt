@@ -1,0 +1,19 @@
+scrollB padL=12 padT=12 padR=12 padB=12 gap=12 grow=1 clip=true rect=0,0,844,684
+  textB text="POPUP MENUS" fg=muted small=true rect=12,12,820,14
+  flow h=28 gap=8 rect=12,38,820,28
+    flow padL=10 padR=10 minW=140 bg=accent control=primary shrink=true lighten=true onClick=true rect=12,38,140,28
+      textB text="Open menu" grow=1 fg=accent-text ellipsis=true center=true rect=22,38,120,28
+    textB text="Last pick: nothing yet" fg=muted rect=160,38,133,28
+  flow h=120 bg=sunken control=table onRightClick=true rect=12,78,820,120
+    textB text="Right-click here for a menu" grow=1 fg=muted center=true rect=12,78,820,120
+  textB text="TOOLTIPS" fg=muted small=true rect=12,210,820,14
+  flow h=28 gap=8 rect=12,236,820,28
+    flow padL=10 padR=10 minW=140 bg=sunken control=button tip=A tooltip shows after the pointer rests shrink=true lighten=true rect=12,236,140,28
+      textB text="Hover me" grow=1 fg=chip-text ellipsis=true center=true rect=22,236,120,28
+    flow w=32 bg=sunken control=icon-button tip=Settings (Ctrl+,) lighten=true rect=160,236,32,28
+      iconB grow=1 icon=gear rect=160,236,32,28
+  textB text="MODAL DIALOG" fg=muted small=true rect=12,276,820,14
+  flow h=28 gap=8 rect=12,302,820,28
+    flow padL=10 padR=10 minW=140 bg=sunken control=button shrink=true lighten=true onClick=true rect=12,302,140,28
+      textB text="Open dialog" grow=1 fg=chip-text ellipsis=true center=true rect=22,302,120,28
+    textB text="Last answer: not asked yet" fg=muted rect=160,302,167,28

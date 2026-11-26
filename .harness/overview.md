@@ -13,7 +13,7 @@
 | `desktop/*` | OS probes: display scale, key repeat, file chooser, system info, fonts |
 | `render`, `render/text`, `render/rendertest` | the renderer contract, a GPU-free font measurer, a recording fake |
 | `renderer/ebiten` | the Ebitengine renderer, its own module (package `ebitenrender`) |
-| `examples` | tested examples and the `hello` window, its own module |
+| `examples` | tested examples, the `hello` window and the widget `showcase`, its own module |
 
 ```mermaid
 flowchart LR
@@ -28,7 +28,7 @@ flowchart LR
 
 ## Direction
 
-No package of the root module imports Ebitengine: `core`, `view`, `widget`, `markup` and `engine` draw through `render`, and the Ebitengine renderer is the separate module `renderer/ebiten`. The queue in `tasks/` continues with a showcase and a wgpu renderer (own FFI, no CGO) that can be embedded in another wgpu program. Order and reasons are in the task files.
+No package of the root module imports Ebitengine: `core`, `view`, `widget`, `markup` and `engine` draw through `render`, and the Ebitengine renderer is the separate module `renderer/ebiten`. The queue in `tasks/` continues with a wgpu renderer (own FFI, no CGO) that can be embedded in another wgpu program. Order and reasons are in the task files.
 
 ## Where to change what
 

@@ -1,0 +1,30 @@
+scrollB padL=12 padT=12 padR=12 padB=12 gap=12 grow=1 clip=true rect=0,0,844,684
+  textB text="CHECKBOXES" fg=muted small=true rect=12,12,820,14
+  flow h=28 gap=8 alignItems=2 onClick=true rect=12,38,820,28
+    checkB rect=12,45,14,14
+    textB text="Wrap long lines" rect=34,44,98,16
+  flow h=28 gap=8 alignItems=2 onClick=true rect=12,78,820,28
+    checkB rect=12,85,14,14
+    textB text="Show hidden files" rect=34,84,111,16
+  flow h=28 gap=8 alignItems=2 rect=12,118,820,28
+    checkB onChange=true rect=12,125,14,14
+    textB text="A checkbox on its own" rect=34,124,140,16
+  textB text="SWITCHES" fg=muted small=true rect=12,158,820,14
+  flow h=28 gap=8 alignItems=2 rect=12,184,820,28
+    switchB onChange=true rect=12,189,32,18
+    textB text="Save automatically" rect=52,190,119,16
+  flow h=28 gap=8 alignItems=2 rect=12,224,820,28
+    switchB onChange=true rect=12,229,32,18
+    textB text="Work offline" rect=52,230,75,16
+  flow h=28 gap=8 alignItems=2 rect=12,264,820,28
+    switchB rect=12,269,32,18
+    textB text="Disabled switch" rect=52,270,99,16
+  textB text="SLIDERS" fg=muted small=true rect=12,304,820,14
+  flow h=28 gap=12 rect=12,330,820,28
+    textB text="Volume" w=90 rect=12,330,90,28
+    sliderB w=320 h=24 rect=114,332,320,24
+    textB text="65%" w=60 rect=446,330,60,28
+  flow h=28 gap=12 rect=12,370,820,28
+    textB text="Zoom" w=90 rect=12,370,90,28
+    sliderB w=320 h=24 rect=114,372,320,24
+    textB text="100%" w=60 rect=446,370,60,28

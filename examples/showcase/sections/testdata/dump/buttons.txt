@@ -1,0 +1,39 @@
+scrollB padL=12 padT=12 padR=12 padB=12 gap=12 grow=1 clip=true rect=0,0,844,684
+  textB text="BUTTONS" fg=muted small=true rect=12,12,820,14
+  flow h=28 gap=8 rect=12,38,820,28
+    flow padL=10 padR=10 minW=96 bg=sunken control=button shrink=true lighten=true onClick=true rect=12,38,96,28
+      textB text="Button" grow=1 fg=chip-text ellipsis=true center=true rect=22,38,76,28
+    flow padL=10 padR=10 minW=96 bg=accent control=primary shrink=true lighten=true onClick=true rect=116,38,96,28
+      textB text="Primary" grow=1 fg=accent-text ellipsis=true center=true rect=126,38,76,28
+    flow padL=8 padR=8 hoverBg=hover onClick=true rect=220,38,85,28
+      textB text="Link button" fg=accent-line center=true rect=228,38,69,28
+    flow w=32 bg=sunken control=icon-button tip=Add lighten=true onClick=true rect=313,38,32,28
+      iconB grow=1 icon=plus rect=313,38,32,28
+    flow w=32 bg=sunken control=icon-button tip=Delete lighten=true onClick=true rect=353,38,32,28
+      iconB grow=1 icon=trash rect=353,38,32,28
+  textB text="Clicked 0 times" fg=muted rect=12,78,820,16
+  textB text="SEGMENTED CHIPS" fg=muted small=true rect=12,106,820,14
+  flow h=28 gap=6 rect=12,132,820,28
+    flow padL=10 padR=10 minW=80 bg=accent control=primary shrink=true lighten=true onClick=true rect=12,132,80,28
+      textB text="Small" grow=1 fg=accent-text ellipsis=true center=true rect=22,132,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=98,132,80,28
+      textB text="Medium" grow=1 fg=chip-text ellipsis=true center=true rect=108,132,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=184,132,80,28
+      textB text="Large" grow=1 fg=chip-text ellipsis=true center=true rect=194,132,60,28
+  flow h=24 gap=6 rect=12,172,820,24
+    flow w=40 bg=accent control=primary tip=Files lighten=true onClick=true rect=12,172,40,24
+      iconB grow=1 fg=accent-text icon=folder rect=12,172,40,24
+    flow w=40 bg=sunken control=button tip=History lighten=true onClick=true rect=58,172,40,24
+      iconB grow=1 fg=chip-text icon=history rect=58,172,40,24
+    flow w=40 bg=sunken control=button tip=Search lighten=true onClick=true rect=104,172,40,24
+      iconB grow=1 fg=chip-text icon=search rect=104,172,40,24
+  textB text="STATUS PILLS" fg=muted small=true rect=12,208,820,14
+  flow h=20 gap=8 rect=12,234,820,20
+    flow padL=10 padR=10 bg=ok-soft control=pill rect=12,234,61,20
+      textB text="200 OK" fg=ok small=true bold=true rect=22,234,41,20
+    flow padL=10 padR=10 bg=warn-soft control=pill rect=81,234,48,20
+      textB text="Slow" fg=warn small=true bold=true rect=91,234,28,20
+    flow padL=10 padR=10 bg=error-soft control=pill rect=137,234,55,20
+      textB text="Failed" fg=error small=true bold=true rect=147,234,35,20
+    flow padL=10 padR=10 bg=info-soft control=pill rect=200,234,44,20
+      textB text="Info" fg=info small=true bold=true rect=210,234,24,20
