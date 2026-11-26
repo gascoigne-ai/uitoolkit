@@ -38,6 +38,78 @@ func TestCodeViewVisibleFolds(t *testing.T) {
 	}
 }
 
+// textLine is a Line of one unstyled span.
+func textLine(text string) Line { return Line{Spans: []Span{{Text: text}}} }
+
+// indentOf counted only the leading spaces of the first span, so a
+// tab-indented body read as indent 0 and the fold stopped on it, leaving the
+// rest of the block and its closing line showing.
+func TestCodeViewFoldsTabIndentedBlockLikeSpaces(t *testing.T) {
+	for _, tt := range []struct{ name, step string }{
+		{"spaces", "    "},
+		{"tabs", "\t"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			ifLine := textLine(tt.step + "if ok {")
+			ifLine.Foldable = true
+			var view CodeView
+			view.SetLines([]Line{
+				textLine("func f() {"),
+				ifLine,
+				textLine(tt.step + tt.step + "work()"),
+				textLine(tt.step + "}"),
+				textLine("}"),
+			})
+			view.ToggleFold(1)
+			if got, want := view.Visible(), []int{0, 1, 4}; !reflect.DeepEqual(got, want) {
+				t.Fatalf("got %v, want %v", got, want)
+			}
+		})
+	}
+}
+
+// Indents that mix tabs and spaces compare by display column, not by count of
+// characters.
+func TestCodeViewFoldsMixedIndentBlock(t *testing.T) {
+	opener := textLine("  \tif {")
+	opener.Foldable = true
+	var view CodeView
+	view.SetLines([]Line{opener, textLine("\t\tx"), textLine("    }"), textLine("y")})
+	view.ToggleFold(0)
+	if got, want := view.Visible(), []int{0, 3}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %v, want %v", got, want)
+	}
+}
+
+func TestIndentOfCountsDisplayColumns(t *testing.T) {
+	tests := []struct {
+		name  string
+		spans []string
+		want  int
+	}{
+		{"no spans", nil, 0},
+		{"spaces", []string{"    x"}, 4},
+		{"tab", []string{"\tx"}, 4},
+		{"spaces then tab reach one stop", []string{"  \tx"}, 4},
+		{"tab then spaces", []string{"\t  x"}, 6},
+		{"spaces split across spans", []string{" ", "   ", "x"}, 4},
+		{"tabs split across spans", []string{"\t", "\tx"}, 8},
+		{"trailing blanks do not count", []string{"x  "}, 0},
+		{"whitespace only", []string{"\t"}, 4},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var line Line
+			for _, text := range tt.spans {
+				line.Spans = append(line.Spans, Span{Text: text})
+			}
+			if got := indentOf(line); got != tt.want {
+				t.Fatalf("got %d, want %d", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestCodeViewToggleTwiceUnfolds(t *testing.T) {
 	var v CodeView
 	v.SetLines(sampleLines())

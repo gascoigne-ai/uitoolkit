@@ -326,13 +326,20 @@ func (v *CodeView) Visible() []int {
 	return out
 }
 
-// indentOf counts the leading spaces of a line.
+// indentOf is the display column of a line's first non-blank rune, tabs
+// expanded by core.ColumnAfter across all spans, so tab-, space- and
+// mixed-indented blocks fold alike.
 func indentOf(line Line) int {
-	if len(line.Spans) == 0 {
-		return 0
+	col := 0
+	for _, span := range line.Spans {
+		for _, char := range span.Text {
+			if char != ' ' && char != '\t' {
+				return col
+			}
+			col = core.ColumnAfter(col, char)
+		}
 	}
-	t := line.Spans[0].Text
-	return len(t) - len(strings.TrimLeft(t, " "))
+	return col
 }
 
 // ScrollBy moves the view by dy pixels, keeping it inside the content of

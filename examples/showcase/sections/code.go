@@ -72,12 +72,10 @@ func demoFunc(number int) []Line {
 	}
 }
 
-// codeLine is one line indented by depth steps. The indent is spaces, not
-// tabs: CodeView finds the end of a foldable block by counting the leading
-// spaces of a line's first span.
+// codeLine is one line indented by depth steps.
 func codeLine(depth int, spans ...Span) Line {
 	if depth > 0 {
-		spans = append([]Span{{Text: strings.Repeat(" ", depth*core.TabStop), Style: core.Text}}, spans...)
+		spans = append([]Span{{Text: strings.Repeat("\t", depth), Style: core.Text}}, spans...)
 	}
 	return Line{Spans: spans, Depth: depth}
 }

@@ -316,7 +316,8 @@ Each is also said in the doc comment of what breaks the rule; a new exception ad
   exact advance so the caret, selection, matches and clicks stay on the text. A tab advances to
   the next stop of `core.TabStop` columns along its line (`core.ColumnAfter`); the wrap layout keeps
   each row's start column, so drawing, the caret, selection, matches, clicks, wrapping and the
-  horizontal extent all count it the same way. The text keeps the real tab (display only).
+  horizontal extent all count it the same way, and a fold's extent is measured in the same
+  tab-expanded columns. The text keeps the real tab (display only).
 
 ## examples/showcase: every widget in one window
 
