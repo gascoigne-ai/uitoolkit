@@ -26,6 +26,8 @@ func TestLiveThemeEdit(t *testing.T) {
 		{"unknown field", `{"colour": {}}`},
 		{"cut off", `{"colors": {`},
 		{"empty", ""},
+		{"trailing", `{"colors": {}}x`},
+		{"null", "null"},
 		{"too large", `{"name": "` + strings.Repeat("x", maxThemeJSON) + `"}`},
 		{"deeply nested", `{"colors": ` + strings.Repeat("[", 30000) + strings.Repeat("]", 30000) + `}`},
 		{"deeply nested gradient", `{"controls": {"a": {"gradient": ` + strings.Repeat("[", 30000) + strings.Repeat("]", 30000) + `}}}`},
@@ -67,14 +69,25 @@ func TestTypingInTheThemeEditorAppliesIt(t *testing.T) {
 		open(t, showcase, ctx, "theming")
 		showcase.Form = form
 		frame(t, showcase, ctx)
-		// At the start: theming.ParseTheme ignores whatever follows the first
-		// JSON value, so a character typed after it is not an error.
-		showcase.ThemeJSON.Focused, showcase.ThemeJSON.Cursor = true, 0
+		showcase.ThemeJSON.Focused, showcase.ThemeJSON.Cursor = true, len([]rune(showcase.ThemeJSON.Text))
 		ctx.In = core.Input{Typed: []rune("x")}
 		frame(t, showcase, ctx)
 		if showcase.ThemeErr == "" {
 			t.Errorf("form %d: a typed character that breaks the JSON set no error", form)
 		}
+	}
+}
+
+// An edit is laid over the chosen theme and keeps its corner choice.
+func TestThemeEditKeepsSquareCorners(t *testing.T) {
+	showcase, _, _ := newTestShowcase(t)
+	showcase.Prefs.Corners = "square"
+	showcase.retheme()
+	showcase.ThemeJSON.Text = `{"colors": {"bg": "#102030"}}`
+	showcase.ApplyThemeJSON()
+	theme := showcase.Theme()
+	if showcase.ThemeErr != "" || theme.Style("button").Radius != 0 {
+		t.Errorf("error %q, button radius %v, want square corners", showcase.ThemeErr, theme.Style("button").Radius)
 	}
 }
 

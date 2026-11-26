@@ -349,7 +349,8 @@ two packages.
 - **Live theme.** The editor's text is a theme file laid over the chosen theme, after contrast.
   A text that cannot be read, or is over 64 KiB, shows the error and keeps the theme in effect;
   a change of theme or contrast then shows the new theme without the edit. Parsing is
-  `theming.ParseTheme`, which has its fuzz target.
+  `theming.ParseTheme`, which has its fuzz target. Trailing data and `null` are errors, and an
+  edit keeps the corner choice.
 - **Renderers.** `main` holds the `renderers` table: a name and how to open a backend (device,
   input, window loop, golden tolerance). `wgpu` says it is not built. `host` is the `render.Host`:
   the canvas is the window in device pixels and the context's scale is the display factor times the

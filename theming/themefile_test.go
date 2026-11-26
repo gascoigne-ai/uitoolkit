@@ -152,6 +152,76 @@ func TestIconStrokeComesFromThemeFiles(t *testing.T) {
 	}
 }
 
+func TestParseThemeRejectsTrailingDataAndNull(t *testing.T) {
+	const trailing, notObject = "theme file: data after the theme", "theme file: not a JSON object"
+	dark := Dark()
+	tests := []struct{ text, want string }{
+		{`{"colors":{}}x`, trailing},
+		{`{} {}`, trailing},
+		{`{}{"name":"y"}`, trailing},
+		{`null`, notObject},
+		{` null `, notObject},
+		{`[]`, notObject},
+		{`"x"`, notObject},
+		{`1`, notObject},
+	}
+	for name, base := range map[string]*core.Theme{"no base": nil, "dark": &dark} {
+		for _, test := range tests {
+			if _, err := ParseTheme([]byte(test.text), base); err == nil || err.Error() != test.want {
+				t.Errorf("%s, %q: error %v, want %q", name, test.text, err, test.want)
+			}
+		}
+		for _, text := range []string{"{\"colors\":{}}\n  ", " \r\n\t{}", `{"colors": null}`} {
+			if _, err := ParseTheme([]byte(text), base); err != nil {
+				t.Errorf("%s, %q: %v", name, text, err)
+			}
+		}
+	}
+}
+
+func TestParseThemeKeepsASquareBase(t *testing.T) {
+	for _, scale := range []float64{0, 1.5} {
+		base := Dark()
+		base.RadiusScale = scale
+		th, err := ParseTheme([]byte(`{"colors":{}}`), &base)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if th.RadiusScale != scale || th.Style("button").Radius != base.Style("button").Radius {
+			t.Errorf("base scale %v: scale %v, button radius %v", scale, th.RadiusScale, th.Style("button").Radius)
+		}
+		if scale == 0 && th.Style("button").Radius != 0 {
+			t.Errorf("a square base rounds the button by %v", th.Style("button").Radius)
+		}
+	}
+	th, err := ParseTheme([]byte(`{}`), nil)
+	if err != nil || th.RadiusScale != 1 {
+		t.Errorf("no base: scale %v, error %v, want 1", th.RadiusScale, err)
+	}
+}
+
+func TestParseThemeBoundsIconStroke(t *testing.T) {
+	base := Dark()
+	base.IconStroke = 1.3
+	for _, value := range []string{"-1", "-0.5", "4.01", "1e30", "1e300"} {
+		const want = "theme file: iconStroke must be within 0 and 4"
+		if _, err := ParseTheme([]byte(`{"iconStroke":`+value+`}`), &base); err == nil || err.Error() != want {
+			t.Errorf("iconStroke %s: error %v, want %q", value, err, want)
+		}
+	}
+	for text, want := range map[string]float64{
+		`{"iconStroke":0.25}`: 0.25,
+		`{"iconStroke":1.4}`:  1.4,
+		`{"iconStroke":4}`:    4,
+		`{"iconStroke":0}`:    1.3,
+		`{}`:                  1.3,
+	} {
+		if th, err := ParseTheme([]byte(text), &base); err != nil || th.IconStroke != want {
+			t.Errorf("%s: iconStroke %v, error %v, want %v", text, th.IconStroke, err, want)
+		}
+	}
+}
+
 func TestParseThemeWithoutBaseHasDefaultSizes(t *testing.T) {
 	th, err := ParseTheme([]byte(`{"name": "t"}`), nil)
 	if err != nil {

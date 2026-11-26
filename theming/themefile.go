@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/gascoigne-ai/uitoolkit/core"
 	"image/color"
+	"io"
 	"log/slog"
 	"maps"
 	"slices"
@@ -29,6 +30,11 @@ import (
 // A file may leave out whatever a base theme already defines; colors and
 // controls are merged over it.
 
+// maxIconStroke is the largest iconStroke a theme file may state. Thin icons
+// are 0.8; above four times the drawn width the strokes of an icon merge into
+// a blob, and a huge value paints the icon solid or gives +Inf vertices.
+const maxIconStroke = 4
+
 type controlFile struct {
 	Radius   float64         `json:"radius"`
 	Gradient json.RawMessage `json:"gradient"`
@@ -45,7 +51,8 @@ type themeFile struct {
 	SmallSize float64 `json:"smallSize"`
 	MonoSize  float64 `json:"monoSize"`
 	// IconStroke multiplies the stroke width of every icon: 0.8 for thin
-	// icons, 1.3 for bold ones; absent or 0 keeps the base theme's.
+	// icons, 1.3 for bold ones; absent or 0 keeps the base theme's. The most
+	// is maxIconStroke.
 	IconStroke float64                `json:"iconStroke"`
 	Variables  map[string]string      `json:"variables"`
 	Colors     map[string]string      `json:"colors"`
@@ -65,14 +72,32 @@ func themeExtends(data []byte) (string, error) {
 	return f.Extends, nil
 }
 
-// ParseTheme reads a theme file over base (nil for none). Unknown fields
-// are errors, so a typo in a theme file is not silently ignored.
+// ParseTheme reads a theme file over base (nil for none). The text is one
+// JSON object, with nothing but white space around it: another top-level
+// value, null included, and any data after the object are errors. Unknown
+// fields are errors, so a typo in a theme file is not silently ignored. An
+// iconStroke outside 0 and maxIconStroke is an error.
+//
+// A base keeps its RadiusScale, 0 included: it is the user's corner choice,
+// and 0 is square corners, so reading an edit must not round them again.
+// Without a base the scale is 1.
 func ParseTheme(data []byte, base *core.Theme) (core.Theme, error) {
+	// Decoding null into a struct is no error, so the object is checked first.
+	if !bytes.HasPrefix(bytes.TrimLeft(data, " \t\r\n"), []byte("{")) {
+		return core.Theme{}, errors.New("theme file: not a JSON object")
+	}
 	var f themeFile
 	dec := json.NewDecoder(bytes.NewReader(data))
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&f); err != nil {
 		return core.Theme{}, fmt.Errorf("theme file: %w", err)
+	}
+	// Decode reads one value; only the end of the text may follow it.
+	if err := dec.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
+		return core.Theme{}, errors.New("theme file: data after the theme")
+	}
+	if f.IconStroke < 0 || f.IconStroke > maxIconStroke {
+		return core.Theme{}, fmt.Errorf("theme file: iconStroke must be within 0 and %d", maxIconStroke)
 	}
 	var th core.Theme
 	if base != nil {
@@ -83,9 +108,6 @@ func ParseTheme(data []byte, base *core.Theme) (core.Theme, error) {
 	}
 	if th.Controls == nil {
 		th.Controls = map[string]core.ControlStyle{}
-	}
-	if th.RadiusScale == 0 {
-		th.RadiusScale = 1
 	}
 	if f.Name != "" {
 		th.Name = f.Name
