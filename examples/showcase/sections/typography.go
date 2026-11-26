@@ -12,6 +12,7 @@ import (
 // Texts and sizes of the typography section.
 const (
 	faceLabelW = 110
+	proseMaxW  = 480 // a reading width: the page's whole width makes lines too long to follow
 	sample     = "Sphinx of black quartz, judge my vow. 0O 1lI {}[] ->"
 	prose      = "A paragraph is muted small text that breaks into lines at the width its parent gives it, " +
 		"so a description sits beside a control without a column count guessed in advance. " +
@@ -31,10 +32,8 @@ func dpiLines(ctx *core.Ctx) []string {
 	}
 }
 
-// proseNode takes the width of the page. It has no MaxW: a paragraph's
-// height is measured at the width its parent offers, not at its MaxW, so a
-// narrower one would run over what is under it.
-func proseNode() Node { return Paragraph(prose) }
+// proseNode wraps at a reading width, narrower than the page.
+func proseNode() Node { return Paragraph(prose, MaxW(proseMaxW)) }
 
 func typographyGo(s *Showcase, ctx *core.Ctx) Node {
 	face := func(label string, opts ...Option) Node {

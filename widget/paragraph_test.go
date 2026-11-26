@@ -28,6 +28,31 @@ func TestAParagraphWrapsToTheWidthItIsGiven(t *testing.T) {
 	}
 }
 
+// The height was measured at the offered width but the text wrapped at the
+// narrower MaxW, so the extra lines drew over the element below.
+func TestAParagraphWithMaxWIsAsTallAsItsLines(t *testing.T) {
+	for _, tt := range []struct {
+		name  string
+		bound Option
+	}{{"MaxW", MaxW(120)}, {"W", W(120)}} {
+		t.Run(tt.name, func(t *testing.T) {
+			c := testCtx(t)
+			paragraph, next := Paragraph(paragraphText, tt.bound), Text("next")
+			Layout(c, Col(AlignItems(AlignStart), paragraph, next), 2000, 400)
+			lines := len(wrapParagraph(c, c.F.Small, paragraphText, 120))
+			if lines < 2 {
+				t.Fatalf("%d lines at 120: the text must wrap", lines)
+			}
+			if got, want := paragraph.Rect().H, lines*c.LineH(c.F.Small); got != want {
+				t.Errorf("height %d, want %d (%d lines)", got, want, lines)
+			}
+			if bottom := paragraph.Rect().Y + paragraph.Rect().H; next.Rect().Y < bottom {
+				t.Errorf("next starts at %d, above the paragraph's end at %d", next.Rect().Y, bottom)
+			}
+		})
+	}
+}
+
 func TestAParagraphHoldsAllItsWords(t *testing.T) {
 	c := testCtx(t)
 	paragraph := Paragraph(paragraphText)

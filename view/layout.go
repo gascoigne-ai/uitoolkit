@@ -18,9 +18,9 @@ func (e *El) inner() core.Rect {
 }
 
 // size is the element's wanted size: its fixed size where set, else
-// what its behavior measures.
+// what its behavior measures, within its bounds.
 func (e *El) size(ctx *core.Ctx, maxW int) (w, h int) {
-	w, h = e.measure(ctx, maxW)
+	w, h = e.measure(ctx, e.measureW(maxW))
 	if e.w > 0 {
 		w = e.w
 	}
@@ -28,6 +28,17 @@ func (e *El) size(ctx *core.Ctx, maxW int) (w, h int) {
 		h = e.h
 	}
 	return e.clampSize(w, h)
+}
+
+// measureW is the width an element's content is measured at: its fixed W
+// where set, else the offered width bounded by MinW and MaxW, so content
+// that wraps is measured at the width it is laid out and drawn at.
+func (e *El) measureW(offered int) int {
+	if e.w > 0 {
+		return e.w
+	}
+	w, _ := e.clampSize(offered, 0)
+	return w
 }
 
 func (e *El) place(ctx *core.Ctx, bounds core.Rect) {

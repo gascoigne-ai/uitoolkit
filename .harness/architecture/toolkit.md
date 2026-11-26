@@ -184,7 +184,8 @@ state: no diffing and no reactive system. Elements and options are indexed in th
   (`Ctx.LayoutGen`, `Ctx.Laying`).
 - **Layout is a flexbox subset** (`flex.go`). When a row overflows, `Optional` children drop
   first, then `Shrink` children give up the rest, first to last, down to their minimum; a row that
-  fits lays out as if none had it (why explicit: the `Shrink` doc).
+  fits lays out as if none had it (why explicit: the `Shrink` doc). An element is measured at the
+  width it will have: its `W`, else the offered width within `MinW` and `MaxW`.
 - **Cursor.** Widgets ask for a shape in `Ctx.Cursor`, reset every frame and applied by the app.
   `Component.showGrab` asks for `core.CursorMove` while a row, tab or tree row is dragged, unless a
   resize shape was asked for.
