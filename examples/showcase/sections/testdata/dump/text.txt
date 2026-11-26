@@ -2,13 +2,13 @@ scrollB padL=12 padT=12 padR=12 padB=12 gap=12 grow=1 clip=true rect=0,0,844,684
   textB text="TEXT FIELDS" fg=muted small=true rect=12,12,820,14
   flow h=28 gap=12 rect=12,38,820,28
     textB text="Name" w=90 rect=12,38,90,28
-    fieldB w=320 bg=sunken control=field rect=114,38,320,28
+    fieldB w=320 bg=sunken control=field onRightClick=true rect=114,38,320,28
   flow h=28 gap=12 rect=12,78,820,28
     textB text="Password" w=90 rect=12,78,90,28
     fieldB w=320 bg=sunken control=field rect=114,78,320,28
   flow h=28 gap=12 rect=12,118,820,28
     textB text="Search" w=90 rect=12,118,90,28
-    fieldB w=320 bg=sunken control=field rect=114,118,320,28
+    fieldB w=320 bg=sunken control=field onRightClick=true rect=114,118,320,28
   textB text="TEXT AREA" fg=muted small=true rect=12,158,820,14
   areaB h=220 bg=sunken control=field rect=12,184,820,220
   textB text="A text area keeps Tab to indent; Escape and a click elsewhere leave it." fg=muted small=true rect=12,416,820,14

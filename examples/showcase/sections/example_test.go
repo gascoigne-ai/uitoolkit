@@ -16,6 +16,7 @@ func Example_sections() {
 	// Text input
 	// Toggles and sliders
 	// Lists and panes
+	// Layout and custom
 	// Menus and dialogs
 	// Code view
 	// Images and icons

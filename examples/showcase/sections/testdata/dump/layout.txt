@@ -1,0 +1,77 @@
+scrollB padL=12 padT=12 padR=12 padB=12 gap=12 grow=1 clip=true rect=0,0,844,684
+  textB text="STACK" fg=muted small=true rect=12,12,820,14
+  stack h=72 bg=sunken control=table rect=12,38,820,72
+    textB text="A stack layers its children" fg=muted center=true rect=12,38,820,72
+    flow h=20 padL=10 padR=10 floatTop=4 floatRight=4 bg=info-soft control=pill float=true rect=761,42,67,20
+      textB text="Floating" fg=info small=true bold=true rect=771,42,47,20
+  textB text="HORIZONTAL SCROLL" fg=muted small=true rect=12,122,820,14
+  hscrollB h=28 gap=6 clip=true rect=12,148,820,28
+    flow padL=10 padR=10 minW=80 bg=accent control=primary shrink=true lighten=true onClick=true rect=30,148,80,28
+      textB text="Tag 1" grow=1 fg=accent-text ellipsis=true center=true rect=40,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=116,148,80,28
+      textB text="Tag 2" grow=1 fg=chip-text ellipsis=true center=true rect=126,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=202,148,80,28
+      textB text="Tag 3" grow=1 fg=chip-text ellipsis=true center=true rect=212,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=288,148,80,28
+      textB text="Tag 4" grow=1 fg=chip-text ellipsis=true center=true rect=298,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=374,148,80,28
+      textB text="Tag 5" grow=1 fg=chip-text ellipsis=true center=true rect=384,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=460,148,80,28
+      textB text="Tag 6" grow=1 fg=chip-text ellipsis=true center=true rect=470,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=546,148,80,28
+      textB text="Tag 7" grow=1 fg=chip-text ellipsis=true center=true rect=556,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=632,148,80,28
+      textB text="Tag 8" grow=1 fg=chip-text ellipsis=true center=true rect=642,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=718,148,80,28
+      textB text="Tag 9" grow=1 fg=chip-text ellipsis=true center=true rect=728,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=804,148,80,28
+      textB text="Tag 10" grow=1 fg=chip-text ellipsis=true center=true rect=814,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=890,148,80,28
+      textB text="Tag 11" grow=1 fg=chip-text ellipsis=true center=true rect=900,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=976,148,80,28
+      textB text="Tag 12" grow=1 fg=chip-text ellipsis=true center=true rect=986,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=1062,148,80,28
+      textB text="Tag 13" grow=1 fg=chip-text ellipsis=true center=true rect=1072,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=1148,148,80,28
+      textB text="Tag 14" grow=1 fg=chip-text ellipsis=true center=true rect=1158,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=1234,148,80,28
+      textB text="Tag 15" grow=1 fg=chip-text ellipsis=true center=true rect=1244,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=1320,148,80,28
+      textB text="Tag 16" grow=1 fg=chip-text ellipsis=true center=true rect=1330,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=1406,148,80,28
+      textB text="Tag 17" grow=1 fg=chip-text ellipsis=true center=true rect=1416,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=1492,148,80,28
+      textB text="Tag 18" grow=1 fg=chip-text ellipsis=true center=true rect=1502,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=1578,148,80,28
+      textB text="Tag 19" grow=1 fg=chip-text ellipsis=true center=true rect=1588,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=1664,148,80,28
+      textB text="Tag 20" grow=1 fg=chip-text ellipsis=true center=true rect=1674,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=1750,148,80,28
+      textB text="Tag 21" grow=1 fg=chip-text ellipsis=true center=true rect=1760,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=1836,148,80,28
+      textB text="Tag 22" grow=1 fg=chip-text ellipsis=true center=true rect=1846,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=1922,148,80,28
+      textB text="Tag 23" grow=1 fg=chip-text ellipsis=true center=true rect=1932,148,60,28
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=2008,148,80,28
+      textB text="Tag 24" grow=1 fg=chip-text ellipsis=true center=true rect=2018,148,60,28
+  textB text="INSET RULES" fg=muted small=true rect=12,188,820,14
+  flow h=28 gap=8 alignItems=2 rect=12,214,820,28
+    textB text="Bold" bold=true rect=12,220,31,16
+    flow w=1 h=28 padT=6 padB=6 rect=51,214,1,28
+      plain w=1 bg=border rect=51,220,1,16
+    textB text="Italic" rect=60,220,32,16
+    flow w=1 h=28 padT=6 padB=6 rect=100,214,1,28
+      plain w=1 bg=border rect=100,220,1,16
+    textB text="Code" mono=true rect=109,220,31,15
+  textB text="LINES AND A CUSTOM ELEMENT" fg=muted small=true rect=12,254,820,14
+  flow gap=12 alignItems=1 rect=12,280,820,66
+    flow rect=12,280,198,66
+      textB text="Lines draws one text per line," h=22 fg=muted rect=12,280,198,22
+      textB text="so a short note keeps its breaks" h=22 fg=muted rect=12,302,198,22
+      textB text="without a paragraph." h=22 fg=muted rect=12,324,198,22
+    meterB meter=65 rect=222,280,120,32
+  textB text="RESIZABLE" fg=muted small=true rect=12,358,820,14
+  flow h=150 bg=sunken control=table alignItems=2 justify=1 rect=12,384,820,150
+    resizableB w=240 h=80 dismissMargin=4 bg=panel border=border justify=1 rect=302,419,240,80
+      textB text="240 × 80" center=true rect=302,444,240,16
+      textB text="Drag an edge" fg=muted small=true center=true rect=302,460,240,14

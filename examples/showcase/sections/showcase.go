@@ -4,8 +4,13 @@
 //
 // Each section is built twice, with the Go DSL and from a markup template,
 // and the Form control switches between the two. A template is in a const at
-// the end of its section's file. Widgets markup has no element for (switch,
-// disabled-switch, paragraph) are Go nodes put into the template with slot.
+// the end of its section's file. What markup has no element for (switch,
+// disabled switch, paragraph, key chips, a view.Custom element and a
+// Resizable outside a dialog) is a Go node put into the template with slot.
+//
+// Over a section lie at most one dialog, picked by an enum with a table of its
+// two forms, then the toasts and the popup menu. Toasts outlive a change of
+// section; the dialog and the menu do not.
 //
 // State is in memory only: nothing is saved.
 package sections
@@ -47,9 +52,9 @@ type Showcase struct {
 	themeChanged bool // lastGood is not on the context yet
 
 	widgets widgets
-	// dialog is the open dialog, nil for none. The open popup menu is the
-	// context's (core.Ctx.Menu).
-	dialog *widget.DialogState
+	// dialog is which dialog is open; there is at most one. The open popup
+	// menu is the context's (core.Ctx.Menu).
+	dialog dialogKind
 
 	now        func() time.Time
 	frameStart time.Time
@@ -81,7 +86,7 @@ func (s *Showcase) Select(ctx *core.Ctx, index int) {
 
 func (s *Showcase) closeLayers(ctx *core.Ctx) {
 	widget.CloseMenu(ctx)
-	s.dialog = nil
+	s.dismissDialog()
 }
 
 // SetForm picks how sections are built: an index into Forms.

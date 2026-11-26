@@ -42,9 +42,20 @@ type widgets struct {
 	// overlays
 	overlaysPage              widget.ScrollState
 	lastPick, lastAnswer      string
+	message                   widget.DialogState
 	confirm                   widget.TextField
-	dialogMove                view.MoveState
+	dialogMove                view.MoveState // reset each time a dialog opens
+	panelSearch               widget.TextField
+	panelScope                int
+	sized                     widget.ResizeState // zero is the default size
+	sizedBody                 widget.ScrollState
+	toasts                    widget.ToastStack
 	menuButton, tooltipAnchor *view.El // where the poses open the menu and rest the pointer
+
+	// layout
+	layoutPage, tagStrip widget.ScrollState
+	tag                  int
+	box                  widget.ResizeState // zero is the default size
 
 	// code
 	code     widget.CodeView
@@ -83,7 +94,7 @@ func newWidgets() widgets {
 		volume: 65, zoom: 100,
 
 		lastPick: "nothing yet", lastAnswer: "not asked yet",
-		confirm: widget.NewTextField(""),
+		confirm: widget.NewTextField(""), panelSearch: widget.NewTextField(""),
 
 		sample: widget.NewTextField("Sample text"), sampleChecked: true, sampleOn: true,
 	}

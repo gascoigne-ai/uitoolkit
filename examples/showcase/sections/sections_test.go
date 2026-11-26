@@ -8,7 +8,7 @@ import (
 	"github.com/gascoigne-ai/uitoolkit/view"
 )
 
-var wantSections = []string{"buttons", "text", "toggles", "lists", "overlays", "code", "images", "typography", "theming"}
+var wantSections = []string{"buttons", "text", "toggles", "lists", "layout", "overlays", "code", "images", "typography", "theming"}
 
 func TestSectionsTable(t *testing.T) {
 	var ids, labels []string

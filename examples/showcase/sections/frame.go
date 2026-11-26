@@ -27,6 +27,7 @@ func (s *Showcase) Update(ctx *core.Ctx, width, height int) error {
 		return err
 	}
 	ctx.Cursor = core.CursorDefault
+	s.widgets.toasts.Prune(s.now())
 	if ctx.In.Pressed(render.KeyF3) {
 		s.Overlay = !s.Overlay
 	}
@@ -34,7 +35,7 @@ func (s *Showcase) Update(ctx *core.Ctx, width, height int) error {
 		s.escape(ctx)
 	}
 	PopupMenuKeys(ctx, ctx.In)
-	root := s.View(ctx)
+	root := s.View(ctx, width, height)
 	Layout(ctx, root, width, height)
 	Update(ctx, root)
 	return s.syncTheme(ctx) // a handler may have changed the theme
@@ -46,13 +47,13 @@ func (s *Showcase) escape(ctx *core.Ctx) {
 		CloseMenu(ctx)
 		return
 	}
-	s.dialog = nil
+	s.dismissDialog()
 }
 
 // Draw paints one frame of width by height logical pixels on canvas.
 func (s *Showcase) Draw(ctx *core.Ctx, width, height int, canvas render.Canvas) {
 	s.beginFrame(ctx)
-	root := s.View(ctx)
+	root := s.View(ctx, width, height)
 	Layout(ctx, root, width, height)
 	Draw(ctx, root, canvas)
 }
@@ -72,8 +73,8 @@ func (s *Showcase) beginFrame(ctx *core.Ctx) {
 }
 
 // View is the whole window: the top bar over the nav and the chosen section,
-// then the layers over them.
-func (s *Showcase) View(ctx *core.Ctx) Node {
+// then the layers over them, in a window of width by height logical pixels.
+func (s *Showcase) View(ctx *core.Ctx, width, height int) Node {
 	return Stack(
 		Col(Bg(core.Bg),
 			s.topBar(),
@@ -83,7 +84,7 @@ func (s *Showcase) View(ctx *core.Ctx) Node {
 			),
 		),
 		If(s.Overlay, s.statsPanel()),
-		s.layers(ctx),
+		s.layers(ctx, width, height),
 		TooltipLayer(&s.widgets.tooltip),
 	)
 }
@@ -93,18 +94,22 @@ func (s *Showcase) SectionView(ctx *core.Ctx) Node {
 	return Forms[s.Form].section(Sections[s.Section])(s, ctx)
 }
 
-// layers are the dialog and the popup menu in the chosen form, each only
-// while it is open.
-func (s *Showcase) layers(ctx *core.Ctx) Node {
+// layers are the dialog, the toasts and the popup menu in the chosen form,
+// each only while there is one. The toasts place themselves in a window of
+// width by height, so the layers must be direct children of its Stack.
+func (s *Showcase) layers(ctx *core.Ctx, width, height int) Node {
 	form := Forms[s.Form]
-	var dialog, menu Node
-	if s.dialog != nil {
-		dialog = form.dialog(s, ctx)
+	var dialog, toasts, menu Node
+	if s.dialog != noDialog {
+		dialog = form.dialog(dialogViews[s.dialog])(s, ctx)
+	}
+	if len(s.widgets.toasts) > 0 {
+		toasts = form.toasts(s, ctx, width, height)
 	}
 	if MenuOpen(ctx) {
 		menu = form.menu(s, ctx)
 	}
-	return Frag(dialog, menu)
+	return Frag(dialog, toasts, menu)
 }
 
 // Nav lists the sections down the left side.

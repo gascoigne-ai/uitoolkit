@@ -62,10 +62,11 @@ var slotGaps = []struct {
 	source string
 	slots  []string
 }{
-	{"buttons", buttonsSource, nil},
+	{"buttons", buttonsSource, []string{"keys"}},
 	{"text", textSource, nil},
 	{"toggles", togglesSource, []string{"autosave", "disabled", "offline"}},
 	{"lists", listsSource, nil},
+	{"layout", layoutSource, []string{"meter", "resizable"}},
 	{"overlays", overlaysSource, nil},
 	{"code", codeSource, nil},
 	{"images", imagesSource, nil},
@@ -116,7 +117,7 @@ func TestGoAndMarkupFormsDumpAlike(t *testing.T) {
 	}
 }
 
-// The dialog and the popup menu are layers of the window, so their two forms
+// The dialogs, the toasts and the popup menu are layers of the window, so their two forms
 // are compared on their own.
 func TestGoAndMarkupLayersDumpAlike(t *testing.T) {
 	showcase, ctx, _ := newTestShowcase(t)
@@ -127,6 +128,10 @@ func TestGoAndMarkupLayersDumpAlike(t *testing.T) {
 	}{
 		{"menu", `"New file"`, func() { showcase.openMenu(ctx, 40, 60) }},
 		{"dialog", `"Delete project?"`, func() { showcase.openDialog() }},
+		{"panel", `"Preferences"`, showcase.openPanel},
+		{"resizable", "resizableB", showcase.openSized},
+		// last: closeLayers leaves the toasts, which would show in later rows
+		{"toasts", `"Export failed"`, func() { postBothToasts(showcase) }},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -135,7 +140,7 @@ func TestGoAndMarkupLayersDumpAlike(t *testing.T) {
 			var dumps []string
 			for form := range Forms {
 				showcase.Form = form
-				dumps = append(dumps, layoutDump(ctx, view.Stack(showcase.layers(ctx))))
+				dumps = append(dumps, layoutDump(ctx, view.Stack(showcase.layers(ctx, contentW, contentH))))
 			}
 			if len(dumps) != 2 || dumps[0] != dumps[1] || !strings.Contains(dumps[0], test.shows) {
 				t.Errorf("layers of the two forms differ or miss %s:\n%s", test.shows, strings.Join(dumps, "\n---\n"))

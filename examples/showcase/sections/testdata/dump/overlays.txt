@@ -17,3 +17,19 @@ scrollB padL=12 padT=12 padR=12 padB=12 gap=12 grow=1 clip=true rect=0,0,844,684
     flow padL=10 padR=10 minW=140 bg=sunken control=button shrink=true lighten=true onClick=true rect=12,302,140,28
       textB text="Open dialog" grow=1 fg=chip-text ellipsis=true center=true rect=22,302,120,28
     textB text="Last answer: not asked yet" fg=muted rect=160,302,167,28
+  textB text="DIALOG PARTS" fg=muted small=true rect=12,342,820,14
+  flow h=28 rect=12,368,820,28
+    flow padL=10 padR=10 minW=140 bg=sunken control=button shrink=true lighten=true onClick=true rect=12,368,140,28
+      textB text="Open preferences" grow=1 fg=chip-text ellipsis=true center=true rect=22,368,120,28
+  textB text="RESIZABLE DIALOG" fg=muted small=true rect=12,408,820,14
+  flow h=28 gap=8 rect=12,434,820,28
+    flow padL=10 padR=10 minW=140 bg=sunken control=button shrink=true lighten=true onClick=true rect=12,434,140,28
+      textB text="Open resizable" grow=1 fg=chip-text ellipsis=true center=true rect=22,434,120,28
+    textB text="Size: 480 × 320 (default)" fg=muted rect=160,434,154,28
+  textB text="TOASTS" fg=muted small=true rect=12,474,820,14
+  flow h=28 gap=8 rect=12,500,820,28
+    flow padL=10 padR=10 minW=140 bg=sunken control=button shrink=true lighten=true onClick=true rect=12,500,140,28
+      textB text="Info toast" grow=1 fg=chip-text ellipsis=true center=true rect=22,500,120,28
+    flow padL=10 padR=10 minW=140 bg=sunken control=button shrink=true lighten=true onClick=true rect=160,500,140,28
+      textB text="Error toast" grow=1 fg=chip-text ellipsis=true center=true rect=170,500,120,28
+    textB text="0 shown" fg=muted rect=308,500,52,28

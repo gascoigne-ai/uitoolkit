@@ -40,7 +40,7 @@ func TestSwitchingSectionsClosesPopupsAndDialog(t *testing.T) {
 	showcase.openDialog()
 	open(t, showcase, ctx, "buttons")
 	frame(t, showcase, ctx)
-	if widget.MenuOpen(ctx) || showcase.dialog != nil {
+	if widget.MenuOpen(ctx) || showcase.dialog != noDialog {
 		t.Errorf("menu open = %v, dialog = %v after switching, want neither", widget.MenuOpen(ctx), showcase.dialog)
 	}
 }

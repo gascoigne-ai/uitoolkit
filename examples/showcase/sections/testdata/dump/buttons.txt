@@ -37,3 +37,22 @@ scrollB padL=12 padT=12 padR=12 padB=12 gap=12 grow=1 clip=true rect=0,0,844,684
       textB text="Failed" fg=error small=true bold=true rect=147,234,35,20
     flow padL=10 padR=10 bg=info-soft control=pill rect=200,234,44,20
       textB text="Info" fg=info small=true bold=true rect=210,234,24,20
+  textB text="KEYBOARD KEYS" fg=muted small=true rect=12,266,820,14
+  flow h=24 gap=12 rect=12,292,820,24
+    flow gap=4 alignItems=2 rect=12,292,83,24
+      flow h=24 padL=4 padR=4 bg=chip control=button rect=12,292,27,24
+        textB text="Ctrl" fg=chip-text small=true rect=16,292,19,24
+      flow h=24 padL=4 padR=4 bg=chip control=button rect=43,292,32,24
+        textB text="Shift" fg=chip-text small=true rect=47,292,24,24
+      flow h=24 padL=4 padR=4 bg=chip control=button rect=79,292,16,24
+        textB text="P" fg=chip-text small=true rect=83,292,8,24
+    flow gap=4 alignItems=2 rect=107,292,43,24
+      flow h=24 padL=4 padR=4 bg=chip control=button rect=107,292,27,24
+        textB text="Ctrl" fg=chip-text small=true rect=111,292,19,24
+      flow h=24 padL=4 padR=4 bg=chip control=button rect=138,292,12,24
+        textB text="," fg=chip-text small=true rect=142,292,4,24
+    flow gap=4 alignItems=2 rect=162,292,46,24
+      flow h=24 padL=4 padR=4 bg=chip control=button rect=162,292,27,24
+        textB text="Ctrl" fg=chip-text small=true rect=166,292,19,24
+      flow h=24 padL=4 padR=4 bg=chip control=button rect=193,292,15,24
+        textB text="+" fg=chip-text small=true rect=197,292,7,24

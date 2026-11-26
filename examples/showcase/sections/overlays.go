@@ -11,12 +11,11 @@ import (
 
 // Sizes and texts of the overlays section.
 const (
-	dropPanelH   = 120
-	overlayBtnW  = 140
-	settingsTip  = "Settings (Ctrl+,)"
-	hoverTip     = "A tooltip shows after the pointer rests"
-	dropHint     = "Right-click here for a menu"
-	dialogRemark = "The dialog is modal. Drag it by its title bar."
+	dropPanelH  = 120
+	overlayBtnW = 140
+	settingsTip = "Settings (Ctrl+,)"
+	hoverTip    = "A tooltip shows after the pointer rests"
+	dropHint    = "Right-click here for a menu"
 )
 
 var overlaysPoses = []Pose{
@@ -39,6 +38,19 @@ var overlaysPoses = []Pose{
 		s.openDialog()
 		return OffCanvas
 	}},
+	{Name: "panel", Apply: func(s *Showcase, _ *core.Ctx) image.Point {
+		s.openPanel()
+		return OffCanvas
+	}},
+	{Name: "resizable", Apply: func(s *Showcase, _ *core.Ctx) image.Point {
+		s.openSized()
+		return OffCanvas
+	}},
+	{Name: "toasts", Apply: func(s *Showcase, _ *core.Ctx) image.Point {
+		s.postToast(infoToast, ToastInfo)
+		s.postToast(errorToast, ToastError)
+		return OffCanvas
+	}},
 }
 
 // openMenu opens the demo popup menu at posX, posY. Markup can show a menu
@@ -54,40 +66,6 @@ func (s *Showcase) openMenu(ctx *core.Ctx, posX, posY int) {
 		{Label: "Unavailable", Disabled: true},
 		{Separator: true},
 		{Label: "Delete...", Icon: "trash", Run: s.openDialog},
-	})
-}
-
-// openDialog asks before the pretend delete.
-func (s *Showcase) openDialog() {
-	s.widgets.confirm = NewTextField("")
-	s.widgets.confirm.Focused = true
-	s.widgets.dialogMove = MoveState{}
-	answer := func(said string) func() {
-		return func() {
-			s.widgets.lastAnswer = said
-			s.dialog = nil
-		}
-	}
-	s.dialog = &DialogState{
-		Title: "Delete project?",
-		Body:  "This cannot be undone.\nType the project name to confirm.",
-		Input: &s.widgets.confirm,
-		Buttons: []DialogButton{
-			{Label: "Cancel", Run: answer("cancelled")},
-			{Label: "Delete", Primary: true, Run: answer("deleted")},
-		},
-	}
-}
-
-func (s *Showcase) dismissDialog() { s.dialog = nil }
-
-func dialogGo(s *Showcase, _ *core.Ctx) Node {
-	return MessageDialog(s.dialog, Text(dialogRemark, Small(), Muted()), OnDismiss(s.dismissDialog), Moved(&s.widgets.dialogMove))
-}
-
-func dialogMarkup(s *Showcase, ctx *core.Ctx) Node {
-	return fill(ctx, dialogTemplate, markup.Scope{
-		"dialog": s.dialog, "remark": dialogRemark, "dismiss": s.dismissDialog, "move": &s.widgets.dialogMove,
 	})
 }
 
@@ -129,6 +107,19 @@ func overlaysGo(s *Showcase, ctx *core.Ctx) Node {
 			Button("Open dialog", W(overlayBtnW), OnClick(s.openDialog)),
 			Text("Last answer: "+state.lastAnswer, Muted()),
 		),
+		Caption("Dialog parts"),
+		Row(HOf(core.RowOf), Button("Open preferences", W(overlayBtnW), OnClick(s.openPanel))),
+		Caption("Resizable dialog"),
+		Row(HOf(core.RowOf), Gap(core.LooseGap),
+			Button("Open resizable", W(overlayBtnW), OnClick(s.openSized)),
+			Text(s.sizedText(), Muted()),
+		),
+		Caption("Toasts"),
+		Row(HOf(core.RowOf), Gap(core.LooseGap),
+			Button("Info toast", W(overlayBtnW), OnClick(func() { s.postToast(infoToast, ToastInfo) })),
+			Button("Error toast", W(overlayBtnW), OnClick(func() { s.postToast(errorToast, ToastError) })),
+			Text(s.toastCount(), Muted()),
+		),
 	)
 }
 
@@ -139,12 +130,14 @@ func overlaysMarkup(s *Showcase, ctx *core.Ctx) Node {
 		"page": &state.overlaysPage, "buttonW": overlayBtnW, "panelH": dropPanelH, "openMenu": open,
 		"lastPick": state.lastPick, "lastAnswer": state.lastAnswer, "openDialog": s.openDialog,
 		"dropHint": dropHint, "hoverTip": hoverTip, "settingsTip": settingsTip,
+		"openPanel": s.openPanel, "openSized": s.openSized, "sizedText": s.sizedText(), "toastCount": s.toastCount(),
+		"postInfo":  func() { s.postToast(infoToast, ToastInfo) },
+		"postError": func() { s.postToast(errorToast, ToastError) },
 	})
 }
 
 var (
 	overlaysTemplate = markup.Must("overlays.vml", overlaysSource)
-	dialogTemplate   = markup.Must("dialog.vml", dialogSource)
 	menuTemplate     = markup.Must("menu.vml", menuSource)
 )
 
@@ -168,11 +161,21 @@ const overlaysSource = `
     <button w="{{buttonW}}" on-click="openDialog">Open dialog</button>
     <text muted>Last answer: {{lastAnswer}}</text>
   </row>
+  <caption>Dialog parts</caption>
+  <row h="{{rowH}}">
+    <button w="{{buttonW}}" on-click="openPanel">Open preferences</button>
+  </row>
+  <caption>Resizable dialog</caption>
+  <row h="{{rowH}}" gap="{{looseGap}}">
+    <button w="{{buttonW}}" on-click="openSized">Open resizable</button>
+    <text muted>{{sizedText}}</text>
+  </row>
+  <caption>Toasts</caption>
+  <row h="{{rowH}}" gap="{{looseGap}}">
+    <button w="{{buttonW}}" on-click="postInfo">Info toast</button>
+    <button w="{{buttonW}}" on-click="postError">Error toast</button>
+    <text muted>{{toastCount}}</text>
+  </row>
 </scroll>`
-
-const dialogSource = `
-<message-dialog state="dialog" on-dismiss="dismiss" moved="move">
-  <text small muted>{{remark}}</text>
-</message-dialog>`
 
 const menuSource = `<menu ctx="ctx" state="menu" on-select="pick" on-dismiss="dismiss"/>`

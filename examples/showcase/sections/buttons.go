@@ -17,6 +17,17 @@ const (
 	chipHeading = "Segmented chips"
 )
 
+// keyCombos are shown as key chips; the last ends in the plus key itself.
+var keyCombos = []string{"Ctrl+Shift+P", "Ctrl+,", "Ctrl++"}
+
+// keyRow is a Go node in both forms: markup has no element for
+// widget.KeyChips.
+func keyRow() Node {
+	return Row(HOf(core.CompactOf), Gap(core.Gutter),
+		For(keyCombos, func(_ int, combo string) Node { return KeyChips(combo) }),
+	)
+}
+
 // choice is one chip of a segmented control as a view reads it.
 type choice struct {
 	Label, Icon, Tip string
@@ -86,6 +97,8 @@ func buttonsGo(s *Showcase, _ *core.Ctx) Node {
 					Text(entry.Label, Small(), Bold(), Color(entry.Color)))
 			}),
 		),
+		Caption("Keyboard keys"),
+		keyRow(),
 	)
 }
 
@@ -94,6 +107,7 @@ func buttonsMarkup(s *Showcase, ctx *core.Ctx) Node {
 		"page": &s.widgets.buttonsPage, "count": func() { s.widgets.clicks++ }, "clicked": s.clickedText(),
 		"sizes": s.sizeChoices(), "views": s.viewChoices(), "pills": pills,
 		"buttonW": buttonW, "chipW": chipW, "modeChipW": modeChipW, "chipHeading": chipHeading,
+		"keys": keyRow(),
 	})
 }
 
@@ -123,4 +137,6 @@ const buttonsSource = `
       <text small bold color="{{entry.Color}}">{{entry.Label}}</text>
     </row>
   </row>
+  <caption>Keyboard keys</caption>
+  <slot name="keys"/>
 </scroll>`

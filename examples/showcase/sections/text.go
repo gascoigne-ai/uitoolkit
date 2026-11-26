@@ -31,9 +31,9 @@ func textGo(s *Showcase, _ *core.Ctx) Node {
 	}
 	return Scroll(&state.textPage, Pad(core.Gutter), Gap(core.Gutter),
 		Caption("Text fields"),
-		row("Name", &state.name),
+		row("Name", &state.name, TextMenu(&state.name)),
 		row("Password", &state.secret),
-		row("Search", &state.search, Placeholder(searchHint)),
+		row("Search", &state.search, Placeholder(searchHint), TextMenu(&state.search)),
 		Caption("Text area"),
 		Area(&state.notes, H(notesH), Bg(core.Sunken), Control("field")),
 		Text(notesRemark, Small(), Muted()),
@@ -54,13 +54,13 @@ const textSource = `
 <scroll state="page" pad="{{gutter}}" gap="{{gutter}}">
   <caption>Text fields</caption>
   <form-row label="Name" label-width="{{labelW}}">
-    <field state="name" w="{{fieldW}}" bg="sunken"/>
+    <field state="name" w="{{fieldW}}" bg="sunken" text-menu="name"/>
   </form-row>
   <form-row label="Password" label-width="{{labelW}}">
     <field state="secret" w="{{fieldW}}" bg="sunken"/>
   </form-row>
   <form-row label="Search" label-width="{{labelW}}">
-    <field state="search" w="{{fieldW}}" bg="sunken" placeholder="{{searchHint}}"/>
+    <field state="search" w="{{fieldW}}" bg="sunken" placeholder="{{searchHint}}" text-menu="search"/>
   </form-row>
   <caption>Text area</caption>
   <area state="notes" h="{{notesH}}" bg="sunken" control="field"/>

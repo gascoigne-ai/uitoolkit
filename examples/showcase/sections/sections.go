@@ -41,6 +41,7 @@ var Sections = []Section{
 	{ID: "text", Label: "Text input", Go: textGo, Markup: textMarkup, Poses: textPoses},
 	{ID: "toggles", Label: "Toggles and sliders", Go: togglesGo, Markup: togglesMarkup},
 	{ID: "lists", Label: "Lists and panes", Go: listsGo, Markup: listsMarkup, Poses: listsPoses},
+	{ID: "layout", Label: "Layout and custom", Go: layoutGo, Markup: layoutMarkup},
 	{ID: "overlays", Label: "Menus and dialogs", Go: overlaysGo, Markup: overlaysMarkup, Poses: overlaysPoses},
 	{ID: "code", Label: "Code view", Go: codeGo, Markup: codeMarkup, Poses: codePoses},
 	{ID: "images", Label: "Images and icons", Go: imagesGo, Markup: imagesMarkup},
@@ -50,15 +51,17 @@ var Sections = []Section{
 
 // Form is one way a view is built.
 type Form struct {
-	ID, Label    string
-	section      func(Section) builder
-	dialog, menu builder
+	ID, Label string
+	section   func(Section) builder
+	dialog    func(dialogView) builder
+	toasts    func(showcase *Showcase, ctx *core.Ctx, width, height int) view.Node
+	menu      builder
 }
 
 // Forms are the choices of the Form control.
 var Forms = []Form{
-	{ID: "go", Label: "Go", section: func(section Section) builder { return section.Go }, dialog: dialogGo, menu: menuGo},
-	{ID: "markup", Label: "Markup", section: func(section Section) builder { return section.Markup }, dialog: dialogMarkup, menu: menuMarkup},
+	{ID: "go", Label: "Go", section: func(section Section) builder { return section.Go }, dialog: func(view dialogView) builder { return view.Go }, toasts: toastsGo, menu: menuGo},
+	{ID: "markup", Label: "Markup", section: func(section Section) builder { return section.Markup }, dialog: func(view dialogView) builder { return view.Markup }, toasts: toastsMarkup, menu: menuMarkup},
 }
 
 // fill builds template for scope. The sizes and spacings of the context are

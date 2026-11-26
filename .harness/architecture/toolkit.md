@@ -324,9 +324,20 @@ two packages.
   that outlives a section switch. Nothing is saved. `Select` closes the popup menu and the dialog,
   since the menu lives in `core.Ctx` and would cover the next section.
 - **Two forms.** Each `Sections` row builds its page in Go and from a markup template, and the Form
-  control switches. `TestGoAndMarkupFormsDumpAlike` compares dump and painted ops. Widgets with no
-  markup element (switch, disabled switch, paragraph) are `<slot>` nodes, listed in that test.
-  A popup menu is opened in Go (`widget.OpenMenu`); both forms can show it.
+  control switches. `TestGoAndMarkupFormsDumpAlike` compares dump and painted ops, and
+  `TestGoAndMarkupLayersDumpAlike` the dumps of the layers. What has no markup element (switch,
+  disabled switch, paragraph, key chips, a `view.Custom` element, a `Resizable` outside a dialog)
+  is a `<slot>` node, listed in the first test. A popup menu is opened in Go (`widget.OpenMenu`);
+  both forms can show it.
+- **Layers.** Over the section lie, in this order, the dialog, the toasts and the popup menu, then
+  the tooltip. At most one dialog is open: `Showcase.dialog` is a `dialogKind` enum (none, message,
+  parts, resizable), `dialogViews` holds its two forms by kind and a `Forms` row picks one. Escape
+  closes the menu first, then the dialog; a click outside leaves a dialog open, as the toolkit's
+  dialogs do. The toasts are a `widget.ToastStack` that `Update` prunes by the showcase's clock;
+  they outlive a section switch and Escape. `widget.Toasts` places itself by the window size, so
+  `View` and `layers` take it as arguments and the layers are direct children of the window's
+  `Stack`. A resizable element's size is derived (the state's, else the default) once in Go, for
+  both forms and the size text.
 - **Live theme.** The editor's text is a theme file laid over the chosen theme, after contrast.
   A text that cannot be read, or is over 64 KiB, shows the error and keeps the theme in effect;
   a change of theme or contrast then shows the new theme without the edit. Parsing is
