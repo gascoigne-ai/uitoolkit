@@ -1,95 +1,95 @@
-scrollB padL=12 padT=12 padR=12 padB=12 gap=12 grow=1 clip=true rect=0,0,844,684
-  textB text="ONE PICTURE, SCALED TO FIT" fg=muted small=true rect=12,12,820,14
-  flow h=160 gap=12 alignItems=1 rect=12,38,820,160
-    imageB w=320 h=160 rect=12,38,320,160
-    imageB w=160 h=80 rect=344,38,160,80
-    imageB w=80 h=40 rect=516,38,80,40
-  textB text="ICONS" fg=muted small=true rect=12,210,820,14
-  flow gap=8 rect=12,236,820,42
-    flow w=104 gap=4 alignItems=2 rect=12,236,104,42
-      iconB w=24 h=24 fg=text icon=arrow-down rect=52,236,24,24
-      textB text="arrow-down" fg=muted small=true rect=31,264,66,14
-    flow w=104 gap=4 alignItems=2 rect=124,236,104,42
-      iconB w=24 h=24 fg=text icon=arrow-up rect=164,236,24,24
-      textB text="arrow-up" fg=muted small=true rect=151,264,50,14
-    flow w=104 gap=4 alignItems=2 rect=236,236,104,42
-      iconB w=24 h=24 fg=text icon=check rect=276,236,24,24
-      textB text="check" fg=muted small=true rect=272,264,31,14
-    flow w=104 gap=4 alignItems=2 rect=348,236,104,42
-      iconB w=24 h=24 fg=text icon=chevron-down rect=388,236,24,24
-      textB text="chevron-down" fg=muted small=true rect=361,264,78,14
-    flow w=104 gap=4 alignItems=2 rect=460,236,104,42
-      iconB w=24 h=24 fg=text icon=chevron-up rect=500,236,24,24
-      textB text="chevron-up" fg=muted small=true rect=480,264,63,14
-    flow w=104 gap=4 alignItems=2 rect=572,236,104,42
-      iconB w=24 h=24 fg=text icon=clipboard rect=612,236,24,24
-      textB text="clipboard" fg=muted small=true rect=599,264,50,14
-    flow w=104 gap=4 alignItems=2 rect=684,236,104,42
-      iconB w=24 h=24 fg=text icon=copy rect=724,236,24,24
-      textB text="copy" fg=muted small=true rect=723,264,25,14
-  flow gap=8 rect=12,290,820,42
-    flow w=104 gap=4 alignItems=2 rect=12,290,104,42
-      iconB w=24 h=24 fg=text icon=cross rect=52,290,24,24
-      textB text="cross" fg=muted small=true rect=49,318,29,14
-    flow w=104 gap=4 alignItems=2 rect=124,290,104,42
-      iconB w=24 h=24 fg=text icon=dot rect=164,290,24,24
-      textB text="dot" fg=muted small=true rect=167,318,17,14
-    flow w=104 gap=4 alignItems=2 rect=236,290,104,42
-      iconB w=24 h=24 fg=text icon=dots rect=276,290,24,24
-      textB text="dots" fg=muted small=true rect=276,318,23,14
-    flow w=104 gap=4 alignItems=2 rect=348,290,104,42
-      iconB w=24 h=24 fg=text icon=external rect=388,290,24,24
-      textB text="external" fg=muted small=true rect=378,318,43,14
-    flow w=104 gap=4 alignItems=2 rect=460,290,104,42
-      iconB w=24 h=24 fg=text icon=folder rect=500,290,24,24
-      textB text="folder" fg=muted small=true rect=496,318,31,14
-    flow w=104 gap=4 alignItems=2 rect=572,290,104,42
-      iconB w=24 h=24 fg=text icon=gear rect=612,290,24,24
-      textB text="gear" fg=muted small=true rect=612,318,24,14
-    flow w=104 gap=4 alignItems=2 rect=684,290,104,42
-      iconB w=24 h=24 fg=text icon=grip rect=724,290,24,24
-      textB text="grip" fg=muted small=true rect=726,318,20,14
-  flow gap=8 rect=12,344,820,42
-    flow w=104 gap=4 alignItems=2 rect=12,344,104,42
-      iconB w=24 h=24 fg=text icon=history rect=52,344,24,24
-      textB text="history" fg=muted small=true rect=46,372,36,14
-    flow w=104 gap=4 alignItems=2 rect=124,344,104,42
-      iconB w=24 h=24 fg=text icon=pencil rect=164,344,24,24
-      textB text="pencil" fg=muted small=true rect=160,372,32,14
-    flow w=104 gap=4 alignItems=2 rect=236,344,104,42
-      iconB w=24 h=24 fg=text icon=plus rect=276,344,24,24
-      textB text="plus" fg=muted small=true rect=276,372,23,14
-    flow w=104 gap=4 alignItems=2 rect=348,344,104,42
-      iconB w=24 h=24 fg=text icon=prompt rect=388,344,24,24
-      textB text="prompt" fg=muted small=true rect=381,372,37,14
-    flow w=104 gap=4 alignItems=2 rect=460,344,104,42
-      iconB w=24 h=24 fg=text icon=redo rect=500,344,24,24
-      textB text="redo" fg=muted small=true rect=500,372,24,14
-    flow w=104 gap=4 alignItems=2 rect=572,344,104,42
-      iconB w=24 h=24 fg=text icon=replay rect=612,344,24,24
-      textB text="replay" fg=muted small=true rect=607,372,33,14
-    flow w=104 gap=4 alignItems=2 rect=684,344,104,42
-      iconB w=24 h=24 fg=text icon=save rect=724,344,24,24
-      textB text="save" fg=muted small=true rect=723,372,25,14
-  flow gap=8 rect=12,398,820,42
-    flow w=104 gap=4 alignItems=2 rect=12,398,104,42
-      iconB w=24 h=24 fg=text icon=scissors rect=52,398,24,24
-      textB text="scissors" fg=muted small=true rect=42,426,44,14
-    flow w=104 gap=4 alignItems=2 rect=124,398,104,42
-      iconB w=24 h=24 fg=text icon=search rect=164,398,24,24
-      textB text="search" fg=muted small=true rect=158,426,36,14
-    flow w=104 gap=4 alignItems=2 rect=236,398,104,42
-      iconB w=24 h=24 fg=text icon=trash rect=276,398,24,24
-      textB text="trash" fg=muted small=true rect=274,426,27,14
-    flow w=104 gap=4 alignItems=2 rect=348,398,104,42
-      iconB w=24 h=24 fg=text icon=triangle-down rect=388,398,24,24
-      textB text="triangle-down" fg=muted small=true rect=362,426,76,14
-    flow w=104 gap=4 alignItems=2 rect=460,398,104,42
-      iconB w=24 h=24 fg=text icon=triangle-right rect=500,398,24,24
-      textB text="triangle-right" fg=muted small=true rect=476,426,71,14
-    flow w=104 gap=4 alignItems=2 rect=572,398,104,42
-      iconB w=24 h=24 fg=text icon=undo rect=612,398,24,24
-      textB text="undo" fg=muted small=true rect=610,426,27,14
-    flow w=104 gap=4 alignItems=2 rect=684,398,104,42
-      iconB w=24 h=24 fg=text icon=unlink rect=724,398,24,24
-      textB text="unlink" fg=muted small=true rect=720,426,32,14
+scrollB padL=12 padT=12 padR=12 padB=12 gap=12 grow=1 clip=true rect=0,0,844,683
+  textB text="ONE PICTURE, SCALED TO FIT" fg=muted small=true rect=12,12,820,15
+  flow h=160 gap=12 alignItems=1 rect=12,39,820,160
+    imageB w=320 h=160 rect=12,39,320,160
+    imageB w=160 h=80 rect=344,39,160,80
+    imageB w=80 h=40 rect=516,39,80,40
+  textB text="ICONS" fg=muted small=true rect=12,211,820,15
+  flow gap=8 rect=12,238,820,43
+    flow w=104 gap=4 alignItems=2 rect=12,238,104,43
+      iconB w=24 h=24 fg=text icon=arrow-down rect=52,238,24,24
+      textB text="arrow-down" fg=muted small=true rect=28,266,71,15
+    flow w=104 gap=4 alignItems=2 rect=124,238,104,43
+      iconB w=24 h=24 fg=text icon=arrow-up rect=164,238,24,24
+      textB text="arrow-up" fg=muted small=true rect=148,266,55,15
+    flow w=104 gap=4 alignItems=2 rect=236,238,104,43
+      iconB w=24 h=24 fg=text icon=check rect=276,238,24,24
+      textB text="check" fg=muted small=true rect=271,266,34,15
+    flow w=104 gap=4 alignItems=2 rect=348,238,104,43
+      iconB w=24 h=24 fg=text icon=chevron-down rect=388,238,24,24
+      textB text="chevron-down" fg=muted small=true rect=357,266,85,15
+    flow w=104 gap=4 alignItems=2 rect=460,238,104,43
+      iconB w=24 h=24 fg=text icon=chevron-up rect=500,238,24,24
+      textB text="chevron-up" fg=muted small=true rect=478,266,68,15
+    flow w=104 gap=4 alignItems=2 rect=572,238,104,43
+      iconB w=24 h=24 fg=text icon=clipboard rect=612,238,24,24
+      textB text="clipboard" fg=muted small=true rect=597,266,54,15
+    flow w=104 gap=4 alignItems=2 rect=684,238,104,43
+      iconB w=24 h=24 fg=text icon=copy rect=724,238,24,24
+      textB text="copy" fg=muted small=true rect=722,266,27,15
+  flow gap=8 rect=12,293,820,43
+    flow w=104 gap=4 alignItems=2 rect=12,293,104,43
+      iconB w=24 h=24 fg=text icon=cross rect=52,293,24,24
+      textB text="cross" fg=muted small=true rect=48,321,31,15
+    flow w=104 gap=4 alignItems=2 rect=124,293,104,43
+      iconB w=24 h=24 fg=text icon=dot rect=164,293,24,24
+      textB text="dot" fg=muted small=true rect=167,321,18,15
+    flow w=104 gap=4 alignItems=2 rect=236,293,104,43
+      iconB w=24 h=24 fg=text icon=dots rect=276,293,24,24
+      textB text="dots" fg=muted small=true rect=275,321,25,15
+    flow w=104 gap=4 alignItems=2 rect=348,293,104,43
+      iconB w=24 h=24 fg=text icon=external rect=388,293,24,24
+      textB text="external" fg=muted small=true rect=376,321,47,15
+    flow w=104 gap=4 alignItems=2 rect=460,293,104,43
+      iconB w=24 h=24 fg=text icon=folder rect=500,293,24,24
+      textB text="folder" fg=muted small=true rect=495,321,33,15
+    flow w=104 gap=4 alignItems=2 rect=572,293,104,43
+      iconB w=24 h=24 fg=text icon=gear rect=612,293,24,24
+      textB text="gear" fg=muted small=true rect=611,321,26,15
+    flow w=104 gap=4 alignItems=2 rect=684,293,104,43
+      iconB w=24 h=24 fg=text icon=grip rect=724,293,24,24
+      textB text="grip" fg=muted small=true rect=725,321,22,15
+  flow gap=8 rect=12,348,820,43
+    flow w=104 gap=4 alignItems=2 rect=12,348,104,43
+      iconB w=24 h=24 fg=text icon=history rect=52,348,24,24
+      textB text="history" fg=muted small=true rect=44,376,39,15
+    flow w=104 gap=4 alignItems=2 rect=124,348,104,43
+      iconB w=24 h=24 fg=text icon=pencil rect=164,348,24,24
+      textB text="pencil" fg=muted small=true rect=158,376,35,15
+    flow w=104 gap=4 alignItems=2 rect=236,348,104,43
+      iconB w=24 h=24 fg=text icon=plus rect=276,348,24,24
+      textB text="plus" fg=muted small=true rect=276,376,24,15
+    flow w=104 gap=4 alignItems=2 rect=348,348,104,43
+      iconB w=24 h=24 fg=text icon=prompt rect=388,348,24,24
+      textB text="prompt" fg=muted small=true rect=379,376,41,15
+    flow w=104 gap=4 alignItems=2 rect=460,348,104,43
+      iconB w=24 h=24 fg=text icon=redo rect=500,348,24,24
+      textB text="redo" fg=muted small=true rect=499,376,26,15
+    flow w=104 gap=4 alignItems=2 rect=572,348,104,43
+      iconB w=24 h=24 fg=text icon=replay rect=612,348,24,24
+      textB text="replay" fg=muted small=true rect=606,376,36,15
+    flow w=104 gap=4 alignItems=2 rect=684,348,104,43
+      iconB w=24 h=24 fg=text icon=save rect=724,348,24,24
+      textB text="save" fg=muted small=true rect=722,376,27,15
+  flow gap=8 rect=12,403,820,43
+    flow w=104 gap=4 alignItems=2 rect=12,403,104,43
+      iconB w=24 h=24 fg=text icon=scissors rect=52,403,24,24
+      textB text="scissors" fg=muted small=true rect=40,431,47,15
+    flow w=104 gap=4 alignItems=2 rect=124,403,104,43
+      iconB w=24 h=24 fg=text icon=search rect=164,403,24,24
+      textB text="search" fg=muted small=true rect=156,431,39,15
+    flow w=104 gap=4 alignItems=2 rect=236,403,104,43
+      iconB w=24 h=24 fg=text icon=trash rect=276,403,24,24
+      textB text="trash" fg=muted small=true rect=273,431,29,15
+    flow w=104 gap=4 alignItems=2 rect=348,403,104,43
+      iconB w=24 h=24 fg=text icon=triangle-down rect=388,403,24,24
+      textB text="triangle-down" fg=muted small=true rect=359,431,82,15
+    flow w=104 gap=4 alignItems=2 rect=460,403,104,43
+      iconB w=24 h=24 fg=text icon=triangle-right rect=500,403,24,24
+      textB text="triangle-right" fg=muted small=true rect=473,431,77,15
+    flow w=104 gap=4 alignItems=2 rect=572,403,104,43
+      iconB w=24 h=24 fg=text icon=undo rect=612,403,24,24
+      textB text="undo" fg=muted small=true rect=609,431,29,15
+    flow w=104 gap=4 alignItems=2 rect=684,403,104,43
+      iconB w=24 h=24 fg=text icon=unlink rect=724,403,24,24
+      textB text="unlink" fg=muted small=true rect=718,431,35,15

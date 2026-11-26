@@ -21,10 +21,10 @@ func TestCheckboxOnChangeRunsWhenTheBoxIsClicked(t *testing.T) {
 	}
 }
 
-func TestCheckboxIsA14PixelSquare(t *testing.T) {
+func TestCheckboxIsA15PixelSquare(t *testing.T) {
 	box := Checkbox(false)
 	Layout(testCtx(t), Row(AlignItems(AlignStart), box), 100, 50)
-	if got := box.Rect(); got.W != 14 || got.H != 14 {
-		t.Fatalf("size %dx%d, want 14x14", got.W, got.H)
+	if got := box.Rect(); got.W != 15 || got.H != 15 {
+		t.Fatalf("size %dx%d, want 15x15", got.W, got.H)
 	}
 }

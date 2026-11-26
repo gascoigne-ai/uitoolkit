@@ -236,8 +236,8 @@ func TestSpacerAndRulesTakeTheirSizes(t *testing.T) {
 func TestLinesMakesOneRowPerLine(t *testing.T) {
 	lines := Lines("a\nb\nc", core.Muted)
 	Layout(testCtx(t), Col(lines), 100, 200)
-	if len(lines.kids) != 3 || lines.rect.H != 3*22 {
-		t.Fatalf("rows %d height %d, want 3 rows of 22px", len(lines.kids), lines.rect.H)
+	if len(lines.kids) != 3 || lines.rect.H != 3*23 {
+		t.Fatalf("rows %d height %d, want 3 rows of 23px", len(lines.kids), lines.rect.H)
 	}
 	for _, k := range lines.kids {
 		if k.fg != core.Muted {

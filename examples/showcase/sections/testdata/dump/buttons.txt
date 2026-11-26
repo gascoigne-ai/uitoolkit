@@ -1,58 +1,58 @@
-scrollB padL=12 padT=12 padR=12 padB=12 gap=12 grow=1 clip=true rect=0,0,844,684
-  textB text="BUTTONS" fg=muted small=true rect=12,12,820,14
-  flow h=28 gap=8 rect=12,38,820,28
-    flow padL=10 padR=10 minW=96 bg=sunken control=button shrink=true lighten=true onClick=true rect=12,38,96,28
-      textB text="Button" grow=1 fg=chip-text ellipsis=true center=true rect=22,38,76,28
-    flow padL=10 padR=10 minW=96 bg=accent control=primary shrink=true lighten=true onClick=true rect=116,38,96,28
-      textB text="Primary" grow=1 fg=accent-text ellipsis=true center=true rect=126,38,76,28
-    flow padL=8 padR=8 hoverBg=hover onClick=true rect=220,38,85,28
-      textB text="Link button" fg=accent-line center=true rect=228,38,69,28
-    flow w=32 bg=sunken control=icon-button tip=Add lighten=true onClick=true rect=313,38,32,28
-      iconB grow=1 icon=plus rect=313,38,32,28
-    flow w=32 bg=sunken control=icon-button tip=Delete lighten=true onClick=true rect=353,38,32,28
-      iconB grow=1 icon=trash rect=353,38,32,28
-  textB text="Clicked 0 times" fg=muted rect=12,78,820,16
-  textB text="SEGMENTED CHIPS" fg=muted small=true rect=12,106,820,14
-  flow h=28 gap=6 rect=12,132,820,28
-    flow padL=10 padR=10 minW=80 bg=accent control=primary shrink=true lighten=true onClick=true rect=12,132,80,28
-      textB text="Small" grow=1 fg=accent-text ellipsis=true center=true rect=22,132,60,28
-    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=98,132,80,28
-      textB text="Medium" grow=1 fg=chip-text ellipsis=true center=true rect=108,132,60,28
-    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=184,132,80,28
-      textB text="Large" grow=1 fg=chip-text ellipsis=true center=true rect=194,132,60,28
-  flow h=24 gap=6 rect=12,172,820,24
-    flow w=40 bg=accent control=primary tip=Files lighten=true onClick=true rect=12,172,40,24
-      iconB grow=1 fg=accent-text icon=folder rect=12,172,40,24
-    flow w=40 bg=sunken control=button tip=History lighten=true onClick=true rect=58,172,40,24
-      iconB grow=1 fg=chip-text icon=history rect=58,172,40,24
-    flow w=40 bg=sunken control=button tip=Search lighten=true onClick=true rect=104,172,40,24
-      iconB grow=1 fg=chip-text icon=search rect=104,172,40,24
-  textB text="STATUS PILLS" fg=muted small=true rect=12,208,820,14
-  flow h=20 gap=8 rect=12,234,820,20
-    flow padL=10 padR=10 bg=ok-soft control=pill rect=12,234,61,20
-      textB text="200 OK" fg=ok small=true bold=true rect=22,234,41,20
-    flow padL=10 padR=10 bg=warn-soft control=pill rect=81,234,48,20
-      textB text="Slow" fg=warn small=true bold=true rect=91,234,28,20
-    flow padL=10 padR=10 bg=error-soft control=pill rect=137,234,55,20
-      textB text="Failed" fg=error small=true bold=true rect=147,234,35,20
-    flow padL=10 padR=10 bg=info-soft control=pill rect=200,234,44,20
-      textB text="Info" fg=info small=true bold=true rect=210,234,24,20
-  textB text="KEYBOARD KEYS" fg=muted small=true rect=12,266,820,14
-  flow h=24 gap=12 rect=12,292,820,24
-    flow gap=4 alignItems=2 rect=12,292,83,24
-      flow h=24 padL=4 padR=4 bg=chip control=button rect=12,292,27,24
-        textB text="Ctrl" fg=chip-text small=true rect=16,292,19,24
-      flow h=24 padL=4 padR=4 bg=chip control=button rect=43,292,32,24
-        textB text="Shift" fg=chip-text small=true rect=47,292,24,24
-      flow h=24 padL=4 padR=4 bg=chip control=button rect=79,292,16,24
-        textB text="P" fg=chip-text small=true rect=83,292,8,24
-    flow gap=4 alignItems=2 rect=107,292,43,24
-      flow h=24 padL=4 padR=4 bg=chip control=button rect=107,292,27,24
-        textB text="Ctrl" fg=chip-text small=true rect=111,292,19,24
-      flow h=24 padL=4 padR=4 bg=chip control=button rect=138,292,12,24
-        textB text="," fg=chip-text small=true rect=142,292,4,24
-    flow gap=4 alignItems=2 rect=162,292,46,24
-      flow h=24 padL=4 padR=4 bg=chip control=button rect=162,292,27,24
-        textB text="Ctrl" fg=chip-text small=true rect=166,292,19,24
-      flow h=24 padL=4 padR=4 bg=chip control=button rect=193,292,15,24
-        textB text="+" fg=chip-text small=true rect=197,292,7,24
+scrollB padL=12 padT=12 padR=12 padB=12 gap=12 grow=1 clip=true rect=0,0,844,683
+  textB text="BUTTONS" fg=muted small=true rect=12,12,820,15
+  flow h=29 gap=8 rect=12,39,820,29
+    flow padL=10 padR=10 minW=96 bg=sunken control=button shrink=true lighten=true onClick=true rect=12,39,96,29
+      textB text="Button" grow=1 fg=chip-text ellipsis=true center=true rect=22,39,76,29
+    flow padL=10 padR=10 minW=96 bg=accent control=primary shrink=true lighten=true onClick=true rect=116,39,96,29
+      textB text="Primary" grow=1 fg=accent-text ellipsis=true center=true rect=126,39,76,29
+    flow padL=8 padR=8 hoverBg=hover onClick=true rect=220,39,90,29
+      textB text="Link button" fg=accent-line center=true rect=228,39,74,29
+    flow w=33 bg=sunken control=icon-button tip=Add lighten=true onClick=true rect=318,39,33,29
+      iconB grow=1 icon=plus rect=318,39,33,29
+    flow w=33 bg=sunken control=icon-button tip=Delete lighten=true onClick=true rect=359,39,33,29
+      iconB grow=1 icon=trash rect=359,39,33,29
+  textB text="Clicked 0 times" fg=muted rect=12,80,820,17
+  textB text="SEGMENTED CHIPS" fg=muted small=true rect=12,109,820,15
+  flow h=29 gap=6 rect=12,136,820,29
+    flow padL=10 padR=10 minW=80 bg=accent control=primary shrink=true lighten=true onClick=true rect=12,136,80,29
+      textB text="Small" grow=1 fg=accent-text ellipsis=true center=true rect=22,136,60,29
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=98,136,80,29
+      textB text="Medium" grow=1 fg=chip-text ellipsis=true center=true rect=108,136,60,29
+    flow padL=10 padR=10 minW=80 bg=sunken control=button shrink=true lighten=true onClick=true rect=184,136,80,29
+      textB text="Large" grow=1 fg=chip-text ellipsis=true center=true rect=194,136,60,29
+  flow h=25 gap=6 rect=12,177,820,25
+    flow w=40 bg=accent control=primary tip=Files lighten=true onClick=true rect=12,177,40,25
+      iconB grow=1 fg=accent-text icon=folder rect=12,177,40,25
+    flow w=40 bg=sunken control=button tip=History lighten=true onClick=true rect=58,177,40,25
+      iconB grow=1 fg=chip-text icon=history rect=58,177,40,25
+    flow w=40 bg=sunken control=button tip=Search lighten=true onClick=true rect=104,177,40,25
+      iconB grow=1 fg=chip-text icon=search rect=104,177,40,25
+  textB text="STATUS PILLS" fg=muted small=true rect=12,214,820,15
+  flow h=21 gap=8 rect=12,241,820,21
+    flow padL=10 padR=10 bg=ok-soft control=pill rect=12,241,65,21
+      textB text="200 OK" fg=ok small=true bold=true rect=22,241,45,21
+    flow padL=10 padR=10 bg=warn-soft control=pill rect=85,241,51,21
+      textB text="Slow" fg=warn small=true bold=true rect=95,241,31,21
+    flow padL=10 padR=10 bg=error-soft control=pill rect=144,241,58,21
+      textB text="Failed" fg=error small=true bold=true rect=154,241,38,21
+    flow padL=10 padR=10 bg=info-soft control=pill rect=210,241,46,21
+      textB text="Info" fg=info small=true bold=true rect=220,241,26,21
+  textB text="KEYBOARD KEYS" fg=muted small=true rect=12,274,820,15
+  flow h=25 gap=12 rect=12,301,820,25
+    flow gap=4 alignItems=2 rect=12,301,88,25
+      flow h=25 padL=4 padR=4 bg=chip control=button rect=12,301,29,25
+        textB text="Ctrl" fg=chip-text small=true rect=16,301,21,25
+      flow h=25 padL=4 padR=4 bg=chip control=button rect=45,301,34,25
+        textB text="Shift" fg=chip-text small=true rect=49,301,26,25
+      flow h=25 padL=4 padR=4 bg=chip control=button rect=83,301,17,25
+        textB text="P" fg=chip-text small=true rect=87,301,9,25
+    flow gap=4 alignItems=2 rect=112,301,45,25
+      flow h=25 padL=4 padR=4 bg=chip control=button rect=112,301,29,25
+        textB text="Ctrl" fg=chip-text small=true rect=116,301,21,25
+      flow h=25 padL=4 padR=4 bg=chip control=button rect=145,301,12,25
+        textB text="," fg=chip-text small=true rect=149,301,4,25
+    flow gap=4 alignItems=2 rect=169,301,49,25
+      flow h=25 padL=4 padR=4 bg=chip control=button rect=169,301,29,25
+        textB text="Ctrl" fg=chip-text small=true rect=173,301,21,25
+      flow h=25 padL=4 padR=4 bg=chip control=button rect=202,301,16,25
+        textB text="+" fg=chip-text small=true rect=206,301,8,25

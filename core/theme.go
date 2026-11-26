@@ -62,8 +62,8 @@ const (
 // follow the faces really in use are Ctx.Sizes (SizesFor); the constants
 // stay as the documented default until every consumer reads Ctx.Sizes.
 const (
-	BaseLine      = 16 // line height of the default UI face (Go regular at 14 px)
-	BaseSmallLine = 14 // line height of the default small face (Go regular at 12 px)
+	BaseLine      = 17 // line height of the default UI face (Go regular at 15 px)
+	BaseSmallLine = 15 // line height of the default small face (Go regular at 13 px)
 	Unit          = 2  // the grid every padding and gap is a multiple of
 )
 

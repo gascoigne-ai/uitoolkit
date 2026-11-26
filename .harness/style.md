@@ -19,19 +19,19 @@ Logical pixels; the interface scale multiplies them at draw time. Every size is 
 
 | Base | Value | What it is |
 |---|---|---|
-| `BaseLine` | 16 | line height of the default UI face (`TestBaseLineIsTheDefaultFaceLineHeight`) |
-| `BaseSmallLine` | 14 | line height of the default small face |
+| `BaseLine` | 17 | line height of the default UI face (`TestBaseLineIsTheDefaultFaceLineHeight`) |
+| `BaseSmallLine` | 15 | line height of the default small face |
 | `Unit` | 2 | the grid every padding and gap sits on |
 
 **Height classes** are a line plus padding on both sides, so text centers on whole pixels:
 
 | Class | Rule | Value | Use |
 |---|---|---|---|
-| `RowH` | `BaseLine` + 6U | 28 | list and table rows, standard controls, dialog buttons |
-| `CompactH` | `BaseLine` + 4U | 24 | chips, icon buttons, inline fields in a row, menu rows (`MenuRowH`) |
-| `LabelH` | `BaseLine` + 3U | 22 | section captions |
-| `SlimH` | `BaseLine` + 2U | 20 | pills, and buttons in the status bar |
-| `NoteH` | `BaseSmallLine` + 2U | 18 | one-line notes |
+| `RowH` | `BaseLine` + 6U | 29 | list and table rows, standard controls, dialog buttons |
+| `CompactH` | `BaseLine` + 4U | 25 | chips, icon buttons, inline fields in a row, menu rows (`MenuRowH`) |
+| `LabelH` | `BaseLine` + 3U | 23 | section captions |
+| `SlimH` | `BaseLine` + 2U | 21 | pills, and buttons in the status bar |
+| `NoteH` | `BaseSmallLine` + 2U | 19 | one-line notes |
 
 **Sizes follow the faces.** `Ctx.Sizes` (`SizesFor(line, small)`) applies these rules to the line heights of the faces the context really draws with, so a larger text size never clips a row. It is recomputed in `NewCtx`, `SetTheme` and `SetFonts`, never in `SetScale` (the scale multiplies at draw time). The UI line is clamped to 13..28 (a 24 px font has a line near 27, so the largest Text size is not cut short) and the small line to 1..line; spacings never move. Toolkit widgets read them: Go views write `HOf(core.RowOf)`, `WOf(core.IconBtnOf)` or `SeparatorOf(f)`, which `Layout` resolves from `ctx.Sizes` on every pass (a later `H` or `W` replaces the role), and widgets with a `*Ctx` read `ctx.Sizes` directly (`MenuRowHeight(ctx)`). The constants in the tables are the same rules for the default faces (`DefaultSizes()` equals them) and stay only for code outside the toolkit that still uses them (`MenuRowH`, ...). `Sizes.Scope()` names them for templates (`rowH`, `compactH`, `gutter`, ...). The app's views follow the same rule: a template gets `App.scope(...)`, which merges `ctx.Sizes.Scope()`, the app's fixed control widths (`internal/app/window_sizes.go`, one named constant per role, e.g. `wrapChipW`) and the view's own entries, so a template holds no raw size attribute and Go code writes `a.ctx.Sizes.Row` or `HOf(core.CompactOf)`. Text size therefore moves the app's rows, bars and chips too. The feature views (`internal/{collection,request,response,settings}/ui`) follow the same rule: each build function takes the `*Ctx` (`page.View(ctx, host)`), a package-local `scope(ctx.Sizes, own)` merges `Sizes.Scope()` with the view's own entries and one named constant per fixed width (`labelColW`). Dialog widths follow the units too: `DialogW` 380 (a message dialog) and `DialogButtonMinW` 80 (5 dialog steps).
 
@@ -51,12 +51,12 @@ Logical pixels; the interface scale multiplies them at draw time. Every size is 
 
 | Constant | Rule | Value |
 |---|---|---|
-| `ToolbarH` | `RowH` + 2 `NearGap` | 36 |
-| `DialogToolbarH`, `TabBarH` | `RowH` + 2 `TightGap` | 40 |
-| `DialogTitleH` | `RowH` + 2 `LooseGap` | 44 |
-| `IconBtnW` | `CompactH` + 2 `NearGap` | 32 |
-| `WordBtnW` | `IconBtnW` + `StepGutter` | 44 (one short word: Log, Raw, Reset) |
-| `CheckboxSize` | `BaseSmallLine` | 14 |
+| `ToolbarH` | `RowH` + 2 `NearGap` | 37 |
+| `DialogToolbarH`, `TabBarH` | `RowH` + 2 `TightGap` | 41 |
+| `DialogTitleH` | `RowH` + 2 `LooseGap` | 45 |
+| `IconBtnW` | `CompactH` + 2 `NearGap` | 33 |
+| `WordBtnW` | `IconBtnW` + `StepGutter` | 45 (one short word: Log, Raw, Reset) |
+| `CheckboxSize` | `BaseSmallLine` | 15 |
 
 **Fixed geometry**, not content, so it follows no line or step: `DialogMargin` 40 (room kept around a dialog), `DialogMaxH` 560 (tallest default dialog height).
 
@@ -108,7 +108,7 @@ An unknown token draws in `Text`, so a typo stays visible.
 ### Type
 
 - The interface font is the embedded Go font, code the Go Mono font; the user may pick installed families (Settings, `uitoolkit/desktop/fonts`). A saved family that is not installed draws in the Go font.
-- Three faces, each with its own size setting, whole numbers of pixels: interface `settings.FontSize` (10..24, default 14), small `settings.SmallFontSize` (8..24, default 12) and code `settings.CodeFontSize` (8..32, default 13). `theming.FontSizes{UI, Small, Code}.Resolved` brings each into its range (0 is the default). The sizes are independent: small may exceed interface (`core.SizesFor` keeps the small line inside the line height), and control heights follow the interface size through `Ctx.Sizes`. A file written before version 3 had one size; its reader derives small (size - 2, never under 9) and code (size - 1) from it, so nothing changes on screen. Theme files do not state sizes; one that still carries `fontSize`, `smallSize` or `monoSize` loads and the keys are ignored (logged at debug).
+- Three faces, each with its own size setting, whole numbers of pixels: interface `settings.FontSize` (10..24, default 15), small `settings.SmallFontSize` (8..24, default 13) and code `settings.CodeFontSize` (8..32, default 14). `theming.FontSizes{UI, Small, Code}.Resolved` brings each into its range (0 is the default). The sizes are independent: small may exceed interface (`core.SizesFor` keeps the small line inside the line height), and control heights follow the interface size through `Ctx.Sizes`. A file written before version 3 had one size; its reader derives small (size - 2, never under 9) and code (size - 1) from it, so nothing changes on screen. Theme files do not state sizes; one that still carries `fontSize`, `smallSize` or `monoSize` loads and the keys are ignored (logged at debug).
 - Tabs are display only: the text keeps the real `\t`. In code (`CodeView`, `TextArea`) a tab advances to the next stop of `core.TabStop` (4) columns, counted along the whole line, and the caret, selection, hit-testing, wrap and horizontal extent count it the same way (`core.ColumnAfter`, `Column`, `IndexAt`); in proportional text (labels, fields) it is a gap of `TabStop` spaces of the face (`Ctx.Width`, `Ctx.Text`). The fonts have no tab glyph, so a tab is never handed to the font as is.
 - Bold marks names that structure the window: dialog titles, a collection's root row, table headers. Folder, request and tab names stay regular.
 - Table headers are small, bold, muted and upper case. Secondary text (badges, shortcuts, hints, subtitles) is small and muted.
@@ -149,13 +149,13 @@ An unknown token draws in `Text`, so a typo stays visible.
 
 **Window.** The header (44) is the app's identity: `Hero` with the `hero` gradient, the title bold in `HeroText`, icons in `HeroMuted` lit to `HeroText` on hover, the environment as a `HeroText` pill. Every pane starts its first row one `Gutter` below its tabs, so rows line up across the divider (`TestRequestAndResponsePanesShareTheirFirstRowBand`). The status bar (28) is `Frame` with a `Border` line on top, small muted text; the response status is a small bold pill, `OK`/`Warn`/`Error` on its `*Soft` color, then the timing.
 
-**Tabs.** The request tab row is `tabsH` (42), a pane tab row `TabBarH` (40), each with `TabGap` above. The strip draws one bottom `Border` line under transparent inactive tabs (label `Muted`); the open tab has the pane color `Bg`, its label in `Text` and a square 2 px `AccentLine` outline on top, left and right, open at the bottom so it runs into the pane. No tab name is bold. A strip that does not fit scrolls sideways with an arrow only at an end that can still scroll.
+**Tabs.** The request tab row is `tabsH` (42), a pane tab row `TabBarH` (41), each with `TabGap` above. The strip draws one bottom `Border` line under transparent inactive tabs (label `Muted`); the open tab has the pane color `Bg`, its label in `Text` and a square 2 px `AccentLine` outline on top, left and right, open at the bottom so it runs into the pane. No tab name is bold. A strip that does not fit scrolls sideways with an arrow only at an end that can still scroll.
 
 **Buttons.** `Button`: `Sunken` fill, `ChipText` label, outlined, brightens on hover, label padded 10, ellipsized only when the row has no room. `PrimaryButton`: `Accent` fill, `AccentText` label, `AccentLine` outline. `SegmentChip`: a primary button when chosen, a button otherwise. `LinkButton`: `AccentLine` text on no fill, `Hover` under the pointer. Dialog buttons are `RowH` high and at least 80 wide.
 
 **Fields.** `Sunken`, `RowH` high (`CompactH` inline), `BorderStrong` outline, `AccentLine` when focused; variables in a field are green when resolved and red when not (`internal/feature/send/FEATURE.md`). The text caret of fields and text areas is `Accent`: by default a steady block with its character in `AccentText`; the app may choose a bar or an underline (`CaretW` thick, the character left as it is) and blinking (`Ctx.Caret`), which no theme sets.
 
-**Menus.** `Bg` panel, `menu` control, shadow, inset `MenuPad` (4), 120 to 420 wide; rows `MenuRowH` (24) padded 10, the hot row `Selected`, others `Hover` on hover; shortcut and hint lines small and muted; separators 9 high.
+**Menus.** `Bg` panel, `menu` control, shadow, inset `MenuPad` (4), 120 to 420 wide; rows `MenuRowH` (25) padded 10, the hot row `Selected`, others `Hover` on hover; shortcut and hint lines small and muted; separators 9 high.
 
 **Tables.** Rows on `Sunken`, a `BorderSoft` hairline between rows, the row under the pointer lit, no zebra stripes unless the table opts in (`TableSpec.Zebra`: every second row in `Alt`; the Shortcuts page does); the header is `RowH` on `Panel` with a `Border` line under it; cells padded `CellPad`; columns at least `MinColumnPx` (56). A table may also opt into a fixed lead column (`RowLead`, `tableActionW` wide, a header spacer over it) that shows the pencil icon on the selected row, a row click (`OnRowClick`, editable or not), a node in place of a cell's text (`CellNode`) and a detail node under a row (`RowDetail`); all are off when unset. The Shortcuts page is such a table (Action, Keystrokes, Source): the selected row is `Selected` with the pencil, and its Unbind and Reset buttons and its conflict, refusal or plain-key note sit in the detail under it.
 
@@ -167,7 +167,7 @@ An unknown token draws in `Text`, so a typo stays visible.
 
 **Toasts.** Bottom right, above the status bar, 320 x 36, 6 apart, at most 5, oldest on top: `Panel` with a shadow, `Border` and `Text` for info (fades after 3 s), `Error` border and text for errors (stay until clicked).
 
-**Checkbox and slider.** A 14 px checkbox: an outline in `Rule` when off, an `Accent` square with the check in `AccentText` when on. A slider thumb in `Chip`, outlined in `Border`, with a `Rule` tick at the middle.
+**Checkbox and slider.** A 15 px checkbox: an outline in `Rule` when off, an `Accent` square with the check in `AccentText` when on. A slider thumb in `Chip`, outlined in `Border`, with a `Rule` tick at the middle.
 
 **Switch.** A toggle for a true-or-false value (`widget.Switch`): a pill `IconBtnW` wide and `Checkbox + 2 * StepHair` high with a `Checkbox`-sized round knob, both from `ctx.Sizes`. On: `Accent` track, `AccentText` knob at the right. Off: `Track` fill, `BorderStrong` outline (`Muted` under the pointer), `Muted` knob at the left. `DisabledSwitch` draws the off colors whatever the value and ignores a click. A click flips the value the caller owns, as for a checkbox; it takes no keyboard focus, like the checkbox.
 
@@ -182,14 +182,14 @@ An unknown token draws in `Text`, so a typo stays visible.
 Every dialog is a modal floating panel over a dimmed scrim (`widget.Dialog`, `ResizableDialog`, `MessageDialog`), centered until the user drags it, built from the top: the **title bar** (`DialogTitle`), optionally the **toolbar** (`DialogToolbar`), then the **body**.
 
 **Title bar.**
-- Height `DialogTitleH` (44), side padding `DialogPad` (16), gap `LooseGap` (8), items centered vertically, flush with the panel's edges (the panel has no padding).
+- Height `DialogTitleH` (45), side padding `DialogPad` (16), gap `LooseGap` (8), items centered vertically, flush with the panel's edges (the panel has no padding).
 - Drawn like the window's header: `Hero` with the `hero` gradient (`Control("hero")`), so it differs from the body in every theme, its top corners rounded to the panel's radius (`RoundT("menu")`), a `Border` line under it. Text on it is `HeroText`, icons and the subtitle `HeroMuted`; never `Text`/`Muted`, which are for the body.
 - From the left: the **title** (bold; a short noun: "Settings", "Log", "Rename"), an optional **subtitle** (`DialogSubtitle`: small, ellipsized, gives way first; the page shown, a count, the file; never a sentence or an action), free room, then the **close button** (`IconBtnW` x `CompactH`, no chip, `CrossIcon` in `HeroMuted`, darkened under the pointer with `Shadow` in the `row` control's corners, tooltip "Close (Esc)").
 - No controls in the bar besides close; they go in the toolbar.
 - The close button and Escape run `OnDismiss`, so they cancel alike. A click outside a dialog is swallowed and leaves it open (`KeepOnOutsideClick`); menus and pick lists still close on it.
 - The bar is the drag handle (`DragHandle`): a press on its free part drags the dialog, a double click centers it. The grab cursor shows only from press to release, so an idle bar reads as a title, not a control. The dialog stays inside the window (`Moved`, `MoveState`).
 
-**Toolbar.** Height `DialogToolbarH` (40), side padding 16, gap 8, `BorderSoft` line under it; controls `CompactH` (fields `RowH`), a field that takes the room has `Grow(1)`. It holds what acts on the whole dialog: Settings has Save only, and no toolbar while changes are written at once; Log has filter, Clear. A dialog with no such control has no toolbar.
+**Toolbar.** Height `DialogToolbarH` (41), side padding 16, gap 8, `BorderSoft` line under it; controls `CompactH` (fields `RowH`), a field that takes the room has `Grow(1)`. It holds what acts on the whole dialog: Settings has Save only, and no toolbar while changes are written at once; Log has filter, Clear. A dialog with no such control has no toolbar.
 
 **Message dialogs.** Title bar (title only), then a body padded 16 with gap 12: a muted `Lines` text, any form, the input line, then the buttons on the right (gap 8, the primary one lit). Width `MessageDialogW` (380).
 - The welcome dialog is a message dialog 560 wide: the lead text, then the release notes scrolling in a column (a bold heading and bulleted muted points per section, 12 between sections, 4 inside, points wrapped by hand at 64 characters), and one primary button, Get started.

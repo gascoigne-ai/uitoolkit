@@ -41,15 +41,15 @@ type ThemeChoice struct {
 const (
 	MinFontSize     = 10
 	MaxFontSize     = 24
-	DefaultFontSize = 14
+	DefaultFontSize = 15
 
 	MinSmallSize     = 8
 	MaxSmallSize     = 24
-	DefaultSmallSize = 12
+	DefaultSmallSize = 13
 
 	MinCodeSize     = 8
 	MaxCodeSize     = 32
-	DefaultCodeSize = 13
+	DefaultCodeSize = 14
 )
 
 // FontSizes are the sizes in pixels of the three faces: interface, small

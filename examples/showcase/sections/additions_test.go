@@ -32,8 +32,8 @@ func TestSectionsShowTheWidgets(t *testing.T) {
 	}{
 		{"key chips", "buttons", nil, []string{`"Ctrl"`, `"Shift"`, `"P"`, `","`, `"+"`}},
 		{"text menus", "text", nil, []string{
-			"fieldB w=320 bg=sunken control=field onRightClick=true rect=114,38,",
-			"fieldB w=320 bg=sunken control=field onRightClick=true rect=114,118,",
+			"fieldB w=320 bg=sunken control=field onRightClick=true rect=114,39,",
+			"fieldB w=320 bg=sunken control=field onRightClick=true rect=114,121,",
 		}},
 		{"dialog parts", "overlays", (*Showcase).openPanel, []string{
 			`"Preferences"`, `"Editor"`, `"Modified"`, "tip=Close (Esc)", "borderB=border-soft", "focusScope=true",
@@ -42,7 +42,7 @@ func TestSectionsShowTheWidgets(t *testing.T) {
 		{"toasts", "overlays", postBothToasts, []string{`"Settings saved"`, `"Export failed"`, `"2 shown"`}},
 		{"stack", "layout", nil, []string{" stack h=72 bg=sunken control=table", "float=true"}},
 		{"hscroll", "layout", nil, []string{"hscrollB", `"Tag 1"`, `"Tag 24"`}},
-		{"inset rule", "layout", nil, []string{"flow w=1 h=28 padT=6 padB=6"}},
+		{"inset rule", "layout", nil, []string{"flow w=1 h=29 padT=6 padB=6"}},
 		{"lines", "layout", nil, []string{`"Lines draws one text per line,"`, `"so a short note keeps its breaks"`, `"without a paragraph."`}},
 		{"custom", "layout", nil, []string{"meterB meter=65"}},
 		{"resizable", "layout", nil, []string{"resizableB w=240 h=80", `"240 × 80"`}},

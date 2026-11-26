@@ -157,8 +157,8 @@ func TestParseThemeWithoutBaseHasDefaultSizes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if th.FontSize != 14 || th.SmallSize != 12 || th.MonoSize != 13 {
-		t.Fatalf("sizes = %v, %v, %v; want 14, 12, 13", th.FontSize, th.SmallSize, th.MonoSize)
+	if th.FontSize != 15 || th.SmallSize != 13 || th.MonoSize != 14 {
+		t.Fatalf("sizes = %v, %v, %v; want 15, 13, 14", th.FontSize, th.SmallSize, th.MonoSize)
 	}
 }
 

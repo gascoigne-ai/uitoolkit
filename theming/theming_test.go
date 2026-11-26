@@ -120,7 +120,7 @@ func TestFontSizesResolved(t *testing.T) {
 		sizes                       FontSizes
 		wantUI, wantSmall, wantMono float64
 	}{
-		{"zero is every default", FontSizes{}, 14, 12, 13},
+		{"zero is every default", FontSizes{}, 15, 13, 14},
 		{"inside", FontSizes{UI: 16, Small: 14, Code: 15}, 16, 14, 15},
 		{"independent", FontSizes{UI: 10, Small: 24, Code: 8}, 10, 24, 8},
 		{"lowest", FontSizes{UI: MinFontSize, Small: MinSmallSize, Code: MinCodeSize}, 10, 8, 8},
@@ -146,8 +146,8 @@ func TestCatalogThemeUsesTheThreeSizes(t *testing.T) {
 		wantUI, wantSmall, wantMono float64
 	}{
 		{Prefs{Theme: "dark", Fonts: FontSizes{UI: 18, Small: 11, Code: 20}}, 18, 11, 20},
-		{Prefs{Theme: "dark"}, 14, 12, 13},
-		{Prefs{Theme: "light", Fonts: FontSizes{UI: 10}}, 10, 12, 13},
+		{Prefs{Theme: "dark"}, 15, 13, 14},
+		{Prefs{Theme: "light", Fonts: FontSizes{UI: 10}}, 10, 13, 14},
 	} {
 		th := catalog.Theme(test.prefs)
 		if th.FontSize != test.wantUI || th.SmallSize != test.wantSmall || th.MonoSize != test.wantMono {
@@ -206,6 +206,9 @@ func TestBaseLineIsTheDefaultFaceLineHeight(t *testing.T) {
 	}
 	if got := ctx.LineH(ctx.F.Small); got != core.BaseSmallLine {
 		t.Errorf("small face line height = %d, BaseSmallLine = %d", got, core.BaseSmallLine)
+	}
+	if ctx.Sizes != core.DefaultSizes() {
+		t.Errorf("sizes of the default faces = %+v, DefaultSizes() = %+v", ctx.Sizes, core.DefaultSizes())
 	}
 }
 

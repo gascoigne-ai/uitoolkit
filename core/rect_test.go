@@ -193,6 +193,6 @@ func TestCtrlHomeEndMapToDocMovement(t *testing.T) {
 func testTheme() Theme {
 	return Theme{
 		Colors:   map[Token]color.RGBA{Text: RGB(0xffffff), Bg: RGB(0x101010)},
-		FontSize: 14, SmallSize: 12, MonoSize: 13,
+		FontSize: 15, SmallSize: 13, MonoSize: 14,
 	}
 }

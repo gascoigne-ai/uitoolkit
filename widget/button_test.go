@@ -160,7 +160,7 @@ func TestListRowLooksSelectedOrHoverable(t *testing.T) {
 // shortens with an ellipsis instead of wrapping.
 func TestNoteIsOneColoredLineOfSmallText(t *testing.T) {
 	note := Note("Port must be a number", core.Error)
-	hasProps(t, note, "h=18")
+	hasProps(t, note, "h=19")
 	kids := note.Children()
 	if len(kids) != 1 {
 		t.Fatalf("want one text child, got %d", len(kids))

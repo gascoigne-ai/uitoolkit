@@ -1,27 +1,27 @@
-scrollB padL=12 padT=12 padR=12 padB=12 gap=12 grow=1 clip=true rect=0,0,844,684
-  textB text="TEXT FIELDS" fg=muted small=true rect=12,12,820,14
-  flow h=28 gap=12 rect=12,38,820,28
-    textB text="Name" w=90 rect=12,38,90,28
-    fieldB w=320 bg=sunken control=field onRightClick=true rect=114,38,320,28
-  flow h=28 gap=12 rect=12,78,820,28
-    textB text="Password" w=90 rect=12,78,90,28
-    fieldB w=320 bg=sunken control=field rect=114,78,320,28
-  flow h=28 gap=12 rect=12,118,820,28
-    textB text="Search" w=90 rect=12,118,90,28
-    fieldB w=320 bg=sunken control=field onRightClick=true rect=114,118,320,28
-  textB text="TEXT AREA" fg=muted small=true rect=12,158,820,14
-  areaB h=220 bg=sunken control=field rect=12,184,820,220
-  textB text="A text area keeps Tab to indent; Escape and a click elsewhere leave it." fg=muted small=true rect=12,416,820,14
-  textB text="CARET" fg=muted small=true rect=12,442,820,14
-  flow h=28 gap=12 rect=12,468,820,28
-    textB text="Shape" w=90 rect=12,468,90,28
-    flow gap=6 rect=114,468,300,28
-      flow padL=10 padR=10 minW=96 bg=accent control=primary shrink=true lighten=true onClick=true rect=114,468,96,28
-        textB text="Block" grow=1 fg=accent-text ellipsis=true center=true rect=124,468,76,28
-      flow padL=10 padR=10 minW=96 bg=sunken control=button shrink=true lighten=true onClick=true rect=216,468,96,28
-        textB text="Bar" grow=1 fg=chip-text ellipsis=true center=true rect=226,468,76,28
-      flow padL=10 padR=10 minW=96 bg=sunken control=button shrink=true lighten=true onClick=true rect=318,468,96,28
-        textB text="Underline" grow=1 fg=chip-text ellipsis=true center=true rect=328,468,76,28
-  flow h=28 gap=8 alignItems=2 onClick=true rect=12,508,820,28
-    checkB rect=12,515,14,14
-    textB text="Blink" rect=34,514,31,16
+scrollB padL=12 padT=12 padR=12 padB=12 gap=12 grow=1 clip=true rect=0,0,844,683
+  textB text="TEXT FIELDS" fg=muted small=true rect=12,12,820,15
+  flow h=29 gap=12 rect=12,39,820,29
+    textB text="Name" w=90 rect=12,39,90,29
+    fieldB w=320 bg=sunken control=field onRightClick=true rect=114,39,320,29
+  flow h=29 gap=12 rect=12,80,820,29
+    textB text="Password" w=90 rect=12,80,90,29
+    fieldB w=320 bg=sunken control=field rect=114,80,320,29
+  flow h=29 gap=12 rect=12,121,820,29
+    textB text="Search" w=90 rect=12,121,90,29
+    fieldB w=320 bg=sunken control=field onRightClick=true rect=114,121,320,29
+  textB text="TEXT AREA" fg=muted small=true rect=12,162,820,15
+  areaB h=220 bg=sunken control=field rect=12,189,820,220
+  textB text="A text area keeps Tab to indent; Escape and a click elsewhere leave it." fg=muted small=true rect=12,421,820,15
+  textB text="CARET" fg=muted small=true rect=12,448,820,15
+  flow h=29 gap=12 rect=12,475,820,29
+    textB text="Shape" w=90 rect=12,475,90,29
+    flow gap=6 rect=114,475,300,29
+      flow padL=10 padR=10 minW=96 bg=accent control=primary shrink=true lighten=true onClick=true rect=114,475,96,29
+        textB text="Block" grow=1 fg=accent-text ellipsis=true center=true rect=124,475,76,29
+      flow padL=10 padR=10 minW=96 bg=sunken control=button shrink=true lighten=true onClick=true rect=216,475,96,29
+        textB text="Bar" grow=1 fg=chip-text ellipsis=true center=true rect=226,475,76,29
+      flow padL=10 padR=10 minW=96 bg=sunken control=button shrink=true lighten=true onClick=true rect=318,475,96,29
+        textB text="Underline" grow=1 fg=chip-text ellipsis=true center=true rect=328,475,76,29
+  flow h=29 gap=8 alignItems=2 onClick=true rect=12,516,820,29
+    checkB rect=12,523,15,15
+    textB text="Blink" rect=35,522,34,17

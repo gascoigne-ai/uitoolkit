@@ -17,7 +17,6 @@ const (
 	detailMinW    = 240
 	listEntries   = 60
 	posedEntry    = 7
-	posedListY    = 112
 	posedStripTab = 2
 )
 
@@ -29,7 +28,8 @@ var stripTabs = []TabItem{
 
 var detailTabs = []TabItem{{Label: "Summary"}, {Label: "Activity", Badge: 2}, {Label: "Notes"}}
 
-var listsPoses = []Pose{{Apply: func(s *Showcase, _ *core.Ctx) image.Point {
+var listsPoses = []Pose{{Apply: func(s *Showcase, ctx *core.Ctx) image.Point {
+	posedListY := 4 * ctx.Sizes.Row
 	s.widgets.picked, s.widgets.list.Y, s.widgets.tab = posedEntry, posedListY, posedStripTab
 	return OffCanvas
 }}}

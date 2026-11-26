@@ -16,7 +16,8 @@ func TestSizesForTable(t *testing.T) {
 		line, small int
 		want        Sizes
 	}{
-		{"default", 16, 14, Sizes{16, 14, 28, 24, 20, 22, 18, 36, 40, 44, 40, 32, 44, 14}},
+		{"default", 17, 15, Sizes{17, 15, 29, 25, 21, 23, 19, 37, 41, 45, 41, 33, 45, 15}},
+		{"line 16 (the old default)", 16, 14, Sizes{16, 14, 28, 24, 20, 22, 18, 36, 40, 44, 40, 32, 44, 14}},
 		{"small text", 13, 11, Sizes{13, 11, 25, 21, 17, 19, 15, 33, 37, 41, 37, 29, 41, 11}},
 		{"line 15", 15, 13, Sizes{15, 13, 27, 23, 19, 21, 17, 35, 39, 43, 39, 31, 43, 13}},
 		{"line 19", 19, 15, Sizes{19, 15, 31, 27, 23, 25, 19, 39, 43, 47, 43, 35, 47, 15}},
@@ -59,8 +60,8 @@ func checkSizeInvariants(t *testing.T, sizes Sizes) {
 
 func TestSizesScopeNames(t *testing.T) {
 	want := map[string]any{
-		"rowH": 28, "compactH": 24, "slimH": 20, "labelH": 22, "noteH": 18, "toolbarH": 36, "tabBarH": 40,
-		"dialogToolbarH": 40, "dialogTitleH": 44, "iconBtnW": 32, "wordBtnW": 44, "checkboxSize": 14,
+		"rowH": 29, "compactH": 25, "slimH": 21, "labelH": 23, "noteH": 19, "toolbarH": 37, "tabBarH": 41,
+		"dialogToolbarH": 41, "dialogTitleH": 45, "iconBtnW": 33, "wordBtnW": 45, "checkboxSize": 15,
 		"tabLead": 2, "edgeW": 2, "nearGap": 4, "shadowOffset": 4, "tightGap": 6, "tabGap": 6,
 		"ruleInset": 6, "edgeGrab": 6, "looseGap": 8, "cellPad": 8, "labelPad": 10, "tabSepInset": 10,
 		"gutter": 12, "dialogPad": 16,

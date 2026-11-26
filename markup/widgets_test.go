@@ -682,7 +682,7 @@ func TestSmallLinesElementMatchesTheGoSmallLines(t *testing.T) {
 		Scope{"description": description})
 	goView := view.Col(view.Lines(description, core.Muted, view.Small()))
 	sameLayout(t, testCtx(t), template, goView, 300, 80)
-	if !strings.Contains(view.Dump(template), `text="before giving up" h=18 fg=muted small=true`) {
+	if !strings.Contains(view.Dump(template), `text="before giving up" h=19 fg=muted small=true`) {
 		t.Fatalf("the lines are not small texts of note height:\n%s", view.Dump(template))
 	}
 }

@@ -16,7 +16,7 @@ import (
 const (
 	navW       = 180
 	overlayW   = 160
-	overlayTop = 44 // under the top bar
+	overlayTop = core.ToolbarH + core.LooseGap // under the top bar
 )
 
 // Update runs one tick in a window of width by height logical pixels: the
