@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Changed (behavior): `theming.ParseTheme` rejects a theme file that is not one JSON object (`null`, data after the object) or whose `iconStroke` is outside 0 to 4, and keeps a base's `RadiusScale`, so a theme laid over square corners stays square.
 - Breaking (behavior): the default text sizes are 15/13/14 px (interface/small/code), up from 14/12/13 (`theming.DefaultFontSize`, `DefaultSmallSize`, `DefaultCodeSize`). `core.BaseLine` is 17 and `core.BaseSmallLine` 15, so `RowH` (29), `CompactH`/`widget.MenuRowH` (25), `SlimH`, `LabelH`, `NoteH`, the bars, `IconBtnW`, `WordBtnW` and `CheckboxSize` (15) grow by 1 px, as does `DefaultSizes()`. Migrate: pass `theming.FontSizes{UI: 14, Small: 12, Code: 13}` to keep the old size.
 - Breaking (behavior): the text caret no longer blinks by default. Migrate: `ctx.Caret.Blink = true`. `Ctx.CaretReads` no longer moves while the caret is steady.
 - Added: `core.Caret` and `core.CaretShape` (`CaretBlock`, `CaretBar`, `CaretUnderline`), set through `Ctx.Caret`, choose the shape of the text caret and whether it blinks; `core.CaretW` is the thickness of the bar and the underline.
