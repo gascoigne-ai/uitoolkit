@@ -122,6 +122,21 @@ func TestMenuRowClickPicksOnlyEnabledRows(t *testing.T) {
 	}
 }
 
+// The rule of a separator row had no width along the row's main axis, so it
+// was laid out 0 wide and a menu showed no separator lines.
+func TestMenuSeparatorRuleSpansTheRow(t *testing.T) {
+	c := testCtx(t)
+	state := NewMenu(5, 5, []MenuItem{{Label: "a"}, {Separator: true}, {Label: "b"}})
+	menu := Menu(c, &state)
+	Layout(c, Stack(menu), 400, 300)
+	separator := menu.Children()[1]
+	row, rule := separator.Rect(), separator.Children()[0].Rect()
+	want := core.Rect{X: row.X + core.RuleInset, Y: row.Y + (MenuSepH-1)/2, W: row.W - 2*core.RuleInset, H: 1}
+	if rule != want {
+		t.Fatalf("the separator rule is %+v in the row %+v, want %+v", rule, row, want)
+	}
+}
+
 // The open menu lives in the context, so any element can open one and the
 // app only mounts PopupMenuLayer once.
 func TestPopupMenuOpensPicksAndClosesBeforeRunning(t *testing.T) {

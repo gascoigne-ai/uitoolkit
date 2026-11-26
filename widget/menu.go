@@ -106,7 +106,9 @@ func Menu(ctx *core.Ctx, state *MenuState, opts ...Option) *El {
 
 func menuRow(ctx *core.Ctx, state *MenuState, index int, item MenuItem, pick func(int)) *El {
 	if item.Separator {
-		return Row(H(MenuSepH), PadX(core.RuleInset), HRule())
+		// The Row centres the 1px line. Width is its main axis, where a rule
+		// with no width of its own is 0 wide unless it grows.
+		return Row(H(MenuSepH), PadX(core.RuleInset), HRule(Grow(1)))
 	}
 	color := core.Text
 	if item.Disabled {
