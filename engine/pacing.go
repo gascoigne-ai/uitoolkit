@@ -6,7 +6,7 @@ package engine
 import "github.com/gascoigne-ai/uitoolkit/core"
 
 // MinFPS is the fewest frames drawn per second, whatever happens: it keeps
-// the text caret blinking and the window content fresh, and costs little.
+// a blinking caret's phase and the window content fresh, and costs little.
 const MinFPS = 10
 
 // Ticks of no activity before the update rate drops, and the two rates.

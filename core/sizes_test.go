@@ -19,6 +19,7 @@ func TestSizeConstantsFollowTheRules(t *testing.T) {
 		{"NoteH", NoteH, BaseSmallLine + 2*(1*Unit), 18, 0},
 		{"TabLead", TabLead, StepHair, 2, 1},
 		{"EdgeW", EdgeW, StepHair, 2, 1},
+		{"CaretW", CaretW, StepHair, 2, 1},
 		{"NearGap", NearGap, StepNear, 4, 2},
 		{"ShadowOffset", ShadowOffset, StepNear, 4, 2},
 		{"TightGap", TightGap, StepTight, 6, 3},

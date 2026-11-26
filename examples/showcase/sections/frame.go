@@ -27,6 +27,10 @@ func (s *Showcase) Update(ctx *core.Ctx, width, height int) error {
 		return err
 	}
 	ctx.Cursor = core.CursorDefault
+	if ctx.In.RestartsCaret() {
+		ctx.RestartCaret()
+	}
+	s.syncCaret(ctx)
 	s.widgets.toasts.Prune(s.now())
 	if ctx.In.Pressed(render.KeyF3) {
 		s.Overlay = !s.Overlay
@@ -38,7 +42,17 @@ func (s *Showcase) Update(ctx *core.Ctx, width, height int) error {
 	root := s.View(ctx, width, height)
 	Layout(ctx, root, width, height)
 	Update(ctx, root)
+	s.syncCaret(ctx)        // a handler may have changed the caret
 	return s.syncTheme(ctx) // a handler may have changed the theme
+}
+
+// syncCaret puts the chosen caret on the context. A blink that is turned on
+// starts in its shown phase.
+func (s *Showcase) syncCaret(ctx *core.Ctx) {
+	if s.Caret.Blink && !ctx.Caret.Blink {
+		ctx.RestartCaret()
+	}
+	ctx.Caret = s.Caret
 }
 
 // escape closes what is on top: the popup menu, else the dialog.
@@ -53,6 +67,7 @@ func (s *Showcase) escape(ctx *core.Ctx) {
 // Draw paints one frame of width by height logical pixels on canvas.
 func (s *Showcase) Draw(ctx *core.Ctx, width, height int, canvas render.Canvas) {
 	s.beginFrame(ctx)
+	s.syncCaret(ctx)
 	root := s.View(ctx, width, height)
 	Layout(ctx, root, width, height)
 	Draw(ctx, root, canvas)

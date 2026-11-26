@@ -13,6 +13,7 @@ func TestTheCaretBlinksOnAWallClockAndRestartsOnActivity(t *testing.T) {
 	}
 	now := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
 	ctx.Now = func() time.Time { return now }
+	ctx.Caret.Blink = true
 	ctx.RestartCaret()
 	steps := []struct {
 		after time.Duration
@@ -42,6 +43,7 @@ func TestTheBlinkRateDoesNotDependOnTheUpdateRate(t *testing.T) {
 	ctx, _ := NewCtx(testTheme(), testDevice{})
 	start := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
 	ctx.Now = func() time.Time { return start.Add(600 * time.Millisecond) }
+	ctx.Caret.Blink = true
 	ctx.CaretSince = start
 	ctx.Tick = 7
 	first := ctx.CaretVisible()
@@ -90,6 +92,7 @@ func TestCaretVisibleCountsReads(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	ctx.Caret.Blink = true
 	if ctx.CaretReads != 0 {
 		t.Fatalf("CaretReads = %d before any read", ctx.CaretReads)
 	}
@@ -98,5 +101,40 @@ func TestCaretVisibleCountsReads(t *testing.T) {
 	ctx.CaretVisible()
 	if ctx.CaretReads != 2 {
 		t.Fatalf("CaretReads = %d after two reads, want 2", ctx.CaretReads)
+	}
+}
+
+func TestAZeroCaretIsASteadyBlock(t *testing.T) {
+	ctx, err := NewCtx(testTheme(), testDevice{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ctx.Caret != (Caret{Shape: CaretBlock}) {
+		t.Fatalf("Caret = %+v, want a steady block", ctx.Caret)
+	}
+	start := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
+	now := start
+	ctx.Now = func() time.Time { return now }
+	ctx.RestartCaret()
+	for _, after := range []time.Duration{0, 500 * time.Millisecond, 900 * time.Millisecond, 1500 * time.Millisecond} {
+		now = start.Add(after)
+		if !ctx.CaretVisible() {
+			t.Errorf("after %v: a steady caret is hidden", after)
+		}
+	}
+}
+
+// A kept drawing redraws for the blink only when CaretReads moved while it
+// was drawn, so a steady caret must not count.
+func TestASteadyCaretCountsNoReads(t *testing.T) {
+	ctx, err := NewCtx(testTheme(), testDevice{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx.CaretVisible()
+	ctx.RestartCaret()
+	ctx.CaretVisible()
+	if ctx.CaretReads != 0 {
+		t.Fatalf("CaretReads = %d for a steady caret, want 0", ctx.CaretReads)
 	}
 }

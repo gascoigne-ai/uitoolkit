@@ -106,7 +106,7 @@ func (b *fieldB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	if f.Focused && ctx.CaretVisible() {
 		shown, cursor := []rune(f.Display()), f.clamp(f.Cursor)
 		cx := r.X + b.textInset() - f.ScrollX + ctx.Width(ctx.F.UI, string(shown[:cursor]))
-		drawBlockCaret(ctx, dst, ctx.F.UI, caretGlyph(shown, cursor), cx, r)
+		drawCaret(ctx, dst, ctx.F.UI, caretGlyph(shown, cursor), cx, r)
 	}
 }
 

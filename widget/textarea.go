@@ -306,7 +306,7 @@ func (a *TextArea) Draw(ctx *core.Ctx, dst render.Canvas, rect core.Rect) {
 		row, offset := a.caretRow(g)
 		cx, cy := g.textX-a.ScrollX+g.colX(offset), rect.Y+row*g.lineH-a.ScrollY
 		cell := core.Rect{X: cx, Y: cy, W: g.colX(offset+1) - g.colX(offset), H: g.lineH}
-		drawBlockCaret(ctx, text, ctx.F.Mono, caretGlyph([]rune(a.Text), a.Cursor), cx, cell)
+		drawCaret(ctx, text, ctx.F.Mono, caretGlyph([]rune(a.Text), a.Cursor), cx, cell)
 	}
 	drawBars(ctx, dst, b, a.drag, g.contentW(core.Rect{W: b.viewW}), g.contentH(), a.ScrollX, a.ScrollY)
 	if a.Focused {

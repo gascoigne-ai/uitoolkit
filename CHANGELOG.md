@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Breaking (behavior): the text caret no longer blinks by default. Migrate: `ctx.Caret.Blink = true`. `Ctx.CaretReads` no longer moves while the caret is steady.
+- Added: `core.Caret` and `core.CaretShape` (`CaretBlock`, `CaretBar`, `CaretUnderline`), set through `Ctx.Caret`, choose the shape of the text caret and whether it blinks; `core.CaretW` is the thickness of the bar and the underline.
 - Breaking: the Ebitengine renderer moved to its own module `github.com/gascoigne-ai/uitoolkit/renderer/ebiten` (package `ebitenrender`); the root module no longer requires Ebitengine. Migrate: change the import path to `github.com/gascoigne-ai/uitoolkit/renderer/ebiten` and `go get` the renderer module. Tags are `vX.Y.Z` for the toolkit and `renderer/ebiten/vX.Y.Z` for the renderer.
 - Removed: `core.Surface`, `Ctx.CanvasOf`, `Ctx.EbitenImage`, the old `Ctx.Clip(*ebiten.Image, Rect)`, `Sampler.Read`, `systeminfo.Ebiten` and `ebitenrender.ImageOf`. The toolkit packages no longer import Ebitengine.
 - Renamed: `Ctx.ClipCanvas` is now `Ctx.Clip`. The `Ctx` draw calls and `view.Draw`, `DrawBelow` and `DrawFrom` take a `render.Canvas`. Use `sampler.Sample(ebitenrender.ReadInput())` for input.

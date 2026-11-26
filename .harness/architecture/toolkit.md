@@ -169,7 +169,7 @@ state: no diffing and no reactive system. Elements and options are indexed in th
   `Scroll`), its children cannot be hit; the click flag still passes, so fields can blur.
 - **Modal owns the pointer.** While a `Modal` element is visible, nothing under it gets clicks,
   wheel or hover (`Ctx.HoverOff`), and a click outside runs `OnDismiss`, except for a dialog (`KeepOnOutsideClick`, set by `widget.Dialog`): it swallows the click and stays until its close button or Escape runs `Dismiss`, so a stray click on the window behind cannot throw away what the user is doing. Menus and pick lists keep closing on a click elsewhere. Toasts are not modal.
-- **A modal splits the root's children.** `view.ModalLayer(ctx, root)` is the index of the first visible direct child of the root that is a `Modal` (menus included: a context menu alone gives the layer under it), or -1 when the modal is deeper, the root draws after its children (`Border`, a control style border, an `OverDrawer`, an edge) or is itself modal. `view.DrawBelow` paints the root's own part and the children before that index, `view.DrawFrom` the children from it on, both with hover off and the root's clip; one after the other on one image they paint what `Draw` paints, element for element (`El.draw` is `drawSelf`, the children, `drawAfter`). An app keeps the first part in an image (`ui/window` `baseSnapshot`). `Ctx.CaretReads` counts `CaretVisible` calls, so a kept drawing knows it shows the blink phase.
+- **A modal splits the root's children.** `view.ModalLayer(ctx, root)` is the index of the first visible direct child of the root that is a `Modal` (menus included: a context menu alone gives the layer under it), or -1 when the modal is deeper, the root draws after its children (`Border`, a control style border, an `OverDrawer`, an edge) or is itself modal. `view.DrawBelow` paints the root's own part and the children before that index, `view.DrawFrom` the children from it on, both with hover off and the root's clip; one after the other on one image they paint what `Draw` paints, element for element (`El.draw` is `drawSelf`, the children, `drawAfter`). An app keeps the first part in an image (`ui/window` `baseSnapshot`). `Ctx.CaretReads` counts `CaretVisible` calls made while the caret blinks, so a kept drawing knows it shows the blink phase.
 - **The runtime draws on a `render.Canvas`.** `Draw`, `DrawBelow` and `DrawFrom` take a
   `render.Canvas`; `drawSelf`, `drawAfter`, `kidsDst`
   (`Ctx.Clip`) and `drawKids` work on it, and culling compares with `kidsDst.Bounds()`. A clip
@@ -286,9 +286,13 @@ Each is also said in the doc comment of what breaks the rule; a new exception ad
   which `ebitenrender` draws from cached corner masks. `Ctx.Stats` counts those calls
   (`MaskFills`, `RingFills`) and the real measurements; `BenchmarkDrawStats` in
   `internal/ui/window` reports them.
-- **Caret blink** follows the clock (`Ctx.CaretVisible`), not ticks, so its rate holds when the idle
-  app drops from 60 to 30 updates. `engine.MinFPS` (10) draws at least every 100 ms, so a phase
-  change shows.
+- **Caret blink** is off by default: `Ctx.Caret` (`core.Caret`: a shape, block, bar or
+  underline, and `Blink`) is zero for a steady block. A steady caret is always visible and
+  `Ctx.CaretReads` does not move; it moves only while blinking. The blink follows the clock
+  (`Ctx.CaretVisible`), not ticks, so its rate holds when the idle app drops from 60 to 30 updates,
+  and it starts over only when the app calls `RestartCaret`. `engine.MinFPS` (10) draws at least
+  every 100 ms, so a phase change shows. A shape that names none draws as the block, at the one
+  lookup of the widget's shape table (`styleOf`).
 - **Width cache.** `Ctx.Width` remembers a measured string by face (font source and size) and text (up to
   4096 entries, then the map is dropped); `SetScale`, `SetTheme` and `SetFonts` clear it. An
   element's own font makes a new face value each call, so the key is what the face is made of,
@@ -321,7 +325,9 @@ two packages.
 - **`sections`** is the whole UI and imports no renderer (`TestSectionsImportNoEbiten`), so it runs
   on a fake device. `Showcase` is the state: indexes into the tables `Sections`, `Forms` and
   `ScaleSteps`, the theming preferences, the live theme text, and one struct of named widget states
-  that outlives a section switch. Nothing is saved. `Select` closes the popup menu and the dialog,
+  that outlives a section switch, and the chosen `core.Caret` (controls in the text section),
+  which `Update` and `Draw` put on the context; `Update` restarts the blink on input
+  (`Input.RestartsCaret`) and when it is turned on. Nothing is saved. `Select` closes the popup menu and the dialog,
   since the menu lives in `core.Ctx` and would cover the next section.
 - **Two forms.** Each `Sections` row builds its page in Go and from a markup template, and the Form
   control switches. `TestGoAndMarkupFormsDumpAlike` compares dump and painted ops, and

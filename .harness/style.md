@@ -39,7 +39,7 @@ Logical pixels; the interface scale multiplies them at draw time. Every size is 
 
 | Step | Units | Value | Roles |
 |---|---|---|---|
-| `StepHair` | 1 | 2 | `TabLead` (room before the first tab), `EdgeW` (open tab outline) |
+| `StepHair` | 1 | 2 | `TabLead` (room before the first tab), `EdgeW` (open tab outline), `CaretW` (bar or underline caret) |
 | `StepNear` | 2 | 4 | `NearGap` (items that read as one), `ShadowOffset` |
 | `StepTight` | 3 | 6 | `TightGap` (controls side by side), `TabGap` (above tabs), `RuleInset` (menu separator), `EdgeGrab` (resize grab inside a border) |
 | `StepLoose` | 4 | 8 | `LooseGap` (blocks of a pane in a column, rows that need air), `CellPad` (table and header cells) |
@@ -153,7 +153,7 @@ An unknown token draws in `Text`, so a typo stays visible.
 
 **Buttons.** `Button`: `Sunken` fill, `ChipText` label, outlined, brightens on hover, label padded 10, ellipsized only when the row has no room. `PrimaryButton`: `Accent` fill, `AccentText` label, `AccentLine` outline. `SegmentChip`: a primary button when chosen, a button otherwise. `LinkButton`: `AccentLine` text on no fill, `Hover` under the pointer. Dialog buttons are `RowH` high and at least 80 wide.
 
-**Fields.** `Sunken`, `RowH` high (`CompactH` inline), `BorderStrong` outline, `AccentLine` when focused; variables in a field are green when resolved and red when not (`internal/feature/send/FEATURE.md`).
+**Fields.** `Sunken`, `RowH` high (`CompactH` inline), `BorderStrong` outline, `AccentLine` when focused; variables in a field are green when resolved and red when not (`internal/feature/send/FEATURE.md`). The text caret of fields and text areas is `Accent`: by default a steady block with its character in `AccentText`; the app may choose a bar or an underline (`CaretW` thick, the character left as it is) and blinking (`Ctx.Caret`), which no theme sets.
 
 **Menus.** `Bg` panel, `menu` control, shadow, inset `MenuPad` (4), 120 to 420 wide; rows `MenuRowH` (24) padded 10, the hot row `Selected`, others `Hover` on hover; shortcut and hint lines small and muted; separators 9 high.
 

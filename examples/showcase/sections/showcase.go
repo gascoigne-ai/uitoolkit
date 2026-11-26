@@ -38,6 +38,9 @@ type Showcase struct {
 	Prefs theming.Prefs
 	// Overlay shows the frame time and the draw counts; F3 toggles it.
 	Overlay bool
+	// Caret is the text caret of every field and text area; Update and Draw
+	// put it on the context.
+	Caret core.Caret
 
 	// ThemeJSON is a theme file the user edits, laid over the chosen theme;
 	// ApplyThemeJSON reads it. ThemeErr says why the last edit was refused,

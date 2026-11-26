@@ -99,6 +99,7 @@ const (
 const (
 	TabLead      = StepHair   // room before the first tab of a strip
 	EdgeW        = StepHair   // the width of an open tab's outline
+	CaretW       = StepHair   // the thickness of a bar or underline caret
 	NearGap      = StepNear   // between items that read as one: a label and its count, a heading and its lines
 	ShadowOffset = StepNear   // how far a shadow is shifted down and right
 	TightGap     = StepTight  // controls side by side
