@@ -65,3 +65,15 @@ func TestFaceWithFontSourceIsComparable(t *testing.T) {
 		t.Error("faces of two loaded fonts are equal")
 	}
 }
+
+// A program that animates a text size must not keep every face it ever used.
+func TestAFontSourceKeepsMeasuringRightPastItsFaceCache(t *testing.T) {
+	source := newFont(t)
+	for step := range 100 {
+		size := 10 + float64(step)/4
+		want, _ := text.Measure("Hg", textV2Face(t, size), 0)
+		if got := source.Measure("Hg", size); got != want {
+			t.Fatalf("size %v: Measure = %v, want %v", size, got, want)
+		}
+	}
+}

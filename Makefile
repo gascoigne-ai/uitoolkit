@@ -15,6 +15,8 @@ vet:
 test:
 	GOWORK=off go test -race ./...
 	go test -race ./renderer/ebiten/... ./examples/...
+# Allocation counts hold only without the race detector (alloc_test.go).
+	go test -run '^TestTextCallsAllocate' ./renderer/ebiten
 
 # The root module must not depend on a GPU library, tests included, must be
 # tidy and must build without cgo.

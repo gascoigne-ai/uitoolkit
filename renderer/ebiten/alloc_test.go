@@ -1,3 +1,5 @@
+//go:build !race
+
 package ebitenrender_test
 
 import (
@@ -12,6 +14,10 @@ import (
 // Every label of a frame is drawn and measured through the font source, which
 // made a new face for each call. A caller that keeps its text/v2 face
 // allocates none, and a font source must not either.
+//
+// It runs without the race detector, which makes sync.Pool drop items at
+// random: text/v2 pools its draw buffers, so a call's allocation count then
+// varies from run to run. The Makefile gives it a pass of its own.
 func TestTextCallsAllocateNoMoreThanTextV2WithAKeptFace(t *testing.T) {
 	source := newFont(t)
 	face := render.Face{Source: source, Size: 13}
@@ -42,17 +48,5 @@ func TestTextCallsAllocateNoMoreThanTextV2WithAKeptFace(t *testing.T) {
 				t.Errorf("%v allocations a call, text/v2 with a kept face makes %v", got, want)
 			}
 		})
-	}
-}
-
-// A program that animates a text size must not keep every face it ever used.
-func TestAFontSourceKeepsMeasuringRightPastItsFaceCache(t *testing.T) {
-	source := newFont(t)
-	for step := range 100 {
-		size := 10 + float64(step)/4
-		want, _ := text.Measure("Hg", textV2Face(t, size), 0)
-		if got := source.Measure("Hg", size); got != want {
-			t.Fatalf("size %v: Measure = %v, want %v", size, got, want)
-		}
 	}
 }
