@@ -32,7 +32,7 @@ func (rig *gripRig) input(in core.Input) {
 	Update(rig.c, rig.root)
 }
 
-const gripX = tableGripW / 2
+var gripX = core.DefaultSizes().TableGripW / 2
 
 func TestPressingARowGripStartsADragOfThatRow(t *testing.T) {
 	rig := newGripRig(t)

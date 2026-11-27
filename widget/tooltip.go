@@ -10,13 +10,6 @@ import (
 // tooltip shows (half a second at 60 ticks per second).
 const tipDelayTicks = 30
 
-// Tooltip box metrics.
-const (
-	tipPadX   = 8
-	tipPadY   = 5
-	tipOffset = 16 // below and right of the pointer, clear of the cursor
-)
-
 // TooltipState is the delay bookkeeping of the tooltip layer. The window
 // owns it, so it can keep frames coming while a tooltip waits to show.
 type TooltipState struct {
@@ -62,12 +55,13 @@ func (s *TooltipState) draw(ctx *core.Ctx, dst render.Canvas, screen core.Rect) 
 		return
 	}
 	s.shown = true
-	w := ctx.Width(ctx.F.Small, ctx.TipText) + 2*tipPadX
-	h := ctx.LineH(ctx.F.Small) + 2*tipPadY
-	x := max(screen.X, min(ctx.In.X+tipOffset, screen.X+screen.W-w))
-	y := ctx.In.Y + tipOffset
+	padX, offset := ctx.Sizes.TipPadX, ctx.Sizes.TipOffset
+	w := ctx.Width(ctx.F.Small, ctx.TipText) + 2*padX
+	h := ctx.LineH(ctx.F.Small) + 2*ctx.Sizes.TipPadY
+	x := max(screen.X, min(ctx.In.X+offset, screen.X+screen.W-w))
+	y := ctx.In.Y + offset
 	if y+h > screen.Y+screen.H {
-		y = ctx.In.Y - tipOffset - h // no room below: above the pointer
+		y = ctx.In.Y - offset - h // no room below: above the pointer
 	}
 	box := core.Rect{X: x, Y: max(screen.Y, y), W: w, H: h}
 	st := ctx.Th.Style("tooltip")
@@ -77,5 +71,5 @@ func (s *TooltipState) draw(ctx *core.Ctx, dst render.Canvas, screen core.Rect) 
 		border = core.Border
 	}
 	ctx.OutlineStyled(dst, box, ctx.Color(border), st.Radius)
-	ctx.TextMid(dst, ctx.F.Small, ctx.TipText, box.X+tipPadX, box, ctx.Color(core.Text))
+	ctx.TextMid(dst, ctx.F.Small, ctx.TipText, box.X+padX, box, ctx.Color(core.Text))
 }

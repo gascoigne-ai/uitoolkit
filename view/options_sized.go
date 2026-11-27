@@ -19,25 +19,37 @@ const (
 	slotPadB
 	slotGap
 	slotMinW
+	slotML
+	slotMT
+	slotMR
+	slotMB
+	slotMaxH
 	slotBorderInset
 	slotFloatX
 	slotFloatY
+	slotDismissMargin
 	slotCount
 )
 
 // slotFields is where each slot's size goes.
 var slotFields = [slotCount]func(element *El) *int{
-	slotW:           func(element *El) *int { return &element.w },
-	slotH:           func(element *El) *int { return &element.h },
-	slotPadL:        func(element *El) *int { return &element.padL },
-	slotPadT:        func(element *El) *int { return &element.padT },
-	slotPadR:        func(element *El) *int { return &element.padR },
-	slotPadB:        func(element *El) *int { return &element.padB },
-	slotGap:         func(element *El) *int { return &element.gap },
-	slotMinW:        func(element *El) *int { return &element.minW },
-	slotBorderInset: func(element *El) *int { return &element.borderInset },
-	slotFloatX:      func(element *El) *int { return &element.fl.x },
-	slotFloatY:      func(element *El) *int { return &element.fl.y },
+	slotW:             func(element *El) *int { return &element.w },
+	slotH:             func(element *El) *int { return &element.h },
+	slotPadL:          func(element *El) *int { return &element.padL },
+	slotPadT:          func(element *El) *int { return &element.padT },
+	slotPadR:          func(element *El) *int { return &element.padR },
+	slotPadB:          func(element *El) *int { return &element.padB },
+	slotGap:           func(element *El) *int { return &element.gap },
+	slotMinW:          func(element *El) *int { return &element.minW },
+	slotML:            func(element *El) *int { return &element.mL },
+	slotMT:            func(element *El) *int { return &element.mT },
+	slotMR:            func(element *El) *int { return &element.mR },
+	slotMB:            func(element *El) *int { return &element.mB },
+	slotMaxH:          func(element *El) *int { return &element.maxH },
+	slotBorderInset:   func(element *El) *int { return &element.borderInset },
+	slotFloatX:        func(element *El) *int { return &element.fl.x },
+	slotFloatY:        func(element *El) *int { return &element.fl.y },
+	slotDismissMargin: func(element *El) *int { return &element.dismissMargin },
 }
 
 // follow makes the slots take size from the context's Sizes at every Layout.
@@ -99,6 +111,42 @@ func GapOf(size func(sizes core.Sizes) int) Option { return followOption(size, s
 // MinWOf is MinW that follows the context's Sizes, as PadOf does for a
 // padding. Like it, it has no template attribute: min-w="{{rowH}}".
 func MinWOf(size func(sizes core.Sizes) int) Option { return followOption(size, slotMinW) }
+
+// MarginOf is Margin that follows the context's Sizes, as PadOf does for a
+// padding: MarginOf(core.DialogMarginOf). Like HOf it has no template
+// attribute; a template writes margin="{{dialogMargin}}".
+func MarginOf(size func(sizes core.Sizes) int) Option {
+	return followOption(size, slotML, slotMT, slotMR, slotMB)
+}
+
+// MarginXOf is MarginX that follows the context's Sizes. It takes a Go func,
+// so it has no template attribute (see MarginOf).
+func MarginXOf(size func(sizes core.Sizes) int) Option { return followOption(size, slotML, slotMR) }
+
+// MarginYOf is MarginY that follows the context's Sizes. It takes a Go func,
+// so it has no template attribute (see MarginOf).
+func MarginYOf(size func(sizes core.Sizes) int) Option { return followOption(size, slotMT, slotMB) }
+
+// MarginLOf is MarginL that follows the context's Sizes. It takes a Go func,
+// so it has no template attribute (see MarginOf).
+func MarginLOf(size func(sizes core.Sizes) int) Option { return followOption(size, slotML) }
+
+// MarginTOf is MarginT that follows the context's Sizes. It takes a Go func,
+// so it has no template attribute (see MarginOf).
+func MarginTOf(size func(sizes core.Sizes) int) Option { return followOption(size, slotMT) }
+
+// MarginROf is MarginR that follows the context's Sizes. It takes a Go func,
+// so it has no template attribute (see MarginOf).
+func MarginROf(size func(sizes core.Sizes) int) Option { return followOption(size, slotMR) }
+
+// MarginBOf is MarginB that follows the context's Sizes. It takes a Go func,
+// so it has no template attribute (see MarginOf).
+func MarginBOf(size func(sizes core.Sizes) int) Option { return followOption(size, slotMB) }
+
+// MaxHOf is MaxH that follows the context's Sizes, as PadOf does for a
+// padding. A later MaxH, MaxH(0) included, replaces it. Like HOf it has no
+// template attribute; a template writes max-h="{{dialogMaxH}}".
+func MaxHOf(size func(sizes core.Sizes) int) Option { return followOption(size, slotMaxH) }
 
 // FloatAtOf is FloatAt for a point that follows the context's Sizes, such as
 // a corner kept a gutter off the window's edge. Like HOf it has no template

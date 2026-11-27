@@ -12,7 +12,7 @@ import (
 // themed size lays a template out as the Go options for it do.
 func TestTemplateSizesComeFromThemedCtx(t *testing.T) {
 	var metrics core.Metrics
-	for name, pixels := range map[string]int{"gutter": 21, "rowH": 50, "looseGap": 14, "dialogW": 200} {
+	for name, pixels := range map[string]int{"gutter": 21, "rowH": 50, "looseGap": 14, "dialogW": 200, "toastW": 123, "sliderH": 61} {
 		pinned, err := metrics.Pin(name, pixels)
 		if err != nil {
 			t.Fatal(err)
@@ -25,10 +25,11 @@ func TestTemplateSizesComeFromThemedCtx(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	template := Must("t.vml", `<col pad="{{gutter}}" gap="{{looseGap}}"><row h="{{rowH}}" w="{{dialogW}}"/><row h="{{rowH}}"/></col>`)
+	template := Must("t.vml", `<col pad="{{gutter}}" gap="{{looseGap}}"><row h="{{rowH}}" w="{{dialogW}}"/><row h="{{rowH}}" w="{{toastW}}"/><row h="{{sliderH}}"/></col>`)
 	fromTemplate := template.MustBuild(Scope(ctx.SizesScope()))
 	fromGo := view.Col(view.PadOf(core.GutterOf), view.GapOf(core.LooseGapOf),
-		view.Row(view.HOf(core.RowOf), view.WOf(core.DialogWOf)), view.Row(view.HOf(core.RowOf)))
+		view.Row(view.HOf(core.RowOf), view.WOf(core.DialogWOf)), view.Row(view.HOf(core.RowOf), view.WOf(core.ToastWOf)),
+		view.Row(view.HOf(core.SliderHOf)))
 	view.Layout(ctx, fromTemplate, 400, 300)
 	view.Layout(ctx, fromGo, 400, 300)
 	got, want := view.Dump(fromTemplate), view.Dump(fromGo)
@@ -37,5 +38,11 @@ func TestTemplateSizesComeFromThemedCtx(t *testing.T) {
 	}
 	if first := fromGo.Children()[0].Rect(); first != (core.Rect{X: 21, Y: 21, W: 200, H: 50}) {
 		t.Errorf("first row = %+v, want it at the themed gutter with the themed size", first)
+	}
+	if second := fromTemplate.Children()[1].Rect(); second.W != 123 {
+		t.Errorf("second row = %+v, want the themed toast width", second)
+	}
+	if third := fromTemplate.Children()[2].Rect(); third.H != 61 {
+		t.Errorf("third row = %+v, want the themed slider height", third)
 	}
 }

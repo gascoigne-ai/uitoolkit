@@ -120,7 +120,7 @@ func TestDividerDragStopsAtTheMinimumWidth(t *testing.T) {
 	r := newRig(t, &widths, true)
 	r.input(core.Input{X: 200, Y: 14, Click: true, Held: true})
 	r.input(core.Input{X: 36, Y: 14, Held: true}) // all the way left
-	if a, b := r.columnWidths(); a != MinColumnPx || b != 328-MinColumnPx {
+	if a, b := r.columnWidths(); a != core.DefaultSizes().MinColumnW || b != 328-core.DefaultSizes().MinColumnW {
 		t.Fatalf("columns %d and %d", a, b)
 	}
 }

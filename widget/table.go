@@ -66,7 +66,7 @@ type TableSpec struct {
 	CellNode func(row, col int) Node
 	// OnRowClick runs when a data row is clicked, editable or not.
 	OnRowClick func(row int)
-	// RowLead, when set, adds a column of tableActionW before the cells
+	// RowLead, when set, adds a column of Sizes.TableActionW before the cells
 	// (a header spacer included); it returns the node of a row, nil for none.
 	RowLead func(row int) Node
 	// RowDetail returns a node shown under a row, nil for none.
@@ -110,8 +110,6 @@ type TableEdit struct {
 	Options Option
 }
 
-const tableActionW = 36
-
 // An edit field is inset in its cell by cellFieldInsetOf, with cellFieldPadOf
 // inside it, so its text starts where the cell's did: both add up to the
 // CellPad. The inset is half the TightGap, and never more than the CellPad.
@@ -122,9 +120,6 @@ func cellFieldPadOf(sizes core.Sizes) int { return sizes.CellPad - cellFieldInse
 // headerSeparatorInset keeps the line between header cells to the height of
 // the small caption: half of what a row has above and below it.
 func headerSeparatorInset(sizes core.Sizes) int { return (sizes.Row - sizes.SmallLine) / 2 }
-
-// tableGripW is the width of the drag handle column.
-const tableGripW = 20
 
 // Table is a grid of rows on Sunken, a soft hairline between rows and the
 // row under the pointer lit, under an uppercase header on Panel with a
@@ -147,14 +142,14 @@ func Table(spec TableSpec, opts ...Option) *El {
 // draggable column dividers on top.
 func tableHeader(tableSpec TableSpec) Node {
 	header := Row(HOf(core.RowOf), Bg(core.Panel), BorderB(core.Border),
-		If(tableSpec.hasGrip(), Row(W(tableGripW))),
+		If(tableSpec.hasGrip(), Row(WOf(core.TableGripWOf))),
 		If(tableSpec.Editable, headerCheck(tableSpec)),
-		If(tableSpec.RowLead != nil, Row(W(tableActionW))),
+		If(tableSpec.RowLead != nil, Row(WOf(core.TableActionWOf))),
 		For(tableSpec.Columns, func(index int, name string) Node {
 			return Row(Grow(tableSpec.weight(index)), PadXOf(core.CellPadOf), When(index > 0, SeparatorOf(headerSeparatorInset)),
 				Text(strings.ToUpper(name), Small(), Bold(), Muted(), Grow(1)))
 		}),
-		If(tableSpec.Editable, Row(W(tableActionW))),
+		If(tableSpec.Editable, Row(WOf(core.TableActionWOf))),
 	)
 	if tableSpec.State == nil {
 		return header
@@ -167,7 +162,7 @@ func (t TableSpec) hasGrip() bool { return t.OnGrabRow != nil }
 
 // headerCheck is the checkbox that enables or disables every row.
 func headerCheck(spec TableSpec) Node {
-	items := []Item{W(tableActionW), JustifyContent(JustifyCenter), Tooltip("Enable or disable every row"), Checkbox(spec.AllChecked)}
+	items := []Item{WOf(core.TableActionWOf), JustifyContent(JustifyCenter), Tooltip("Enable or disable every row"), Checkbox(spec.AllChecked)}
 	if spec.OnToggleAll != nil {
 		items = append(items, OnClick(spec.OnToggleAll))
 	}
@@ -183,8 +178,8 @@ func tableRow(spec TableSpec, index int, tableRow TableRow, placeholder, last bo
 	row := []Item{
 		HOf(core.RowOf),
 		If(spec.hasGrip(), gripCell(spec, index, placeholder)),
-		If(actions, Row(W(tableActionW), JustifyContent(JustifyCenter), OnClick(func() { spec.OnToggle(index) }), Tooltip("Enable or disable this row"), Checkbox(tableRow.Checked))),
-		If(placeholder, Row(W(tableActionW))),
+		If(actions, Row(WOf(core.TableActionWOf), JustifyContent(JustifyCenter), OnClick(func() { spec.OnToggle(index) }), Tooltip("Enable or disable this row"), Checkbox(tableRow.Checked))),
+		If(placeholder, Row(WOf(core.TableActionWOf))),
 		leadCell(spec, index),
 		For(tableRow.Cells, func(other int, text string) Node {
 			cellClr := clr
@@ -193,8 +188,8 @@ func tableRow(spec TableSpec, index int, tableRow TableRow, placeholder, last bo
 			}
 			return tableCell(spec, index, other, text, cellClr)
 		}),
-		If(actions, Row(W(tableActionW), JustifyContent(JustifyCenter), OnClick(func() { spec.OnDelete(index) }), Tooltip("Delete row"), TrashIcon())),
-		If(placeholder, Row(W(tableActionW))),
+		If(actions, Row(WOf(core.TableActionWOf), JustifyContent(JustifyCenter), OnClick(func() { spec.OnDelete(index) }), Tooltip("Delete row"), TrashIcon())),
+		If(placeholder, Row(WOf(core.TableActionWOf))),
 	}
 	if spec.OnDragOverRow != nil && !placeholder {
 		row = append(row, OnDragOver(func() { spec.OnDragOverRow(index) }))
@@ -235,7 +230,7 @@ func leadCell(spec TableSpec, index int) Node {
 	if spec.RowLead == nil {
 		return nil
 	}
-	items := []Item{W(tableActionW), JustifyContent(JustifyCenter)}
+	items := []Item{WOf(core.TableActionWOf), JustifyContent(JustifyCenter)}
 	if lead := spec.RowLead(index); lead != nil {
 		items = append(items, lead)
 	}
@@ -246,9 +241,9 @@ func leadCell(spec TableSpec, index int) Node {
 // empty cell so the columns line up.
 func gripCell(spec TableSpec, index int, placeholder bool) Node {
 	if placeholder {
-		return Row(W(tableGripW))
+		return Row(WOf(core.TableGripWOf))
 	}
-	return Row(W(tableGripW), JustifyContent(JustifyCenter), Tooltip("Drag to move the row"),
+	return Row(WOf(core.TableGripWOf), JustifyContent(JustifyCenter), Tooltip("Drag to move the row"),
 		OnClick(func() { spec.OnGrabRow(index) }), GripIcon(Muted()))
 }
 
@@ -288,9 +283,6 @@ func tableCell(spec TableSpec, row, col int, text string, clr core.Token) Node {
 	}
 	return Row(items...)
 }
-
-// MinColumnPx is the narrowest a table column can be dragged.
-const MinColumnPx = 56
 
 // resizePair moves the divider between columns i and i+1: the two share
 // their combined weight so that column i is leftPx wide out of totalPx
@@ -342,13 +334,14 @@ func (h colHandlesB) Update(element *El, ctx *core.Ctx) {
 		}
 		ctx.Cursor = core.CursorResizeH
 		left, right := cells[st.divider].Rect(), cells[st.divider+1].Rect()
-		st.Weights = resizePair(h.spec.weights(), st.divider, ctx.PointerX-left.X-st.drag.off, left.W+right.W, MinColumnPx)
+		st.Weights = resizePair(h.spec.weights(), st.divider, ctx.PointerX-left.X-st.drag.off, left.W+right.W, ctx.Sizes.MinColumnW)
 		ctx.Fired++ // the cells took their widths from Weights when they were built
 		return
 	}
 	for i := 0; i < len(cells)-1; i++ {
 		x := cells[i].Rect().X + cells[i].Rect().W
-		grab := core.Rect{X: x - handleSlop, Y: h.header.Rect().Y, W: 1 + 2*handleSlop, H: h.header.Rect().H}
+		reach := ctx.Sizes.DividerGrab
+		grab := core.Rect{X: x - reach, Y: h.header.Rect().Y, W: 1 + 2*reach, H: h.header.Rect().H}
 		if !in.Over(grab) {
 			continue
 		}

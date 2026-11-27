@@ -8,23 +8,6 @@ import (
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
-const (
-	// MenuMinW and MenuMaxW bound the width of a menu, which is otherwise
-	// as wide as its widest row.
-	MenuMinW = 120
-	MenuMaxW = 420
-
-	// MenuSepH and MenuPad are the height of a separator and the inset around
-	// the rows, for callers that position things by the rows of a menu. The
-	// height of a plain row is MenuRowHeight.
-	MenuSepH = 9
-	MenuPad  = 4
-
-	menuHintH   = 16 // the extra height of each hint line
-	menuRowPadX = 10
-	menuIconW   = 14 // the icon column; rows without an icon keep it so labels line up
-)
-
 // MenuItem is one row of a Menu. A separator has no label. Icon is the
 // name of a registered icon, "" for none.
 type MenuItem struct {
@@ -97,7 +80,7 @@ func Menu(ctx *core.Ctx, state *MenuState, opts ...Option) *El {
 		rows[index] = menuRow(ctx, state, index, item, pick)
 	}
 	menu = Col(With(append([]Item{
-		W(MenuWidth(ctx, state.Items)), Pad(MenuPad), Bg(core.Bg), Control("menu"), Shadow(),
+		W(MenuWidth(ctx, state.Items)), PadOf(core.MenuPadOf), Bg(core.Bg), Control("menu"), Shadow(),
 		FloatAt(state.X, state.Y), Modal(),
 	}, rows...), opts)...)
 	return menu
@@ -107,7 +90,7 @@ func menuRow(ctx *core.Ctx, state *MenuState, index int, item MenuItem, pick fun
 	if item.Separator {
 		// The Row centres the 1px line. Width is its main axis, where a rule
 		// with no width of its own is 0 wide unless it grows.
-		return Row(H(MenuSepH), PadXOf(core.RuleInsetOf), HRule(Grow(1)))
+		return Row(HOf(core.MenuSepHOf), PadXOf(core.RuleInsetOf), HRule(Grow(1)))
 	}
 	color := core.Text
 	if item.Disabled {
@@ -122,9 +105,9 @@ func menuRow(ctx *core.Ctx, state *MenuState, index int, item MenuItem, pick fun
 	}
 	var icon Item
 	if menuHasIcons(state.Items) {
-		icon = Spacer(W(menuIconW))
+		icon = Spacer(WOf(core.MenuIconWOf))
 		if item.Icon != "" {
-			icon = Icon(item.Icon, W(menuIconW), Color(color))
+			icon = Icon(item.Icon, WOf(core.MenuIconWOf), Color(color))
 		}
 	}
 	label := Item(Text(item.Label, Color(color), Grow(1)))
@@ -136,9 +119,9 @@ func menuRow(ctx *core.Ctx, state *MenuState, index int, item MenuItem, pick fun
 			parts = append(parts, Text(line, Small(), Muted(), Ellipsis()))
 		}
 		label = Col(parts...)
-		height += menuHintH * len(lines)
+		height += ctx.Sizes.MenuHintH * len(lines)
 	}
-	return Row(H(height), PadX(menuRowPadX), GapOf(core.LooseGapOf), AlignItems(AlignCenter), Control("row"), look, OnClick(func() { pick(index) }),
+	return Row(H(height), PadXOf(core.MenuRowPadXOf), GapOf(core.LooseGapOf), AlignItems(AlignCenter), Control("row"), look, OnClick(func() { pick(index) }),
 		icon,
 		label,
 		If(item.Shortcut != "", Text(core.PlatformKeyText(ctx.HostOS, item.Shortcut), Small(), Muted())),
@@ -159,7 +142,8 @@ func menuHasIcons(items []MenuItem) bool {
 func MenuRowHeight(ctx *core.Ctx) int { return ctx.Sizes.Compact }
 
 // MenuWidth is the width of a menu of items: its widest row within
-// MenuMinW and MenuMaxW.
+// Sizes.MenuMinW and Sizes.MenuMaxW. A theme that crosses the two gets the
+// minimum.
 func MenuWidth(ctx *core.Ctx, items []MenuItem) int {
 	widest := 0
 	icons := menuHasIcons(items)
@@ -172,14 +156,15 @@ func MenuWidth(ctx *core.Ctx, items []MenuItem) int {
 			row = max(row, ctx.Width(ctx.F.Small, line))
 		}
 		if item.Shortcut != "" {
-			row += 16 + ctx.Width(ctx.F.Small, core.PlatformKeyText(ctx.HostOS, item.Shortcut))
+			row += ctx.Sizes.MenuShortcutGap + ctx.Width(ctx.F.Small, core.PlatformKeyText(ctx.HostOS, item.Shortcut))
 		}
 		if icons {
-			row += menuIconW + 8
+			row += ctx.Sizes.MenuIconW + ctx.Sizes.LooseGap // the icon column and the row's gap
 		}
 		widest = max(widest, row)
 	}
-	return min(max(widest+2*menuRowPadX+2*MenuPad, MenuMinW), MenuMaxW)
+	sizes := ctx.Sizes
+	return min(max(widest+2*sizes.MenuRowPadX+2*sizes.MenuPad, sizes.MenuMinW), max(sizes.MenuMinW, sizes.MenuMaxW))
 }
 
 // OpenMenu opens a popup menu at x, y; it replaces one that is open. Mount

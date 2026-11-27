@@ -129,11 +129,11 @@ func TestScrollbarThumbDragMovesTheContent(t *testing.T) {
 	c := testCtx(t)
 	Layout(c, root, 200, 100)
 
-	off, length, ok := thumb(100, 400, 100, 0)
+	off, length, ok := thumb(100, 400, 100, 0, c.Sizes.MinThumbLen)
 	if !ok {
 		t.Fatal("a thumb is expected")
 	}
-	x := 200 - scrollbarW/2
+	x := 200 - c.Sizes.ScrollbarW/2
 	click(c, x, off+length/2)
 	Update(c, root)
 	c.In = core.Input{X: x, Y: off + length/2 + 30, Held: true}

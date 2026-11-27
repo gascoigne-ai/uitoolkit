@@ -97,11 +97,11 @@ func TestRowLeadAndDetailKeepTheColumnsAligned(t *testing.T) {
 	// Row 0 has no lead node, yet its cells start where the header's do.
 	row := rowsOf(table)[0]
 	headerCells := Dump(header)
-	if !strings.Contains(headerCells, fmt.Sprintf("w=%d", tableActionW)) {
+	if !strings.Contains(headerCells, fmt.Sprintf("w=%d", core.DefaultSizes().TableActionW)) {
 		t.Fatalf("the header has no spacer for the lead column:\n%s", headerCells)
 	}
 	rowCells := row.Children()
-	if got, want := rowCells[1].Rect().X, tableActionW; got != want {
+	if got, want := rowCells[1].Rect().X, core.DefaultSizes().TableActionW; got != want {
 		t.Errorf("first cell of a row starts at x=%d, want %d (after the lead)", got, want)
 	}
 	if !strings.Contains(Dump(table), `text="detail"`) {
@@ -132,7 +132,7 @@ func TestDividerHandlesCountTheLeadColumn(t *testing.T) {
 	root := Col(table)
 	ctx := testCtx(t)
 	Layout(ctx, root, 400, 400)
-	boundary := tableActionW + (400-tableActionW)/2
+	boundary := core.DefaultSizes().TableActionW + (400-core.DefaultSizes().TableActionW)/2
 	ctx.In = core.Input{X: boundary, Y: core.DefaultSizes().Row / 2, Click: true, Held: true}
 	Update(ctx, root)
 	ctx.In = core.Input{X: boundary + 40, Y: core.DefaultSizes().Row / 2, Held: true}

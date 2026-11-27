@@ -76,7 +76,8 @@ func TestHScrollArrowsStepTheStrip(t *testing.T) {
 	root := Col(strip(st, 5, &hits))
 	c := testCtx(t)
 	Layout(c, root, 300, 100)
-	right := core.Rect{X: 100 - hscrollArrowW, Y: 0, W: hscrollArrowW, H: 20}
+	arrowW := c.Sizes.HScrollArrowW
+	right := core.Rect{X: 100 - arrowW, Y: 0, W: arrowW, H: 20}
 	c.In = core.Input{X: right.X + 2, Y: 10, Click: true, Held: true}
 	Update(c, root)
 	if st.X <= 0 {
@@ -191,7 +192,7 @@ func TestHoldingAnArrowKeepsScrolling(t *testing.T) {
 	root := Col(strip(st, 20, &hits)) // 800px of boxes in 100px
 	c := testCtx(t)
 	Layout(c, root, 300, 100)
-	press := core.Input{X: 100 - hscrollArrowW + 2, Y: 10, Click: true, Held: true}
+	press := core.Input{X: 100 - c.Sizes.HScrollArrowW + 2, Y: 10, Click: true, Held: true}
 	c.In = press
 	Update(c, root)
 	first := st.X

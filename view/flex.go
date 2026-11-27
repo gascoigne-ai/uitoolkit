@@ -50,31 +50,49 @@ func MaxW(pixels int) Option { return func(element *El) { element.maxW = pixels 
 // MinH is the least height the element may have.
 func MinH(pixels int) Option { return func(element *El) { element.minH = pixels } }
 
-// MaxH is the tallest the element may be.
-func MaxH(pixels int) Option { return func(element *El) { element.maxH = pixels } }
+// MaxH is the tallest the element may be; 0 means no bound.
+func MaxH(pixels int) Option {
+	return func(element *El) { element.maxH = pixels; element.literal(slotMaxH) }
+}
 
-// Margin is space around an element, inside its parent's layout.
+// Margin is space around an element, inside its parent's layout. Around a
+// floating element it is the room kept free between it and its Stack.
 func Margin(pixels int) Option {
-	return func(element *El) { element.mL, element.mT, element.mR, element.mB = pixels, pixels, pixels, pixels }
+	return func(element *El) {
+		element.mL, element.mT, element.mR, element.mB = pixels, pixels, pixels, pixels
+		element.literal(slotML, slotMT, slotMR, slotMB)
+	}
 }
 
 // MarginL is margin on the left side.
-func MarginL(pixels int) Option { return func(element *El) { element.mL = pixels } }
+func MarginL(pixels int) Option {
+	return func(element *El) { element.mL = pixels; element.literal(slotML) }
+}
 
 // MarginT is margin on the top side.
-func MarginT(pixels int) Option { return func(element *El) { element.mT = pixels } }
+func MarginT(pixels int) Option {
+	return func(element *El) { element.mT = pixels; element.literal(slotMT) }
+}
 
 // MarginR is margin on the right side.
-func MarginR(pixels int) Option { return func(element *El) { element.mR = pixels } }
+func MarginR(pixels int) Option {
+	return func(element *El) { element.mR = pixels; element.literal(slotMR) }
+}
 
 // MarginB is margin on the bottom side.
-func MarginB(pixels int) Option { return func(element *El) { element.mB = pixels } }
+func MarginB(pixels int) Option {
+	return func(element *El) { element.mB = pixels; element.literal(slotMB) }
+}
 
 // MarginX is left and right margin.
-func MarginX(pixels int) Option { return func(element *El) { element.mL, element.mR = pixels, pixels } }
+func MarginX(pixels int) Option {
+	return func(element *El) { element.mL, element.mR = pixels, pixels; element.literal(slotML, slotMR) }
+}
 
 // MarginY is top and bottom margin.
-func MarginY(pixels int) Option { return func(element *El) { element.mT, element.mB = pixels, pixels } }
+func MarginY(pixels int) Option {
+	return func(element *El) { element.mT, element.mB = pixels, pixels; element.literal(slotMT, slotMB) }
+}
 
 // clampSize applies MinW/MaxW/MinH/MaxH.
 func (e *El) clampSize(width, height int) (int, int) {

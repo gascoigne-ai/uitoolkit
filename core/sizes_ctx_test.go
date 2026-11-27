@@ -77,6 +77,16 @@ func TestSizesScopeNames(t *testing.T) {
 		"ruleInset": 6, "edgeGrab": 6, "looseGap": 8, "cellPad": 8, "labelPad": 10, "tabSepInset": 10,
 		"gutter": 12, "dialogPad": 16,
 		"caretW": 2, "dialogW": 380, "dialogButtonMinW": 80, "dialogMargin": 40, "dialogMaxH": 560,
+		"scrollbarW": 8, "minThumbLen": 24, "thumbInset": 1, "hscrollArrowW": 18,
+		"menuMinW": 120, "menuMaxW": 420, "menuSepH": 9, "menuPad": 4, "menuHintH": 16,
+		"menuRowPadX": 10, "menuIconW": 14, "menuShortcutGap": 16,
+		"tipPadX": 8, "tipPadY": 5, "tipOffset": 16,
+		"toastW": 320, "toastH": 36, "toastGap": 6, "toastMargin": 8,
+		"buttonPadX": 10, "fieldPadX": 10, "selectionInset": 6, "revealMargin": 12,
+		"sliderW": 120, "sliderH": 20, "sliderTrack": 4, "sliderThumbW": 10, "sliderThumbH": 16,
+		"sliderTick": 10, "sliderPad": 7, "dividerGrab": 2, "edgeReach": 4,
+		"tableActionW": 36, "tableGripW": 20, "minColumnW": 56,
+		"foldColW": 18, "monoTextLead": 4, "monoLinePad": 4, "switchInset": 2,
 	}
 	if got := DefaultSizes().Scope(); !reflect.DeepEqual(got, want) {
 		t.Fatalf("Scope() = %v, want %v", got, want)

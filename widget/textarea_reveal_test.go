@@ -17,7 +17,7 @@ func TestAnEditorNotAtTheLeftEdgeScrollsOnlyWhenTheCursorReachesItsRightEdge(t *
 	area.Focused = true
 	r := core.Rect{X: 300, Y: 40, W: 400, H: 200}
 	g := area.geometry(c, r)
-	b := layoutBars(r, g.contentW(r), g.contentH())
+	b := layoutBars(r, g.contentW(r), g.contentH(), c.Sizes.ScrollbarW)
 	fits := g.colAt(b.viewW - (g.textX - r.X)) // columns that fit before the right edge
 	for i := 0; i < fits-3; i++ {
 		c.In = core.Input{X: 5000, Y: 5000, Typed: []rune("x")}

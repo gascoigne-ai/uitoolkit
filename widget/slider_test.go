@@ -17,7 +17,7 @@ type slide struct {
 
 func newSlide(t *testing.T, value int, opts ...Option) (*slide, *core.Ctx) {
 	s := &slide{st: &SliderState{}}
-	items := append([]Option{W(200 + 2*sliderPad), H(20), OnSlideEnd(func(value int) { s.ended = append(s.ended, value) })}, opts...)
+	items := append([]Option{W(200 + 2*core.DefaultSizes().SliderPad), H(20), OnSlideEnd(func(value int) { s.ended = append(s.ended, value) })}, opts...)
 	s.root = Col(Slider(s.st, 50, 200, 5, value, append([]Option{OnSlide(func(value int) { s.live = append(s.live, value) })}, items...)...))
 	c := testCtx(t)
 	Layout(c, s.root, 400, 100)
@@ -31,18 +31,18 @@ func (s *slide) at(ctx *core.Ctx, posX int, held, click bool) {
 
 func TestSliderAppliesLiveWhileDraggingAndEndsOnRelease(t *testing.T) {
 	s, c := newSlide(t, 100) // linear: 50..200 over 200px
-	s.at(c, sliderPad+100, true, true)
+	s.at(c, core.DefaultSizes().SliderPad+100, true, true)
 	if len(s.live) != 1 || s.live[0] != 125 {
 		t.Fatalf("live after the press: %v", s.live)
 	}
-	s.at(c, sliderPad+400, true, false) // far past the end
+	s.at(c, core.DefaultSizes().SliderPad+400, true, false) // far past the end
 	if got := s.live[len(s.live)-1]; got != 200 {
 		t.Fatalf("live at the end: %v", s.live)
 	}
 	if len(s.ended) != 0 {
 		t.Fatalf("ended early: %v", s.ended)
 	}
-	s.at(c, sliderPad+400, false, false)
+	s.at(c, core.DefaultSizes().SliderPad+400, false, false)
 	if len(s.ended) != 1 || s.ended[0] != 200 {
 		t.Fatalf("ended: %v", s.ended)
 	}
@@ -53,13 +53,13 @@ func TestSliderAppliesLiveWhileDraggingAndEndsOnRelease(t *testing.T) {
 
 func TestSliderDragFollowsPointerMovementNotTheTrackPosition(t *testing.T) {
 	s, c := newSlide(t, 100)
-	s.at(c, sliderPad+100, true, true) // 125
+	s.at(c, core.DefaultSizes().SliderPad+100, true, true) // 125
 	// The UI changes size mid-drag: the track now starts elsewhere and
 	// the same pointer position would mean another fraction. Movement is
 	// what counts: 20 device px right of the press is +15 on this track.
 	s.root = Col(PadL(37), s.root.Children()[0])
 	Layout(c, s.root, 400, 100)
-	c.In = core.Input{X: sliderPad + 120, Y: 10, Held: true}
+	c.In = core.Input{X: core.DefaultSizes().SliderPad + 120, Y: 10, Held: true}
 	Update(c, s.root)
 	if got := s.live[len(s.live)-1]; got != 140 {
 		t.Fatalf("live %v, want 140", s.live)
@@ -69,26 +69,26 @@ func TestSliderDragFollowsPointerMovementNotTheTrackPosition(t *testing.T) {
 func TestSliderMiddleValueSitsInTheMiddleOfTheTrack(t *testing.T) {
 	s, c := newSlide(t, 100, SliderMid(100))
 	// Half the track is 100: pressing at the center selects it.
-	s.at(c, sliderPad+100, true, true)
-	s.at(c, sliderPad+100, false, false)
+	s.at(c, core.DefaultSizes().SliderPad+100, true, true)
+	s.at(c, core.DefaultSizes().SliderPad+100, false, false)
 	if len(s.ended) != 1 || s.ended[0] != 100 {
 		t.Fatalf("center = %v", s.ended)
 	}
 	s.ended = nil
-	s.at(c, sliderPad+0, true, true) // left end
-	s.at(c, sliderPad+0, false, false)
+	s.at(c, core.DefaultSizes().SliderPad+0, true, true) // left end
+	s.at(c, core.DefaultSizes().SliderPad+0, false, false)
 	if s.ended[0] != 50 {
 		t.Fatalf("left end = %v", s.ended)
 	}
 	s.ended = nil
-	s.at(c, sliderPad+50, true, true) // a quarter: halfway from 50 to 100 = 75
-	s.at(c, sliderPad+50, false, false)
+	s.at(c, core.DefaultSizes().SliderPad+50, true, true) // a quarter: halfway from 50 to 100 = 75
+	s.at(c, core.DefaultSizes().SliderPad+50, false, false)
 	if s.ended[0] != 75 {
 		t.Fatalf("quarter = %v", s.ended)
 	}
 	s.ended = nil
-	s.at(c, sliderPad+150, true, true) // three quarters: halfway from 100 to 200 = 150
-	s.at(c, sliderPad+150, false, false)
+	s.at(c, core.DefaultSizes().SliderPad+150, true, true) // three quarters: halfway from 100 to 200 = 150
+	s.at(c, core.DefaultSizes().SliderPad+150, false, false)
 	if s.ended[0] != 150 {
 		t.Fatalf("three quarters = %v", s.ended)
 	}
@@ -106,11 +106,11 @@ func TestSliderIgnoresClicksOutside(t *testing.T) {
 func TestSliderKeepsFollowingAPointerThatLeavesItsClippingContainer(t *testing.T) {
 	st := &SliderState{}
 	var live []int
-	slider := Slider(st, 50, 200, 5, 100, OnSlide(func(value int) { live = append(live, value) }), W(200+2*sliderPad), H(20))
+	slider := Slider(st, 50, 200, 5, 100, OnSlide(func(value int) { live = append(live, value) }), W(200+2*core.DefaultSizes().SliderPad), H(20))
 	root := Col(Scroll(&ScrollState{}, H(20), W(216), slider)) // clips: a pointer outside is hidden from the slider
 	c := testCtx(t)
 	Layout(c, root, 400, 100)
-	c.In = core.Input{X: sliderPad + 100, Y: 10, Click: true, Held: true}
+	c.In = core.Input{X: core.DefaultSizes().SliderPad + 100, Y: 10, Click: true, Held: true}
 	Update(c, root)
 	c.In = core.Input{X: 380, Y: 90, Held: true} // far outside the scroller
 	Update(c, root)
@@ -137,14 +137,14 @@ func TestSliderWithADegenerateRangeStaysFinite(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			state := &SliderState{}
 			var live []int
-			opts := []Option{W(200 + 2*sliderPad), H(20), OnSlide(func(value int) { live = append(live, value) })}
+			opts := []Option{W(200 + 2*core.DefaultSizes().SliderPad), H(20), OnSlide(func(value int) { live = append(live, value) })}
 			if tc.mid != 0 {
 				opts = append(opts, SliderMid(tc.mid))
 			}
 			root := Col(Slider(state, tc.min, tc.max, tc.step, tc.min, opts...))
 			c := testCtx(t)
 			Layout(c, root, 400, 100)
-			c.In = core.Input{X: sliderPad + 100, Y: 10, Click: true, Held: true}
+			c.In = core.Input{X: core.DefaultSizes().SliderPad + 100, Y: 10, Click: true, Held: true}
 			Update(c, root)
 			drawn(t, c, root, 400, 100)
 			lo, hi := min(tc.min, tc.max), max(tc.min, tc.max)+1 // an empty range is widened by one

@@ -29,6 +29,7 @@ func themedSizes(t *testing.T, pins map[string]int) core.Sizes {
 func TestSizedOptionsFollowCtxSizes(t *testing.T) {
 	pins := map[string]int{"gutter": 20, "nearGap": 3, "rowH": 50, "iconBtnW": 70, "labelPad": 7}
 	gutter, near := core.GutterOf, core.NearGapOf
+	margin := func(element *El) []int { return []int{element.mL, element.mT, element.mR, element.mB} }
 	padding := func(element *El) []int { return []int{element.padL, element.padT, element.padR, element.padB} }
 	tests := []struct {
 		name            string
@@ -49,6 +50,15 @@ func TestSizedOptionsFollowCtxSizes(t *testing.T) {
 		{"HOf", HOf(core.RowOf), func(element *El) []int { return []int{element.h} }, []int{29}, []int{50}},
 		{"WOf", WOf(core.IconBtnOf), func(element *El) []int { return []int{element.w} }, []int{33}, []int{70}},
 		{"SeparatorOf", SeparatorOf(core.LabelPadOf), func(element *El) []int { return []int{element.borderInset} }, []int{10}, []int{7}},
+		{"MarginOf", MarginOf(gutter), margin, []int{12, 12, 12, 12}, []int{20, 20, 20, 20}},
+		{"MarginXOf", MarginXOf(gutter), margin, []int{12, 0, 12, 0}, []int{20, 0, 20, 0}},
+		{"MarginYOf", MarginYOf(gutter), margin, []int{0, 12, 0, 12}, []int{0, 20, 0, 20}},
+		{"MarginLOf", MarginLOf(gutter), margin, []int{12, 0, 0, 0}, []int{20, 0, 0, 0}},
+		{"MarginTOf", MarginTOf(gutter), margin, []int{0, 12, 0, 0}, []int{0, 20, 0, 0}},
+		{"MarginROf", MarginROf(gutter), margin, []int{0, 0, 12, 0}, []int{0, 0, 20, 0}},
+		{"MarginBOf", MarginBOf(gutter), margin, []int{0, 0, 0, 12}, []int{0, 0, 0, 20}},
+		{"MaxHOf", MaxHOf(core.IconBtnOf), func(element *El) []int { return []int{element.MaxHeight()} }, []int{33}, []int{70}},
+		{"DismissMarginOf", DismissMarginOf(core.NearGapOf), func(element *El) []int { return []int{element.dismissMargin} }, []int{4}, []int{3}},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -78,6 +88,8 @@ func TestSizedOptionsFollowCtxSizes(t *testing.T) {
 // not set keep following the theme.
 func TestLaterLiteralReplacesRole(t *testing.T) {
 	themed := themedSizes(t, map[string]int{"gutter": 20, "iconBtnW": 70})
+	margin := func(element *El) []int { return []int{element.mL, element.mT, element.mR, element.mB} }
+	maxHeight := func(element *El) []int { return []int{element.maxH} }
 	tests := []struct {
 		name    string
 		options []Option
@@ -96,6 +108,17 @@ func TestLaterLiteralReplacesRole(t *testing.T) {
 		{"BorderInset", []Option{SeparatorOf(core.GutterOf), BorderInset(3)}, func(element *El) []int { return []int{element.borderInset} }, []int{3}},
 		{"Separator", []Option{SeparatorOf(core.GutterOf), Separator(3)}, func(element *El) []int { return []int{element.borderInset} }, []int{3}},
 		{"FloatAt", []Option{FloatAtOf(core.GutterOf, core.GutterOf), FloatAt(3, 4)}, func(element *El) []int { return []int{element.fl.x, element.fl.y} }, []int{3, 4}},
+		{"DismissMargin", []Option{DismissMarginOf(core.GutterOf), DismissMargin(1)}, func(element *El) []int { return []int{element.dismissMargin} }, []int{1}},
+		{"Margin", []Option{MarginOf(core.GutterOf), Margin(3)}, margin, []int{3, 3, 3, 3}},
+		{"MarginX", []Option{MarginOf(core.GutterOf), MarginX(3)}, margin, []int{3, 20, 3, 20}},
+		{"MarginY", []Option{MarginOf(core.GutterOf), MarginY(3)}, margin, []int{20, 3, 20, 3}},
+		{"MarginL", []Option{MarginOf(core.GutterOf), MarginL(3)}, margin, []int{3, 20, 20, 20}},
+		{"MarginT", []Option{MarginOf(core.GutterOf), MarginT(3)}, margin, []int{20, 3, 20, 20}},
+		{"MarginR", []Option{MarginOf(core.GutterOf), MarginR(3)}, margin, []int{20, 20, 3, 20}},
+		{"MarginB", []Option{MarginOf(core.GutterOf), MarginB(3)}, margin, []int{20, 20, 20, 3}},
+		{"MaxH", []Option{MaxHOf(core.GutterOf), MaxH(3)}, maxHeight, []int{3}},
+		{"MaxH 0 lifts a role", []Option{MaxHOf(core.GutterOf), MaxH(0)}, maxHeight, []int{0}},
+		{"Margin 0 lifts a role", []Option{MarginOf(core.GutterOf), Margin(0)}, margin, []int{0, 0, 0, 0}},
 		{"role after a literal", []Option{Pad(3), PadXOf(core.GutterOf)}, nil, []int{20, 3, 20, 3}},
 	}
 	for _, test := range tests {

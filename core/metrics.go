@@ -15,9 +15,9 @@ type Metrics struct {
 	Unit int
 	// Leading is extra pixels of leading, 0 to 8, added to the measured UI
 	// and small line. It applies to the height classes, the bars built from
-	// them, and the space between the wrapped lines of widget.Paragraph. A
-	// single-line text and the checkbox keep the measured line; code and
-	// text area lines have their own spacing, which Leading does not move.
+	// them, the space between the wrapped lines of widget.Paragraph and,
+	// through Sizes.MonoLinePad, the rows of widget.Code and widget.Area. A
+	// single-line text and the checkbox keep the measured line.
 	// It is added rather than scaled: it stays a whole pixel, every rule
 	// keeps the form "line plus a padding", and both faces get the same
 	// amount whatever text size the user picks. A theme cannot set font

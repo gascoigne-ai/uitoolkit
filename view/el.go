@@ -23,9 +23,9 @@
 //
 // The names follow a few rules, so a guess is usually right:
 //
-//	Size       W H WOf HOf FitW MinW MinWOf MaxW MinH MaxH Grow Shrink Optional Clip
+//	Size       W H WOf HOf FitW MinW MinWOf MaxW MinH MaxH MaxHOf Grow Shrink Optional Clip
 //	Spacing    Pad PadX PadY PadL PadT PadR PadB   Margin MarginX MarginY MarginL MarginT MarginR MarginB   Gap
-//	Sized      PadOf PadXOf PadYOf PadLOf PadTOf PadROf PadBOf GapOf   (follow the context's Sizes)
+//	Sized      PadOf PadXOf PadYOf PadLOf PadTOf PadROf PadBOf GapOf MarginOf MarginXOf MarginYOf MarginLOf MarginTOf MarginROf MarginBOf   (follow the context's Sizes)
 //	Layout     Row Col Stack Spacer HRule VRule VRuleInset   AlignItems AlignSelf JustifyContent
 //	Look       Bg Border BorderX BorderY BorderL BorderT BorderR BorderB HoverBg BorderInset Shadow Control EdgeT EdgeL EdgeR EdgeB HoverColor Lighten
 //	Text       Text Caption Lines   Color Muted Bold Small Mono FontSource Ellipsis TextCenter
@@ -33,9 +33,9 @@
 //	Events     OnClick OnClickAt OnRightClick OnRightClickIn OnMiddleClick OnDoubleClick OnDragOver   Tooltip KeepInView
 //	Events+    OnSelect SelectHandler DismissHandler ChangeHandler El.Select El.Dismiss El.Changed   Separator SeparatorOf   (Button, Tabs, Menu, Dialog and the rest of the ready-made widgets are in package widget)
 //	Flow       If When For Frag With
-//	Extend     Behavior Base Linear Custom Describer PreUpdater OverDrawer Scroller Focusable Focuser Linear.LayoutIn (El.Inner El.InFlow El.KeepsInView El.Behavior El.Place El.FixedSize El.ColorToken El.HoverColorToken)   a component outside this package is an element through these
+//	Extend     Behavior Base Linear Custom Describer PreUpdater OverDrawer Scroller Focusable Focuser Linear.LayoutIn (El.Inner El.InFlow El.KeepsInView El.Behavior El.Place El.FixedSize El.MaxHeight El.ColorToken El.HoverColorToken)   a component outside this package is an element through these
 //	Layers     ModalLayer DrawBelow DrawFrom   (draw the window under the first modal once, the rest every frame)
-//	Overlay    FloatTR FloatAt FloatAtOf FloatCenter Moved MoveState DragHandle DismissMargin RoundT RoundB RoundBL Modal KeepOnOutsideClick OnDismiss FocusScope
+//	Overlay    FloatTR FloatAt FloatAtOf FloatCenter Moved MoveState DragHandle DismissMargin DismissMarginOf RoundT RoundB RoundBL Modal KeepOnOutsideClick OnDismiss FocusScope
 //
 // A side is a letter suffix (PadL, PadT, PadR, PadB) and an axis is X or
 // Y (PadX is left and right). The same options are the attributes of a
@@ -68,7 +68,7 @@ type El struct {
 	sized            [slotCount]func(sizes core.Sizes) int // set by HOf, PadOf and the like; Layout resolves them
 	grow             float64
 	optional, hidden bool // optional elements are dropped when the row is too narrow
-	shrink           bool // gives up width to an overflowing row, down to its MinW
+	shrink           bool // gives up room to an overflowing row or column, down to its MinW or MinH
 	padL, padT       int
 	padR, padB       int
 	gap              int

@@ -289,7 +289,7 @@ func TestCodeViewSelectAllAndBlurOnOutsideClick(t *testing.T) {
 func TestCodeViewFoldArrowToggles(t *testing.T) {
 	v, c, _, r := viewport(t)
 	g := v.geometry(c, r)
-	arrowX := r.X + core.DefaultSizes().Gutter + g.numW + 4 + foldColW/2
+	arrowX := r.X + core.DefaultSizes().Gutter + g.numW + core.DefaultSizes().MonoTextLead + core.DefaultSizes().FoldColW/2
 
 	c.In = core.Input{X: arrowX, Y: rowY(c, v, r, 0), Click: true}
 	v.Update(c, r)
@@ -437,8 +437,9 @@ func TestCodeViewScrollbarThumbDragScrollsTheContent(t *testing.T) {
 	v.SetLines(manyLines(100))
 	r := core.Rect{W: 400, H: 200}
 	g := v.geometry(c, r)
-	track := core.Rect{X: r.W - scrollbarW, Y: 0, W: scrollbarW, H: r.H}
-	off, length, ok := thumb(track.H, 100*g.lineH, r.H, v.ScrollY)
+	barW := c.Sizes.ScrollbarW
+	track := core.Rect{X: r.W - barW, Y: 0, W: barW, H: r.H}
+	off, length, ok := thumb(track.H, 100*g.lineH, r.H, v.ScrollY, c.Sizes.MinThumbLen)
 	if !ok {
 		t.Fatal("100 rows in 200px must need a scrollbar")
 	}

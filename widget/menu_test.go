@@ -68,8 +68,8 @@ func TestMenuWidthFitsItsContentWithinLimits(t *testing.T) {
 	width := func(items ...MenuItem) int { return MenuWidth(c, items) }
 	narrow := width(MenuItem{Label: "ab"})
 	wide := width(MenuItem{Label: "ab"}, MenuItem{Label: strings.Repeat("a long label ", 20)})
-	if narrow >= wide || narrow < MenuMinW || wide > MenuMaxW {
-		t.Fatalf("widths %d and %d, want a short menu narrower than a long one within %d..%d", narrow, wide, MenuMinW, MenuMaxW)
+	if narrow >= wide || narrow < c.Sizes.MenuMinW || wide > c.Sizes.MenuMaxW {
+		t.Fatalf("widths %d and %d, want a short menu narrower than a long one within %d..%d", narrow, wide, c.Sizes.MenuMinW, c.Sizes.MenuMaxW)
 	}
 	state := NewMenu(0, 0, []MenuItem{{Label: "ab"}})
 	if menu := Menu(c, &state); !contains(props(menu), fmt.Sprintf("w=%d", narrow)) {
@@ -131,7 +131,7 @@ func TestMenuSeparatorRuleSpansTheRow(t *testing.T) {
 	Layout(c, Stack(menu), 400, 300)
 	separator := menu.Children()[1]
 	row, rule := separator.Rect(), separator.Children()[0].Rect()
-	want := core.Rect{X: row.X + core.DefaultSizes().RuleInset, Y: row.Y + (MenuSepH-1)/2, W: row.W - 2*core.DefaultSizes().RuleInset, H: 1}
+	want := core.Rect{X: row.X + core.DefaultSizes().RuleInset, Y: row.Y + (c.Sizes.MenuSepH-1)/2, W: row.W - 2*core.DefaultSizes().RuleInset, H: 1}
 	if rule != want {
 		t.Fatalf("the separator rule is %+v in the row %+v, want %+v", rule, row, want)
 	}

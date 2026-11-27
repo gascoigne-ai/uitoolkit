@@ -381,9 +381,19 @@ func (stack) Layout(element *El, ctx *core.Ctx) {
 			k.place(ctx, in)
 			continue
 		}
-		w, h := k.size(ctx, in.W)
-		w, h = min(w, in.W), min(h, in.H)
-		k.place(ctx, floatRect(k, in, w, h))
+		room := floatRoom(k, in)
+		w, h := k.size(ctx, room.W)
+		w, h = min(w, room.W), min(h, room.H)
+		k.place(ctx, floatRect(k, room, w, h))
+	}
+}
+
+// floatRoom is where a floating child may be: the stack's inner rect less the
+// child's margins, never of a negative size.
+func floatRoom(element *El, in core.Rect) core.Rect {
+	return core.Rect{
+		X: in.X + element.mL, Y: in.Y + element.mT,
+		W: max(in.W-element.mL-element.mR, 0), H: max(in.H-element.mT-element.mB, 0),
 	}
 }
 
@@ -425,7 +435,8 @@ func With(base []Item, opts []Option) []Item {
 	return base
 }
 
-// floatRect places a floating child in the stack's inner rect.
+// floatRect places a floating child in its room: every way of floating is
+// measured from the room's edges and keeps the child inside them.
 func floatRect(element *El, in core.Rect, width, height int) core.Rect {
 	switch element.fl.mode {
 	case floatPoint:

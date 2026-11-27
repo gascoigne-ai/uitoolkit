@@ -6,10 +6,6 @@ import (
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
-// hscrollArrowW is the width of the arrow buttons at the ends of an
-// overflowing HScroll.
-const hscrollArrowW = 18
-
 // Holding an arrow scrolls once at the press, then repeats every
 // hscrollHoldEvery frames after hscrollHoldDelay frames.
 const (
@@ -27,6 +23,7 @@ type hscrollB struct {
 	state   *ScrollState
 	content int // natural width of the children, set by layout
 	origin  int // x of the shifted rect the children were laid out in
+	arrowW  int // Sizes.HScrollArrowW, set by layout
 }
 
 // overflow reports whether the children are wider than the box.
@@ -36,7 +33,7 @@ func (s *hscrollB) overflow(element *El) bool { return s.content > element.Rect(
 // and last tab are not hidden under them; none when everything fits.
 func (s *hscrollB) inset(element *El) int {
 	if s.overflow(element) {
-		return hscrollArrowW
+		return s.arrowW
 	}
 	return 0
 }
@@ -57,6 +54,7 @@ func (s *hscrollB) step(element *El, delta int) { s.state.X = s.clamp(element, s
 // Layout places the children for the scroll position the state holds,
 // clamped; it does not change the state (settle does, in update).
 func (s *hscrollB) Layout(element *El, ctx *core.Ctx) {
+	s.arrowW = ctx.Sizes.HScrollArrowW
 	r := element.Rect()
 	s.content, _ = s.Linear.Measure(element, ctx, 1<<20)
 	x := s.clamp(element, s.state.X)
@@ -98,8 +96,8 @@ func (s *hscrollB) settle(element *El) {
 
 func (s *hscrollB) arrows(element *El) (left, right core.Rect) {
 	r := element.Rect()
-	left = core.Rect{X: r.X, Y: r.Y, W: hscrollArrowW, H: r.H}
-	right = core.Rect{X: r.X + r.W - hscrollArrowW, Y: r.Y, W: hscrollArrowW, H: r.H}
+	left = core.Rect{X: r.X, Y: r.Y, W: s.arrowW, H: r.H}
+	right = core.Rect{X: r.X + r.W - s.arrowW, Y: r.Y, W: s.arrowW, H: r.H}
 	return
 }
 

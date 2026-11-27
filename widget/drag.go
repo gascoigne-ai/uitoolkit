@@ -2,9 +2,6 @@ package widget
 
 import "github.com/gascoigne-ai/uitoolkit/core"
 
-// handleSlop is how many pixels each side of a divider still grab it.
-const handleSlop = 2
-
 // grab is a drag in progress that started on a press: the split divider,
 // a scrollbar thumb, a column edge. off is where inside the grabbed thing
 // the pointer was when it began, so it does not jump to the pointer.

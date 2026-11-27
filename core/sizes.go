@@ -9,8 +9,9 @@ package core
 //
 // Why a struct of fields: layout reads it every frame and it changes only
 // with the theme or fonts. Rejected: a map keyed by scope name (untyped,
-// and a typo compiles). Revisit past about 80 fields, or when a pane needs
-// sizes per face (rows in the mono face).
+// and a typo compiles) and nested groups (they break the one name a size has
+// in Go, templates and theme files). Revisit past 150 fields, or when a pane
+// needs sizes per face (rows in the mono face).
 type Sizes struct {
 	// Line and SmallLine are the measured line heights of the UI and the
 	// small face, without Leading.
@@ -60,10 +61,55 @@ type Sizes struct {
 
 	DialogW          int // a message dialog: wide enough for a sentence and two buttons
 	DialogButtonMinW int // the least width of a dialog button, so Yes and No match
-	// DialogMargin and DialogMaxH are for app layouts that size a dialog to
-	// the window; no toolkit widget applies them.
+	// widget.Dialog applies DialogMargin and DialogMaxH to its panel.
 	DialogMargin int // kept free between a dialog and the window's edge
-	DialogMaxH   int // the tallest a dialog grows by itself
+	DialogMaxH   int // the tallest a dialog is unless the app gives it a MaxH
+
+	// Scrollbars: the width of a track, the least length of its thumb and how
+	// far the thumb stays off the track's long sides.
+	ScrollbarW, MinThumbLen, ThumbInset int
+	HScrollArrowW                       int // the arrow at each end of an overflowing HScroll
+
+	MenuMinW, MenuMaxW int // the bounds of a menu, otherwise as wide as its widest row
+	MenuSepH           int // a separator row
+	MenuPad            int // the inset around a menu's rows
+	MenuHintH          int // the extra height of each hint line of a row
+	MenuRowPadX        int // the side inset of a row
+	MenuIconW          int // the icon column; rows without an icon keep it so labels line up
+	MenuShortcutGap    int // the least room between a label and its shortcut
+
+	TipPadX, TipPadY int // the inset of a tooltip's text
+	TipOffset        int // below and right of the pointer, clear of the cursor
+
+	ToastW, ToastH int // one toast
+	ToastGap       int // between two toasts
+	ToastMargin    int // between the stack and the bottom inset
+
+	ButtonPadX     int // the side inset of a button's label
+	FieldPadX      int // the side inset of a field's text
+	SelectionInset int // how far a field's selection stays off its top and bottom
+	RevealMargin   int // the context a field keeps in view beyond its cursor
+
+	// Sliders: the size one asks for, its track, thumb and middle tick, and
+	// the room at each end of the track for half the thumb.
+	SliderW, SliderH           int
+	SliderTrack                int
+	SliderThumbW, SliderThumbH int
+	SliderTick, SliderPad      int
+
+	DividerGrab int // how far each side of a split or column divider still grabs it
+	EdgeReach   int // how far outside its border a resizable element grabs an edge
+
+	TableActionW int // a table's checkbox, delete and lead columns
+	TableGripW   int // a table's drag handle column
+	MinColumnW   int // the narrowest a table column can be dragged
+
+	// The monospace grid of CodeView and TextArea.
+	FoldColW     int // the column of a CodeView's fold arrows
+	MonoTextLead int // the room left of the text that its clip includes
+	MonoLinePad  int // what a row has beyond the measured mono line, the leading included
+
+	SwitchInset int // how far a switch's knob stays off the ends of its track
 }
 
 // The UI line height is limited so a huge font cannot blow up every row.
@@ -116,6 +162,11 @@ func looseStep(steps Steps) int  { return steps.Loose }
 func labelStep(steps Steps) int  { return steps.Label }
 func gutterStep(steps Steps) int { return steps.Gutter }
 func dialogStep(steps Steps) int { return steps.Dialog }
+
+// units is the rule of an object's width or height: a number of grid units.
+func units(count int) func(sizeBase, *Sizes) int {
+	return func(base sizeBase, _ *Sizes) int { return count * base.unit }
+}
 
 // linePlus is a height class: a line box plus units grid steps of padding.
 func linePlus(units int) func(sizeBase, *Sizes) int {
@@ -181,6 +232,61 @@ var sizeRules = [...]sizeRule{
 		func(_ sizeBase, sizes *Sizes) int { return 5 * sizes.Steps.Dialog }, 0, 400},
 	{"dialogMargin", func(sizes *Sizes) *int { return &sizes.DialogMargin }, fixed(40), 0, 200},
 	{"dialogMaxH", func(sizes *Sizes) *int { return &sizes.DialogMaxH }, fixed(560), 120, 4000},
+
+	{"scrollbarW", func(sizes *Sizes) *int { return &sizes.ScrollbarW }, units(4), 2, 32},
+	{"minThumbLen", func(sizes *Sizes) *int { return &sizes.MinThumbLen }, units(12), 4, 200},
+	{"thumbInset", func(sizes *Sizes) *int { return &sizes.ThumbInset }, fixed(1), 0, 8},
+	{"hscrollArrowW", func(sizes *Sizes) *int { return &sizes.HScrollArrowW }, units(9), 4, 64},
+
+	{"menuMinW", func(sizes *Sizes) *int { return &sizes.MenuMinW }, units(60), 40, 800},
+	{"menuMaxW", func(sizes *Sizes) *int { return &sizes.MenuMaxW }, units(210), 40, 1600},
+	{"menuSepH", func(sizes *Sizes) *int { return &sizes.MenuSepH },
+		func(_ sizeBase, sizes *Sizes) int { return 2*sizes.NearGap + 1 }, 1, 64},
+	{"menuPad", func(sizes *Sizes) *int { return &sizes.MenuPad }, step(nearStep), 0, 64},
+	{"menuHintH", func(sizes *Sizes) *int { return &sizes.MenuHintH }, units(8), 8, 160},
+	{"menuRowPadX", func(sizes *Sizes) *int { return &sizes.MenuRowPadX }, step(labelStep), 0, 64},
+	{"menuIconW", func(sizes *Sizes) *int { return &sizes.MenuIconW }, units(7), 0, 64},
+	{"menuShortcutGap", func(sizes *Sizes) *int { return &sizes.MenuShortcutGap },
+		func(_ sizeBase, sizes *Sizes) int { return 2 * sizes.LooseGap }, 0, 128},
+
+	{"tipPadX", func(sizes *Sizes) *int { return &sizes.TipPadX }, step(looseStep), 0, 64},
+	{"tipPadY", func(sizes *Sizes) *int { return &sizes.TipPadY },
+		func(_ sizeBase, sizes *Sizes) int { return sizes.Steps.Label / 2 }, 0, 64},
+	{"tipOffset", func(sizes *Sizes) *int { return &sizes.TipOffset }, units(8), 0, 64},
+
+	{"toastW", func(sizes *Sizes) *int { return &sizes.ToastW }, units(160), 80, 1600},
+	{"toastH", func(sizes *Sizes) *int { return &sizes.ToastH }, units(18), 8, 160},
+	{"toastGap", func(sizes *Sizes) *int { return &sizes.ToastGap }, step(tightStep), 0, 64},
+	{"toastMargin", func(sizes *Sizes) *int { return &sizes.ToastMargin }, step(looseStep), 0, 200},
+
+	{"buttonPadX", func(sizes *Sizes) *int { return &sizes.ButtonPadX }, step(labelStep), 0, 64},
+	{"fieldPadX", func(sizes *Sizes) *int { return &sizes.FieldPadX }, step(labelStep), 0, 64},
+	{"selectionInset", func(sizes *Sizes) *int { return &sizes.SelectionInset }, step(tightStep), 0, 32},
+	{"revealMargin", func(sizes *Sizes) *int { return &sizes.RevealMargin }, step(gutterStep), 0, 64},
+
+	{"sliderW", func(sizes *Sizes) *int { return &sizes.SliderW }, units(60), 16, 800},
+	{"sliderH", func(sizes *Sizes) *int { return &sizes.SliderH }, units(10), 8, 160},
+	{"sliderTrack", func(sizes *Sizes) *int { return &sizes.SliderTrack }, units(2), 1, 32},
+	{"sliderThumbW", func(sizes *Sizes) *int { return &sizes.SliderThumbW }, units(5), 2, 64},
+	{"sliderThumbH", func(sizes *Sizes) *int { return &sizes.SliderThumbH }, units(8), 2, 64},
+	{"sliderTick", func(sizes *Sizes) *int { return &sizes.SliderTick }, units(5), 0, 64},
+	{"sliderPad", func(sizes *Sizes) *int { return &sizes.SliderPad },
+		func(_ sizeBase, sizes *Sizes) int { return sizes.SliderThumbW/2 + sizes.Steps.Hair }, 0, 64},
+
+	{"dividerGrab", func(sizes *Sizes) *int { return &sizes.DividerGrab }, step(hairStep), 0, 16},
+	{"edgeReach", func(sizes *Sizes) *int { return &sizes.EdgeReach }, step(nearStep), 0, 32},
+
+	{"tableActionW", func(sizes *Sizes) *int { return &sizes.TableActionW }, units(18), 8, 160},
+	{"tableGripW", func(sizes *Sizes) *int { return &sizes.TableGripW }, units(10), 8, 160},
+	{"minColumnW", func(sizes *Sizes) *int { return &sizes.MinColumnW }, units(28), 8, 800},
+
+	{"foldColW", func(sizes *Sizes) *int { return &sizes.FoldColW }, units(9), 0, 64},
+	{"monoTextLead", func(sizes *Sizes) *int { return &sizes.MonoTextLead }, step(nearStep), 0, 32},
+	// Leading spaces the rows of Code and TextArea too; a pin wins over both.
+	{"monoLinePad", func(sizes *Sizes) *int { return &sizes.MonoLinePad },
+		func(base sizeBase, sizes *Sizes) int { return 2*base.unit + sizes.Leading }, 0, 32},
+
+	{"switchInset", func(sizes *Sizes) *int { return &sizes.SwitchInset }, step(hairStep), 0, 16},
 }
 
 // SizesFor applies the size rules of metrics to a UI line height, clamped to
@@ -253,3 +359,42 @@ func DialogWOf(sizes Sizes) int          { return sizes.DialogW }
 func DialogButtonMinWOf(sizes Sizes) int { return sizes.DialogButtonMinW }
 func DialogMarginOf(sizes Sizes) int     { return sizes.DialogMargin }
 func DialogMaxHOf(sizes Sizes) int       { return sizes.DialogMaxH }
+func ScrollbarWOf(sizes Sizes) int       { return sizes.ScrollbarW }
+func MinThumbLenOf(sizes Sizes) int      { return sizes.MinThumbLen }
+func ThumbInsetOf(sizes Sizes) int       { return sizes.ThumbInset }
+func HScrollArrowWOf(sizes Sizes) int    { return sizes.HScrollArrowW }
+func MenuMinWOf(sizes Sizes) int         { return sizes.MenuMinW }
+func MenuMaxWOf(sizes Sizes) int         { return sizes.MenuMaxW }
+func MenuSepHOf(sizes Sizes) int         { return sizes.MenuSepH }
+func MenuPadOf(sizes Sizes) int          { return sizes.MenuPad }
+func MenuHintHOf(sizes Sizes) int        { return sizes.MenuHintH }
+func MenuRowPadXOf(sizes Sizes) int      { return sizes.MenuRowPadX }
+func MenuIconWOf(sizes Sizes) int        { return sizes.MenuIconW }
+func MenuShortcutGapOf(sizes Sizes) int  { return sizes.MenuShortcutGap }
+func TipPadXOf(sizes Sizes) int          { return sizes.TipPadX }
+func TipPadYOf(sizes Sizes) int          { return sizes.TipPadY }
+func TipOffsetOf(sizes Sizes) int        { return sizes.TipOffset }
+func ToastWOf(sizes Sizes) int           { return sizes.ToastW }
+func ToastHOf(sizes Sizes) int           { return sizes.ToastH }
+func ToastGapOf(sizes Sizes) int         { return sizes.ToastGap }
+func ToastMarginOf(sizes Sizes) int      { return sizes.ToastMargin }
+func ButtonPadXOf(sizes Sizes) int       { return sizes.ButtonPadX }
+func FieldPadXOf(sizes Sizes) int        { return sizes.FieldPadX }
+func SelectionInsetOf(sizes Sizes) int   { return sizes.SelectionInset }
+func RevealMarginOf(sizes Sizes) int     { return sizes.RevealMargin }
+func SliderWOf(sizes Sizes) int          { return sizes.SliderW }
+func SliderHOf(sizes Sizes) int          { return sizes.SliderH }
+func SliderTrackOf(sizes Sizes) int      { return sizes.SliderTrack }
+func SliderThumbWOf(sizes Sizes) int     { return sizes.SliderThumbW }
+func SliderThumbHOf(sizes Sizes) int     { return sizes.SliderThumbH }
+func SliderTickOf(sizes Sizes) int       { return sizes.SliderTick }
+func SliderPadOf(sizes Sizes) int        { return sizes.SliderPad }
+func DividerGrabOf(sizes Sizes) int      { return sizes.DividerGrab }
+func EdgeReachOf(sizes Sizes) int        { return sizes.EdgeReach }
+func TableActionWOf(sizes Sizes) int     { return sizes.TableActionW }
+func TableGripWOf(sizes Sizes) int       { return sizes.TableGripW }
+func MinColumnWOf(sizes Sizes) int       { return sizes.MinColumnW }
+func FoldColWOf(sizes Sizes) int         { return sizes.FoldColW }
+func MonoTextLeadOf(sizes Sizes) int     { return sizes.MonoTextLead }
+func MonoLinePadOf(sizes Sizes) int      { return sizes.MonoLinePad }
+func SwitchInsetOf(sizes Sizes) int      { return sizes.SwitchInset }

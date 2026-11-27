@@ -190,6 +190,21 @@ func TestAnsweringTheMessageDialogClosesIt(t *testing.T) {
 	}
 }
 
+// The message dialog's state is assigned anew for each question, so a new
+// dialog starts at the top of its body however far the last one was scrolled.
+func TestANewMessageDialogStartsAtTheTop(t *testing.T) {
+	showcase, ctx, _ := newTestShowcase(t)
+	open(t, showcase, ctx, "overlays")
+	showcase.openDialog()
+	frame(t, showcase, ctx)
+	showcase.widgets.message.Scroll.Y = 40
+	showcase.dismissDialog()
+	showcase.openDialog()
+	if got := showcase.widgets.message.Scroll.Y; got != 0 {
+		t.Errorf("the new dialog is scrolled to %d", got)
+	}
+}
+
 func TestToastLifetime(t *testing.T) {
 	showcase, ctx, clock := newTestShowcase(t)
 	open(t, showcase, ctx, "overlays")

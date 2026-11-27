@@ -81,7 +81,16 @@ func OnRightClick(callback func(posX, posY int)) Option {
 // DismissMargin makes a click within px outside a modal element's rect
 // count as a click on it, so it does not dismiss it: a resizable dialog
 // grabs its edge there.
-func DismissMargin(px int) Option { return func(element *El) { element.dismissMargin = px } }
+func DismissMargin(px int) Option {
+	return func(element *El) { element.dismissMargin = px; element.literal(slotDismissMargin) }
+}
+
+// DismissMarginOf is DismissMargin that follows the context's Sizes, as
+// PadOf does for a padding. It takes a Go func, so it has no template
+// attribute (see PadOf).
+func DismissMarginOf(size func(sizes core.Sizes) int) Option {
+	return followOption(size, slotDismissMargin)
+}
 
 // OnChange runs after the element's value was edited: the text of a field
 // or an area, or a checkbox that was clicked. It is an attribute of any

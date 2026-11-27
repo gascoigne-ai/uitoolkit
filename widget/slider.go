@@ -6,9 +6,6 @@ import (
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
-// sliderPad is the room at each end of the track for half the thumb.
-const sliderPad = 7
-
 // SliderState is the drag of a Slider. The app owns it.
 //
 // A drag follows the pointer by how far it moved in device pixels since
@@ -53,8 +50,10 @@ func (s *sliderB) normalize() {
 	}
 }
 
-func (s *sliderB) track(element *El) (x, w int) {
-	return element.Rect().X + sliderPad, max(element.Rect().W-2*sliderPad, 1)
+// track is where the track starts and how long it is: the slider less
+// Sizes.SliderPad at each end.
+func (s *sliderB) track(element *El, sizes core.Sizes) (x, w int) {
+	return element.Rect().X + sizes.SliderPad, max(element.Rect().W-2*sizes.SliderPad, 1)
 }
 
 // valueAt maps a track fraction (0..1) to a stepped value. With a mid
@@ -87,7 +86,9 @@ func (s *sliderB) fracOf(value int) float64 {
 	return 0.5 + 0.5*float64(value-s.mid)/float64(s.max-s.mid)
 }
 
-func (s *sliderB) Measure(*El, *core.Ctx, int) (int, int) { return 120, 20 }
+func (s *sliderB) Measure(_ *El, ctx *core.Ctx, _ int) (int, int) {
+	return ctx.Sizes.SliderW, ctx.Sizes.SliderH
+}
 
 func (s *sliderB) Update(element *El, ctx *core.Ctx) {
 	in, st := ctx.In, s.state
@@ -110,7 +111,7 @@ func (s *sliderB) Update(element *El, ctx *core.Ctx) {
 			s.onEnd(st.pending)
 		}
 	case in.Click && in.Over(element.Rect()):
-		x, w := s.track(element)
+		x, w := s.track(element, ctx.Sizes)
 		st.Dragging = true
 		st.startF = max(0, min(float64(in.X-x)/float64(w), 1))
 		st.startDev, st.trackDev = float64(in.X)*ctx.Scale, float64(w)*ctx.Scale
@@ -124,19 +125,21 @@ func (s *sliderB) Update(element *El, ctx *core.Ctx) {
 }
 
 func (s *sliderB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
-	r := element.Rect()
-	x, w := s.track(element)
+	r, sizes := element.Rect(), ctx.Sizes
+	x, w := s.track(element, sizes)
 	frac := s.fracOf(s.state.Shown(s.value))
 	mid := r.Y + r.H/2
-	pill := float64(2) * min(ctx.Th.RadiusScale, 1) // the track is square when corners are
+	groove := core.Rect{X: x, Y: mid - sizes.SliderTrack/2, W: w, H: sizes.SliderTrack}
+	pill := float64(groove.H) / 2 * min(ctx.Th.RadiusScale, 1) // the track is square when corners are
 	chip, accent := ctx.Color(core.Chip), ctx.Color(core.Accent)
-	ctx.FillStyled(dst, core.Rect{X: x, Y: mid - 2, W: w, H: 4}, chip, chip, pill)
-	if s.mid != 0 { // a tick at the middle value
-		ctx.Fill(dst, core.Rect{X: x + w/2, Y: mid - 5, W: 1, H: 10}, ctx.Color(core.Rule))
+	ctx.FillStyled(dst, groove, chip, chip, pill)
+	if s.mid != 0 { // a tick at the middle value, a hairline wide
+		ctx.Fill(dst, core.Rect{X: x + w/2, Y: mid - sizes.SliderTick/2, W: 1, H: sizes.SliderTick}, ctx.Color(core.Rule))
 	}
-	ctx.FillStyled(dst, core.Rect{X: x, Y: mid - 2, W: int(frac*float64(w) + 0.5), H: 4}, accent, accent, pill)
-	tx := x + int(frac*float64(w)+0.5)
-	thumb := core.Rect{X: tx - 5, Y: mid - 8, W: 10, H: 16}
+	groove.W = int(frac*float64(w) + 0.5)
+	ctx.FillStyled(dst, groove, accent, accent, pill)
+	tx := x + groove.W
+	thumb := core.Rect{X: tx - sizes.SliderThumbW/2, Y: mid - sizes.SliderThumbH/2, W: sizes.SliderThumbW, H: sizes.SliderThumbH}
 	clr := core.Accent
 	if s.state.Dragging || ctx.Hovered(r) {
 		clr = core.AccentLine

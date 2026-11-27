@@ -4,10 +4,8 @@ import (
 	"strings"
 )
 
-// Pixels of context kept visible beyond the cursor when the text
-// scrolls, and the number of undo steps kept.
+// The number of undo steps kept, and the size their snapshots stay under.
 const (
-	revealMargin = 12
 	historyLimit = 100
 	historyBytes = 8 << 20 // the snapshots of a large text are bounded by size too
 )

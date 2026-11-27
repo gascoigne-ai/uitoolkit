@@ -127,7 +127,7 @@ func (a *TextArea) keepTopLine(geometry areaGeometry, rect core.Rect) {
 func (a *TextArea) Update(ctx *core.Ctx, rect core.Rect) (changed bool) {
 	g := a.geometry(ctx, rect)
 	a.keepTopLine(g, rect)
-	b := layoutBars(rect, g.contentW(rect), g.contentH())
+	b := layoutBars(rect, g.contentW(rect), g.contentH(), g.barW)
 	a.ViewLines = max(b.viewH/g.lineH, 1)
 	a.drag.update(ctx, b, g.contentW(core.Rect{W: b.viewW}), g.contentH(), &a.ScrollX, &a.ScrollY)
 
@@ -268,9 +268,10 @@ func (a *TextArea) reveal(rect core.Rect, geometry areaGeometry, sizes bars) {
 // Line numbers stay put while the text scrolls sideways.
 func (a *TextArea) Draw(ctx *core.Ctx, dst render.Canvas, rect core.Rect) {
 	g := a.geometry(ctx, rect)
-	b := layoutBars(rect, g.contentW(rect), g.contentH())
+	b := layoutBars(rect, g.contentW(rect), g.contentH(), g.barW)
 	view := core.Rect{X: rect.X, Y: rect.Y, W: b.viewW, H: b.viewH}
-	body := core.Rect{X: g.textX - 4, Y: rect.Y, W: b.viewW - (g.textX - 4 - rect.X), H: b.viewH}
+	bodyX := max(g.textX-g.lead, rect.X) // a themed lead may be wider than what is left of the text
+	body := core.Rect{X: bodyX, Y: rect.Y, W: b.viewW - (bodyX - rect.X), H: b.viewH}
 	area, text := ctx.Clip(dst, view), ctx.Clip(dst, body)
 	curLine, _ := a.LineCol(a.Cursor)
 	lo, hi, hasSel := a.Selection()

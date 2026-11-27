@@ -247,7 +247,7 @@ Every shared size is a rule in one table in `core` (`sizes.go`), never a free nu
 | `leading` | 0 | 0..8 | extra pixels of leading on the line and the small line |
 | `steps` | 1, 2, 3, 4, 5, 6, 8 | 1..16 each | the spacing steps, in units |
 
-**Leading** is added to the height classes, the bars built from them, and between the wrapped lines of `Paragraph`. A single-line `Text` and the checkbox keep the measured line, and the lines of `Code` and `Area` keep their own spacing.
+**Leading** is added to the height classes, the bars built from them, between the wrapped lines of `Paragraph`, and to the rows of `Code` and `Area` (through `monoLinePad`, unless a theme pins it). A single-line `Text` and the checkbox keep the measured line.
 
 **Height classes** are a line plus leading plus padding on both sides, so text sits on whole pixels (with an odd leading or unit, a pixel can be left over):
 
@@ -279,7 +279,7 @@ Every shared size is a rule in one table in `core` (`sizes.go`), never a free nu
 | `gutter` (12) | `gutter` | `GutterOf` | 0..64 | inset between a container and its content; gap between its sections |
 | `dialog` (16) | `dialogPad` | `DialogPadOf` | 0..64 | inset of a dialog's title bar, toolbar and body |
 
-`ctx.Sizes.Steps` holds the steps in pixels. The switch's track is inset by the `hair` step.
+`ctx.Sizes.Steps` holds the steps in pixels.
 
 **Bars, fixed shapes and dialogs:**
 
@@ -297,7 +297,56 @@ Every shared size is a rule in one table in `core` (`sizes.go`), never a free nu
 | `dialogMargin` | `DialogMarginOf` | 40 | 40 | 0..200 |
 | `dialogMaxH` | `DialogMaxHOf` | 560 | 560 | 120..4000 |
 
-`dialogMargin` (room around a dialog) and `dialogMaxH` (tallest default dialog) are for app layouts; no toolkit widget applies them, so a theme that sets them changes only a layout that reads them.
+`Dialog` applies `dialogMargin` (the room kept between a dialog and the window's edges) and `dialogMaxH` (the tallest a dialog is unless the app says otherwise) to its panel, and so do `ResizableDialog` and `MessageDialog`; see [Dialogs](#widgets-when-to-use-which).
+
+**Scrollbars, menus, tooltips and toasts** draw and hit-test with these. A unit is the `unit` knob, so with the default of 2, 4 units are 8 px.
+
+| Name | Role | Rule | Default | Pin range | What it is |
+|---|---|---|---|---|---|
+| `scrollbarW` | `ScrollbarWOf` | 4 units | 8 | 2..32 | width of a scrollbar track |
+| `minThumbLen` | `MinThumbLenOf` | 12 units | 24 | 4..200 | least length of a thumb |
+| `thumbInset` | `ThumbInsetOf` | 1 | 1 | 0..8 | how far a thumb stays off its track's long sides (a thumb is at least 1 wide) |
+| `hscrollArrowW` | `HScrollArrowWOf` | 9 units | 18 | 4..64 | an arrow of an overflowing `HScroll` |
+| `menuMinW` | `MenuMinWOf` | 60 units | 120 | 40..800 | least width of a menu |
+| `menuMaxW` | `MenuMaxWOf` | 210 units | 420 | 40..1600 | most width of a menu; when below `menuMinW`, the minimum wins |
+| `menuSepH` | `MenuSepHOf` | 2 `nearGap` + 1 | 9 | 1..64 | a separator row |
+| `menuPad` | `MenuPadOf` | `near` step | 4 | 0..64 | inset around the rows |
+| `menuHintH` | `MenuHintHOf` | 8 units | 16 | 8..160 | extra height of each hint line |
+| `menuRowPadX` | `MenuRowPadXOf` | `label` step | 10 | 0..64 | side inset of a row |
+| `menuIconW` | `MenuIconWOf` | 7 units | 14 | 0..64 | the icon column |
+| `menuShortcutGap` | `MenuShortcutGapOf` | 2 `looseGap` | 16 | 0..128 | room counted between a label and its shortcut in a menu's width |
+| `tipPadX` | `TipPadXOf` | `loose` step | 8 | 0..64 | side inset of a tooltip's text |
+| `tipPadY` | `TipPadYOf` | half a `label` step | 5 | 0..64 | its inset above and below |
+| `tipOffset` | `TipOffsetOf` | 8 units | 16 | 0..64 | how far the box is from the pointer |
+| `toastW` | `ToastWOf` | 160 units | 320 | 80..1600 | width of a toast |
+| `toastH` | `ToastHOf` | 18 units | 36 | 8..160 | height of a toast |
+| `toastGap` | `ToastGapOf` | `tight` step | 6 | 0..64 | between two toasts |
+| `toastMargin` | `ToastMarginOf` | `loose` step | 8 | 0..200 | between the lowest toast and the bottom inset |
+
+**Controls** draw and hit-test with these. `selectionInset` and the slider's track, thumb and tick are only drawn (a slider takes a press anywhere in it); `dividerGrab` and `edgeReach` only take the pointer.
+
+| Name | Role | Rule | Default | Pin range | What it is |
+|---|---|---|---|---|---|
+| `buttonPadX` | `ButtonPadXOf` | `label` step | 10 | 0..64 | side inset of the label of `Button` and `PrimaryButton` |
+| `fieldPadX` | `FieldPadXOf` | `label` step | 10 | 0..64 | side inset of a `Field`'s text, unless `FieldPad` sets it |
+| `selectionInset` | `SelectionInsetOf` | `tight` step | 6 | 0..32 | how far a `Field`'s selection stays off its top and bottom |
+| `revealMargin` | `RevealMarginOf` | `gutter` step | 12 | 0..64 | text a `Field` keeps in view beyond its cursor |
+| `sliderW` | `SliderWOf` | 60 units | 120 | 16..800 | the width a slider asks for (it grows by default) |
+| `sliderH` | `SliderHOf` | 10 units | 20 | 8..160 | the height it asks for (`Slider` sets `compactH`) |
+| `sliderTrack` | `SliderTrackOf` | 2 units | 4 | 1..32 | thickness of the track |
+| `sliderThumbW` | `SliderThumbWOf` | 5 units | 10 | 2..64 | width of the thumb |
+| `sliderThumbH` | `SliderThumbHOf` | 8 units | 16 | 2..64 | height of the thumb |
+| `sliderTick` | `SliderTickOf` | 5 units | 10 | 0..64 | height of the middle tick (`SliderMid`) |
+| `sliderPad` | `SliderPadOf` | half `sliderThumbW` + `hair` step | 7 | 0..64 | room at each end of the track; the track is at least 1 long |
+| `dividerGrab` | `DividerGrabOf` | `hair` step | 2 | 0..16 | how far each side of a `Split` or column divider still grabs it |
+| `edgeReach` | `EdgeReachOf` | `near` step | 4 | 0..32 | how far outside its border a `Resizable` grabs an edge |
+| `tableActionW` | `TableActionWOf` | 18 units | 36 | 8..160 | a table's checkbox, delete and lead columns |
+| `tableGripW` | `TableGripWOf` | 10 units | 20 | 8..160 | a table's drag handle column |
+| `minColumnW` | `MinColumnWOf` | 28 units | 56 | 8..800 | the narrowest a table column can be dragged |
+| `foldColW` | `FoldColWOf` | 9 units | 18 | 0..64 | the column of a `Code` view's fold arrows |
+| `monoTextLead` | `MonoTextLeadOf` | `near` step | 4 | 0..32 | room left of the text in `Code` and `Area` that its clip includes; `Code` also has one before the fold column |
+| `monoLinePad` | `MonoLinePadOf` | 2 units + leading | 4 | 0..32 | what a row of `Code` and `Area` has beyond the measured mono line |
+| `switchInset` | `SwitchInsetOf` | `hair` step | 2 | 0..16 | how far a switch's knob stays off its track's ends; the track is that much taller than the knob above and below |
 
 **Sizes follow the faces and the theme.** `ctx.Sizes` is `core.SizesFor(line, small, ctx.Th.Metrics)` for the line heights of the faces the context really draws with. `NewCtx`, `SetTheme` and `SetFonts` recompute it; `SetScale` does not, since the scale multiplies at draw time. The UI line is clamped to 13..28 (`MinLine`, `MaxLine`) and the small line to 1..UI line; spacing does not move with the text size. `DefaultSizes()` is the result for lines 17 and 15 with the default knobs.
 
@@ -437,7 +486,7 @@ All of them take `OnChange` (or `OnClick`) and leave the value to the app: the a
 | `FormRow` | a label in a fixed column and its controls; rows with the same label width line up |
 | `Toolbar` | a bar of controls over a pane: `toolbarH`, `gutter` inset, `Border` under it |
 | `Note` | a one-line message under a control: `core.Error` for a problem, `core.Muted` for a hint |
-| `Table` | rows with columns: uppercase small bold muted header on `Panel`, rows `rowH` on `Sunken`, a `BorderSoft` hairline between rows, the row under the pointer lit, cells padded `cellPad`. Opt-ins: `Zebra`, draggable column dividers (`State`, columns at least `MinColumnPx` 56), editable cells, a lead column, a detail under a row, row drag handles. |
+| `Table` | rows with columns: uppercase small bold muted header on `Panel`, rows `rowH` on `Sunken`, a `BorderSoft` hairline between rows, the row under the pointer lit, cells padded `cellPad`. Opt-ins: `Zebra`, draggable column dividers (`State`, columns at least `minColumnW`), editable cells, a lead column, a detail under a row, row drag handles. |
 | `KeyChips` | a key combination such as `Ctrl+Shift+Tab`, one chip per key |
 
 **Tabs.** `TabBar` holds `Tabs` (or `ScrollTabs` when the labels may not fit). The bar is `tabBarH` with `tabGap` above the tabs and a `Border` line under the inactive ones; inactive labels are `Muted`. The open tab has the pane color `Bg`, its label in `Text` and a 2 px `AccentLine` outline on top, left and right, open at the bottom so it runs into its pane. `ActiveTab()` gives a hand-built tab the same look. No tab label is bold.
@@ -446,7 +495,7 @@ All of them take `OnChange` (or `OnClick`) and leave the value to the app: the a
 
 | Widget | Use |
 |---|---|
-| `Scroll` | content taller than its box; an 8 px track, a thumb at least 24 long, drawn only when the content overflows; one wheel notch is 48 px |
+| `Scroll` | content taller than its box; a track `scrollbarW` (8) wide, a thumb at least `minThumbLen` (24) long, drawn only when the content overflows; one wheel notch is 48 px |
 | `HScroll` | a row wider than its box (tab strips, toolbars in a narrow window): arrows only at an end that can still scroll, wheel, sideways touchpad swipe, drag to pan |
 | `Split` | two panes with a draggable `Border` divider (resize cursor); `Vertical`, `AsRatio`, `MinFirst`, `MinSecond` |
 | `Resizable` | a box the user resizes by its edges |
@@ -457,14 +506,16 @@ All of them take `OnChange` (or `OnClick`) and leave the value to the app: the a
 - **Toolbar** (`DialogToolbar`): `dialogToolbarH`, padded `dialogPad`, gap `looseGap`, a `BorderSoft` line under it. A field that should take the room gets `Grow(1)`.
 - **Body**: padded `dialogPad`.
 - **Message dialog** (`MessageDialog`): `dialogW` wide; the body text in `Muted`, any form you add, an optional input line, then the buttons on the right (gap `looseGap`, at least `dialogButtonMinW` wide, the primary one lit). Enter in the input runs the primary button.
+- **Limits.** A dialog stays `dialogMargin` (40) off every edge of the window, dragged or not, and is at most `dialogMaxH` (560) high. The height limit also caps a height you give it: `H(700)` shows 560 high. Give `MaxH(0)` for no limit, another `MaxH` for another, or `Margin` for another margin. In a window narrower or lower than twice the margin nothing of the dialog is left. The size a user drags a `ResizableDialog` to stops at the same height limit.
+- **Too much content.** Every dialog clips what it holds to its panel; its shadow, and the menus and tooltips opened from it, are not clipped. A `MessageDialog` too tall for its limit scrolls the body text and your content, while the input and the buttons stay in view (a window too low even for those cuts them off). The position is `DialogState.Scroll`: assign a new `DialogState` for each message so it starts at the top, or reset `Scroll` when you change a kept one. Any other dialog scrolls only what you put in a `Scroll` with `Grow(1)`, inside containers that have `Shrink()`. A drag that leaves the panel, or a message dialog's scrolled part, keeps following the pointer.
 - **Closing.** The close button runs `OnDismiss`. A click outside a dialog is swallowed and leaves it open (`KeepOnOutsideClick`), so a stray click cannot throw away the user's work. Escape is the app's to wire (see [What the app owns](#what-the-app-owns)); make it do what the close button does.
 - **Moving.** Pass `Moved(&state)` to let the user drag the dialog by its title bar; a double click on the bar centers it again. Without `Moved` the bar does not drag.
 
-**Toasts.** `Toasts(&stack, width, height, bottomInset)` shows a `ToastStack` in the bottom right corner, above `bottomInset` (a status bar's height, or 0): 320×36 each, 6 apart, at most 5 (`ToastMax`), the oldest on top, on `Panel` with a shadow. Info toasts have a `Border` outline and go after 3 s (`ToastInfoFor`; call `Prune` each tick). Error toasts have `Error` text and outline, stay until clicked, and the same error is not shown twice. A click dismisses any toast. Use a toast to confirm something done or report an error the user did not wait for; use a dialog when the user must decide.
+**Toasts.** `Toasts(&stack, width, height, bottomInset)` shows a `ToastStack` in the bottom right corner, above `bottomInset` (a status bar's height, or 0): `toastW`×`toastH` (320×36) each, `toastGap` (6) apart and `toastMargin` (8) above the inset, a `gutter` off the right edge, at most 5 (`ToastMax`), the oldest on top, on `Panel` with a shadow. Info toasts have a `Border` outline and go after 3 s (`ToastInfoFor`; call `Prune` each tick). Error toasts have `Error` text and outline, stay until clicked, and the same error is not shown twice. A click dismisses any toast. Use a toast to confirm something done or report an error the user did not wait for; use a dialog when the user must decide.
 
-**Tooltips.** `view.Tooltip(text)` on any element; `TooltipLayer` shows the innermost one after the pointer rests 30 ticks (half a second at 60 ticks a second). The box is `Frame` with the `tooltip` outline and small `Text`, 16 px below and right of the pointer, kept inside the window, and above the pointer when there is no room below.
+**Tooltips.** `view.Tooltip(text)` on any element; `TooltipLayer` shows the innermost one after the pointer rests 30 ticks (half a second at 60 ticks a second). The box is `Frame` with the `tooltip` outline and small `Text`, `tipOffset` (16) below and right of the pointer, its text inset `tipPadX` (8) by `tipPadY` (5), kept inside the window, and above the pointer when there is no room below.
 
-**Menus.** `OpenMenu(ctx, x, y, items)` opens the popup menu; mount `PopupMenuLayer(ctx)` once and call `PopupMenuKeys` each tick. The menu is a `Bg` panel with the `menu` style and a shadow, inset `MenuPad` (4), as wide as its widest row within `MenuMinW` 120 and `MenuMaxW` 420, kept inside the window. Rows are `compactH` high, padded 10; the keyboard's row is `Selected`, others `Hover` under the pointer. `MenuItem` has `Shortcut` (shown small and muted, "Ctrl" written "Cmd" on macOS), `Hint` (muted lines under the label), `Icon`, `Disabled` and `Separator` (9 high). A pick or a click outside closes it.
+**Menus.** `OpenMenu(ctx, x, y, items)` opens the popup menu; mount `PopupMenuLayer(ctx)` once and call `PopupMenuKeys` each tick. The menu is a `Bg` panel with the `menu` style and a shadow, inset `menuPad` (4), as wide as its widest row within `menuMinW` (120) and `menuMaxW` (420), kept inside the window. Rows are `compactH` high, padded `menuRowPadX` (10); the keyboard's row is `Selected`, others `Hover` under the pointer. `MenuItem` has `Shortcut` (shown small and muted, "Ctrl" written "Cmd" on macOS), `Hint` (muted lines under the label), `Icon`, `Disabled` and `Separator` (`menuSepH`, 9 high). A pick or a click outside closes it.
 
 **Other.** `Image` draws a `render.Image` scaled to fit. `Paragraph` wraps small muted text, with the theme's `leading` between its lines. `view.HRule`, `view.VRule` and `view.Separator` draw dividers.
 
@@ -486,7 +537,7 @@ All of them take `OnChange` (or `OnClick`) and leave the value to the app: the a
 - **Wheel.** The innermost scroller under the pointer whose content overflows takes the wheel; an enclosing one does not move too.
 - **Modal.** While a modal layer is visible, nothing under it gets clicks, wheel or hover.
 - **Cursor.** Split dividers and resizable edges show resize cursors; a drag shows `CursorMove` only from press to release; an idle drag handle shows the default cursor, so it reads as a label, not a control.
-- **Resizing.** A resizable box is grabbed within `edgeGrab` (6) inside or 4 outside its border.
+- **Resizing.** A resizable box is grabbed within `edgeGrab` (6) inside or `edgeReach` (4) outside its border.
 - **Drags** follow the pointer while the button is held, also after it leaves a clipping parent. Only the element that took the press follows it there; every other element gets no click, drag or `OnDragOver` through the clip. A `Custom` with its own drag reads `ctx.PointerX`/`PointerY` while it runs.
 
 ## Layers
@@ -500,8 +551,9 @@ The window's root is a `Stack`; children later in it are drawn over earlier ones
 5. `TooltipLayer(&state)`, always last
 
 - At most one popup menu is open; it lives in `ctx.Menu`, so any element can open one. `OpenMenu` replaces an open one.
-- A `Modal` element swallows every click; a click outside runs its `OnDismiss` unless it has `KeepOnOutsideClick` (dialogs do). `DismissMargin(px)` counts clicks near its edge as inside.
+- A `Modal` element swallows every click; a click outside runs its `OnDismiss` unless it has `KeepOnOutsideClick` (dialogs do). `DismissMargin(px)` counts clicks near its edge as inside (`DismissMarginOf` takes a size role).
 - `FloatAt(x, y)` places a floating element and keeps it inside its `Stack`; `FloatCenter()` centers it; `FloatTR(top, right)` pins it to the top right.
+- A floating element's margins are kept free between it and its `Stack`: any floating element with a margin is inset. It is centered, pinned, placed at a point and dragged (`Moved`) within the `Stack` less those margins (a point is measured from that room's top left corner), and is never larger than it.
 - An app that skips drawing while idle keeps drawing while `TooltipState.Waiting()` is true, and when `ctx.CaretReads` moved during the last draw (the caret blinks). `view.ModalLayer`, `DrawBelow` and `DrawFrom` let it keep the part under a modal in an image and redraw only the layers.
 
 ## Scaling
@@ -567,4 +619,4 @@ The same tree can be written as a template (`markup`): attributes are the Go opt
 - A table's header and its last row (when selected, hovered or zebra-filled) are square fills inside the table's rounded outline.
 - Tooltip delay counts ticks, so it is longer while the app updates at a lower rate.
 - `core.SystemClipboard` knows no tool on Windows: copy and paste fail there unless the app sets its own `ctx.Clipboard`.
-- Menu hint lines are a fixed 16 px each and do not follow the small text size.
+- Menu hint lines are `menuHintH` (16 by default) high each. That size follows the theme's `unit` or its own pin, not the small text size.

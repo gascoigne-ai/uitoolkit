@@ -12,11 +12,6 @@ const (
 	ToastMax = 5
 	// ToastInfoFor is how long an info toast stays.
 	ToastInfoFor = 3 * time.Second
-
-	toastW      = 320
-	toastH      = 36
-	toastGap    = 6
-	toastMargin = 8 // between the stack and the bottom inset
 )
 
 // ToastKind says how a toast behaves and looks: an info toast fades, an
@@ -84,18 +79,20 @@ func Toasts(stack *ToastStack, width, height, bottomInset int) *El {
 	if len(*stack) == 0 {
 		return nil
 	}
-	total := len(*stack)*toastH + (len(*stack)-1)*toastGap
-	return Col(W(toastW), Gap(toastGap),
+	count := len(*stack)
+	return Col(WOf(core.ToastWOf), GapOf(core.ToastGapOf),
 		FloatAtOf(
-			func(sizes core.Sizes) int { return width - sizes.Gutter - toastW },
-			func(core.Sizes) int { return height - bottomInset - toastMargin - total },
+			func(sizes core.Sizes) int { return width - sizes.Gutter - sizes.ToastW },
+			func(sizes core.Sizes) int {
+				return height - bottomInset - sizes.ToastMargin - (count*sizes.ToastH + (count-1)*sizes.ToastGap)
+			},
 		),
 		For(*stack, func(index int, toast Toast) Node {
 			border, color := core.Border, core.Text
 			if toast.Kind == ToastError {
 				border, color = core.Error, core.Error
 			}
-			return Row(H(toastH), PadXOf(core.GutterOf), Bg(core.Panel), Border(border), Shadow(), OnClick(func() { stack.Dismiss(index) }),
+			return Row(HOf(core.ToastHOf), PadXOf(core.GutterOf), Bg(core.Panel), Border(border), Shadow(), OnClick(func() { stack.Dismiss(index) }),
 				Text(toast.Text, Ellipsis(), Color(color), Grow(1)),
 			)
 		}),

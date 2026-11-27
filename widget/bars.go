@@ -22,16 +22,16 @@ func btoi(flag bool) int {
 }
 
 // layoutBars decides which scrollbars a view in r needs for content of
-// contentW by contentH. A bar takes room from the other direction, so
-// the two decisions depend on each other.
-func layoutBars(rect core.Rect, contentW, contentH int) bars {
+// contentW by contentH, with tracks barW wide. A bar takes room from the
+// other direction, so the two decisions depend on each other.
+func layoutBars(rect core.Rect, contentW, contentH, barW int) bars {
 	var b bars
 	b.vOK = contentH > rect.H
-	b.hOK = contentW > rect.W-btoi(b.vOK)*scrollbarW
-	b.vOK = contentH > rect.H-btoi(b.hOK)*scrollbarW
-	b.viewW, b.viewH = rect.W-btoi(b.vOK)*scrollbarW, rect.H-btoi(b.hOK)*scrollbarW
-	b.vTrack = core.Rect{X: rect.X + rect.W - scrollbarW, Y: rect.Y, W: scrollbarW, H: b.viewH}
-	b.hTrack = core.Rect{X: rect.X, Y: rect.Y + rect.H - scrollbarW, W: b.viewW, H: scrollbarW}
+	b.hOK = contentW > rect.W-btoi(b.vOK)*barW
+	b.vOK = contentH > rect.H-btoi(b.hOK)*barW
+	b.viewW, b.viewH = rect.W-btoi(b.vOK)*barW, rect.H-btoi(b.hOK)*barW
+	b.vTrack = core.Rect{X: rect.X + rect.W - barW, Y: rect.Y, W: barW, H: b.viewH}
+	b.hTrack = core.Rect{X: rect.X, Y: rect.Y + rect.H - barW, W: b.viewW, H: barW}
 	return b
 }
 
@@ -55,16 +55,16 @@ func (d *barDrag) active() bool { return d.bar != barNone }
 // update runs a thumb drag, or starts one (or pages) on a press in a
 // track, moving *sx and *sy.
 func (d *barDrag) update(ctx *core.Ctx, sizes bars, contentW, contentH int, sx, sy *int) {
-	in := ctx.In
+	in, minLen := ctx.In, ctx.Sizes.MinThumbLen
 	if d.bar != barNone {
 		if !d.grab.held(in) {
 			d.bar = barNone
 			return
 		}
 		if d.bar == barV {
-			*sy = posFromOffset(sizes.vTrack.H, contentH, sizes.viewH, ctx.PointerY-sizes.vTrack.Y-d.grab.off)
+			*sy = posFromOffset(sizes.vTrack.H, contentH, sizes.viewH, ctx.PointerY-sizes.vTrack.Y-d.grab.off, minLen)
 		} else {
-			*sx = posFromOffset(sizes.hTrack.W, contentW, sizes.viewW, ctx.PointerX-sizes.hTrack.X-d.grab.off)
+			*sx = posFromOffset(sizes.hTrack.W, contentW, sizes.viewW, ctx.PointerX-sizes.hTrack.X-d.grab.off, minLen)
 		}
 		return
 	}
@@ -72,17 +72,17 @@ func (d *barDrag) update(ctx *core.Ctx, sizes bars, contentW, contentH int, sx, 
 		return
 	}
 	if sizes.vOK && sizes.vTrack.Contains(in.X, in.Y) {
-		d.press(barV, sizes.vTrack.H, contentH, sizes.viewH, in.Y-sizes.vTrack.Y, sy)
+		d.press(barV, sizes.vTrack.H, contentH, sizes.viewH, in.Y-sizes.vTrack.Y, minLen, sy)
 	}
 	if sizes.hOK && sizes.hTrack.Contains(in.X, in.Y) {
-		d.press(barH, sizes.hTrack.W, contentW, sizes.viewW, in.X-sizes.hTrack.X, sx)
+		d.press(barH, sizes.hTrack.W, contentW, sizes.viewW, in.X-sizes.hTrack.X, minLen, sx)
 	}
 }
 
 // press grabs the thumb of bar when the press is on it, else pages toward
 // the press.
-func (d *barDrag) press(bar barKind, track, content, view, at int, scroll *int) {
-	grabbed, off, pos := pressThumb(track, content, view, *scroll, at)
+func (d *barDrag) press(bar barKind, track, content, view, at, minLen int, scroll *int) {
+	grabbed, off, pos := pressThumb(track, content, view, *scroll, at, minLen)
 	*scroll = pos
 	if grabbed {
 		d.bar = bar
@@ -93,9 +93,9 @@ func (d *barDrag) press(bar barKind, track, content, view, at int, scroll *int) 
 // drawBars draws the scrollbars of b for content scrolled to sx, sy.
 func drawBars(ctx *core.Ctx, dst render.Canvas, sizes bars, drag barDrag, contentW, contentH, sx, sy int) {
 	if sizes.vOK {
-		drawScrollbar(ctx, dst, sizes.vTrack, contentH, sizes.viewH, sy, drag.bar == barV || ctx.Hovered(sizes.vTrack))
+		drawScrollbar(ctx, dst, sizes.vTrack, true, contentH, sizes.viewH, sy, drag.bar == barV || ctx.Hovered(sizes.vTrack))
 	}
 	if sizes.hOK {
-		drawScrollbar(ctx, dst, sizes.hTrack, contentW, sizes.viewW, sx, drag.bar == barH || ctx.Hovered(sizes.hTrack))
+		drawScrollbar(ctx, dst, sizes.hTrack, false, contentW, sizes.viewW, sx, drag.bar == barH || ctx.Hovered(sizes.hTrack))
 	}
 }

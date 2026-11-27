@@ -69,13 +69,14 @@ func (s *splitB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	ctx.Fill(dst, s.divider, ctx.Color(core.Border))
 }
 
-// handle is the area that grabs the divider, a little wider than it.
-func (s *splitB) handle() core.Rect {
+// handle is the area that grabs the divider: the divider and reach pixels
+// (Sizes.DividerGrab) each side of it.
+func (s *splitB) handle(reach int) core.Rect {
 	d := s.divider
 	if s.vertical {
-		return core.Rect{X: d.X, Y: d.Y - handleSlop, W: d.W, H: 1 + 2*handleSlop}
+		return core.Rect{X: d.X, Y: d.Y - reach, W: d.W, H: 1 + 2*reach}
 	}
-	return core.Rect{X: d.X - handleSlop, Y: d.Y, W: 1 + 2*handleSlop, H: d.H}
+	return core.Rect{X: d.X - reach, Y: d.Y, W: 1 + 2*reach, H: d.H}
 }
 
 func (s *splitB) Update(element *El, ctx *core.Ctx) {
@@ -106,7 +107,7 @@ func (s *splitB) Update(element *El, ctx *core.Ctx) {
 		st.Size = max(px, 1e-6) // 0 would mean "the default"
 		return
 	}
-	if !in.Over(s.handle()) {
+	if !in.Over(s.handle(ctx.Sizes.DividerGrab)) {
 		return
 	}
 	ctx.Cursor = cursor

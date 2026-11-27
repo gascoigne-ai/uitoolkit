@@ -20,12 +20,16 @@ type monoGrid struct {
 	lineH, charW, textX int
 	adv                 float64 // the exact advance of one character
 	gutter              int     // Sizes.Gutter, the room around the text and the numbers
+	lead                int     // Sizes.MonoTextLead, the room left of the text that its clip includes
+	barW                int     // Sizes.ScrollbarW, the room the vertical scrollbar takes
 }
 
 // newMonoGrid measures the mono font; textX is set by the widget, which
-// knows its gutter.
+// knows its gutter. A row is the measured line plus Sizes.MonoLinePad, which
+// includes the theme's leading unless the theme pins it, so drawing, clicks,
+// the wheel and paging all step by the same rows.
 func newMonoGrid(ctx *core.Ctx) monoGrid {
-	return monoGrid{lineH: ctx.LineH(ctx.F.Mono) + 4, charW: ctx.Width(ctx.F.Mono, "0"), adv: ctx.Advance(ctx.F.Mono), gutter: ctx.Sizes.Gutter}
+	return monoGrid{lineH: ctx.LineH(ctx.F.Mono) + ctx.Sizes.MonoLinePad, charW: ctx.Width(ctx.F.Mono, "0"), adv: ctx.Advance(ctx.F.Mono), gutter: ctx.Sizes.Gutter, lead: ctx.Sizes.MonoTextLead, barW: ctx.Sizes.ScrollbarW}
 }
 
 // colX is the pixel offset of the start of column col from the start of the
@@ -45,7 +49,7 @@ func (g monoGrid) wrapWidth(wrap bool, rect core.Rect) float64 {
 	if !wrap {
 		return 0
 	}
-	return float64(max(rect.W-scrollbarW-(g.textX-rect.X)-g.gutter, 1))
+	return float64(max(rect.W-g.barW-(g.textX-rect.X)-g.gutter, 1))
 }
 
 // wheelDX and wheelDY are the pixels a wheel reading scrolls sideways and

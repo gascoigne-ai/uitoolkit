@@ -73,6 +73,11 @@ type Describer interface{ Describe() string }
 // content's size.
 func (e *El) FixedSize() (w, h int) { return e.w, e.h }
 
+// MaxHeight is the bound given with MaxH or MaxHOf, 0 for none, as the last
+// Layout resolved it: what a component that keeps a height as state caps it
+// at.
+func (e *El) MaxHeight() int { return e.maxH }
+
 // ColorToken is the token given with Color, or fallback when there is
 // none: the color a component draws in.
 func (e *El) ColorToken(fallback core.Token) core.Token { return e.color(fallback) }

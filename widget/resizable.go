@@ -5,10 +5,6 @@ import (
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
-// edgeOut is how far outside the border a press still grabs the edge; the
-// element does not dismiss there (view.DismissMargin).
-const edgeOut = 4
-
 // ResizeState is the size the user gave a Resizable element; 0 means the
 // element's default. The application owns it, like a split or a scroll
 // state, so it survives the per-frame rebuild and can be saved.
@@ -31,19 +27,20 @@ type resizableB struct {
 // wraps, which is laid out and centered by its parent (a floating dialog):
 // the size changes by twice the pointer's movement, so the edge stays under
 // the pointer. The size is kept in state within the given minimum and
-// maximum; the caller applies state.W and state.H to the element's own size,
-// and a double click on an edge puts both back to 0, the default. It has
+// maximum, and state.H also within the element's own MaxH, so it never runs
+// past the height that is drawn; the caller applies state.W and state.H to
+// the element's own size, and a double click on an edge puts both back to 0, the default. It has
 // no element of its own in templates, because only a dialog uses it:
 // <resizable-dialog> is the template form.
 func Resizable(state *ResizeState, minW, minH, maxW, maxH int, items ...Item) *El {
-	return Custom(&resizableB{state: state, minW: minW, minH: minH, maxW: maxW, maxH: maxH}, append([]Item{DismissMargin(edgeOut)}, items...)...)
+	return Custom(&resizableB{state: state, minW: minW, minH: minH, maxW: maxW, maxH: maxH}, append([]Item{DismissMarginOf(core.EdgeReachOf)}, items...)...)
 }
 
-// edges reports which edges of r the point is on, if it is on the border.
-// The border reaches edgeOut outside r, where a modal element does not
-// dismiss either.
-func edges(rect core.Rect, posX, posY, grab int) (left, right, top, bottom bool) {
-	if posX < rect.X-edgeOut || posX >= rect.X+rect.W+edgeOut || posY < rect.Y-edgeOut || posY >= rect.Y+rect.H+edgeOut {
+// edges reports which edges of r the point is on, if it is on the border:
+// grab pixels inside r and reach pixels (Sizes.EdgeReach) outside it, where
+// a modal element does not dismiss either (view.DismissMarginOf).
+func edges(rect core.Rect, posX, posY, grab, reach int) (left, right, top, bottom bool) {
+	if posX < rect.X-reach || posX >= rect.X+rect.W+reach || posY < rect.Y-reach || posY >= rect.Y+rect.H+reach {
 		return
 	}
 	left, right = posX < rect.X+grab, posX >= rect.X+rect.W-grab
@@ -85,12 +82,16 @@ func (b *resizableB) Update(element *El, ctx *core.Ctx) {
 			if st.top {
 				grow = -grow
 			}
-			st.H = min(max(st.startH+grow, b.minH), b.maxH)
+			limit := b.maxH
+			if own := element.MaxHeight(); own > 0 {
+				limit = min(limit, own)
+			}
+			st.H = min(max(st.startH+grow, b.minH), limit)
 		}
 		ctx.Fired++ // the app builds the dialog at its state's size
 		return
 	}
-	left, right, top, bottom := edges(element.Rect(), in.X, in.Y, ctx.Sizes.EdgeGrab)
+	left, right, top, bottom := edges(element.Rect(), in.X, in.Y, ctx.Sizes.EdgeGrab, ctx.Sizes.EdgeReach)
 	if !(left || right || top || bottom) {
 		return
 	}

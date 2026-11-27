@@ -28,13 +28,13 @@ func TestButtonLabelNeverOverflowsTheButton(t *testing.T) {
 			button := test.build(label)
 			Layout(c, Row(H(40), button), 600, 40)
 			text, box := button.Children()[0].Rect(), button.Rect()
-			if text.X < box.X+buttonPadX || text.X+text.W > box.X+box.W-buttonPadX {
+			if text.X < box.X+core.DefaultSizes().ButtonPadX || text.X+text.W > box.X+box.W-core.DefaultSizes().ButtonPadX {
 				t.Errorf("%s %q: label %+v spills into the inset of the button %+v", test.name, label, text, box)
 			}
-			if test.fixed == 0 && box.W < c.Width(c.F.UI, label)+2*buttonPadX {
+			if test.fixed == 0 && box.W < c.Width(c.F.UI, label)+2*core.DefaultSizes().ButtonPadX {
 				t.Errorf("%s %q: width %d leaves no inset around the label", test.name, label, box.W)
 			}
-			want := max(test.fixed, c.Width(c.F.UI, label)+2*buttonPadX)
+			want := max(test.fixed, c.Width(c.F.UI, label)+2*core.DefaultSizes().ButtonPadX)
 			if test.fixed != 0 && box.W != want {
 				t.Errorf("%s %q: width %d, want %d: the given %d, or the label's if that is wider", test.name, label, box.W, want, test.fixed)
 			}
@@ -48,7 +48,7 @@ func TestButtonLabelNeverOverflowsTheButton(t *testing.T) {
 func TestButtonWidthGivesWayToLabelOnlyWhenThereIsRoom(t *testing.T) {
 	c := testCtx(t)
 	const label = "Auto-reconnect (12)"
-	natural := c.Width(c.F.UI, label) + 2*buttonPadX
+	natural := c.Width(c.F.UI, label) + 2*core.DefaultSizes().ButtonPadX
 	tests := []struct {
 		name     string
 		rowWidth int

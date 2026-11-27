@@ -41,6 +41,7 @@ type scrollB struct {
 	Linear
 	state   *ScrollState
 	content int // height of the content, set by layout
+	barW    int // width of the scrollbar, set by layout
 }
 
 // Layout places the children at their natural height, shifted up by the
@@ -48,12 +49,19 @@ type scrollB struct {
 func (s *scrollB) Layout(element *El, ctx *core.Ctx) {
 	r := element.Rect()
 	_, s.content = s.Linear.Measure(element, ctx, element.Inner().W)
-	y := clampScroll(s.state.Y, s.content, r.H) // update writes it back
 
+	s.barW = ctx.Sizes.ScrollbarW
 	width := r.W
 	if s.content > r.H {
-		width -= scrollbarW
+		width = max(width-s.barW, 0)
+		// Beside the bar a wrapping child can be taller than it measured
+		// above, and the scroll must still reach its end. Measure takes the
+		// padding off the width itself. The content never gets shorter here,
+		// so a bar that is shown stays needed.
+		_, beside := s.Linear.Measure(element, ctx, width)
+		s.content = max(s.content, beside)
 	}
+	y := clampScroll(s.state.Y, s.content, r.H) // update writes it back
 	s.LayoutIn(element, ctx, core.Rect{X: r.X, Y: r.Y - y, W: width, H: max(s.content, r.H)})
 }
 
@@ -73,7 +81,7 @@ func (s *scrollB) Update(element *El, ctx *core.Ctx) {
 }
 
 // bars is the scrollbar layout of the box: a vertical bar along its right edge.
-func (s *scrollB) bars(element *El) bars { return layoutBars(element.Rect(), 0, s.content) }
+func (s *scrollB) bars(element *El) bars { return layoutBars(element.Rect(), 0, s.content, s.barW) }
 
 func (s *scrollB) DrawOver(element *El, ctx *core.Ctx, dst render.Canvas) {
 	drawBars(ctx, dst, s.bars(element), s.state.drag, 0, s.content, 0, s.state.Y)

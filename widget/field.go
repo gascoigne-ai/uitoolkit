@@ -6,8 +6,6 @@ import (
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
-const fieldPad = 10
-
 // FieldPad sets a field's inner padding, for fields inset in a box that
 // already has padding of its own, so text lines up with its neighbours.
 func FieldPad(pixels int) Option {
@@ -35,8 +33,8 @@ type fieldB struct {
 	insetOf     func(sizes core.Sizes) int // fieldPadOf; wins over inset while set
 }
 
-// textInset is the space between a field's edge and its text: fieldPad,
-// or what FieldPad or fieldPadOf set.
+// textInset is the space between a field's edge and its text: the themed
+// Sizes.FieldPadX, or what FieldPad or fieldPadOf set.
 func (b *fieldB) textInset(sizes core.Sizes) int {
 	if b.insetOf != nil {
 		return b.insetOf(sizes)
@@ -44,7 +42,7 @@ func (b *fieldB) textInset(sizes core.Sizes) int {
 	if b.inset > 0 {
 		return b.inset
 	}
-	return fieldPad
+	return sizes.FieldPadX
 }
 
 func (b *fieldB) FocusTarget() Focuser { return b.field }
@@ -92,7 +90,7 @@ func (b *fieldB) Update(element *El, ctx *core.Ctx) {
 		b.onTab(in.Shift)
 	}
 	f.Cursor = f.clamp(f.Cursor) // OnChange may have replaced the text
-	f.Reveal(ctx.Width(ctx.F.UI, string([]rune(f.Display())[:f.Cursor])), r.W-2*b.textInset(ctx.Sizes))
+	f.Reveal(ctx.Width(ctx.F.UI, string([]rune(f.Display())[:f.Cursor])), r.W-2*b.textInset(ctx.Sizes), ctx.Sizes.RevealMargin)
 }
 
 func (b *fieldB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
@@ -103,7 +101,8 @@ func (b *fieldB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 		runes := []rune(f.Display())
 		x0 := x + ctx.Width(ctx.F.UI, string(runes[:lo]))
 		x1 := x + ctx.Width(ctx.F.UI, string(runes[:hi]))
-		ctx.Fill(dst, core.Rect{X: x0, Y: r.Y + 6, W: x1 - x0, H: r.H - 12}, ctx.Color(core.Selection))
+		inset := ctx.Sizes.SelectionInset
+		ctx.Fill(dst, core.Rect{X: x0, Y: r.Y + inset, W: x1 - x0, H: max(r.H-2*inset, 0)}, ctx.Color(core.Selection))
 	}
 	segs := []Span{{Text: f.Display(), Style: core.Text}}
 	if b.segments != nil && !f.Masked {

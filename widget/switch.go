@@ -15,9 +15,10 @@ type switchB struct {
 }
 
 // Sizes come from the size rules: the track is as wide as an icon button and
-// a hairline taller than a checkbox each side, so the knob is a checkbox.
+// Sizes.SwitchInset taller than a checkbox each side, so the knob is a
+// checkbox.
 func (switchB) Measure(_ *El, ctx *core.Ctx, _ int) (int, int) {
-	return ctx.Sizes.IconBtnW, ctx.Sizes.Checkbox + 2*ctx.Sizes.Steps.Hair
+	return ctx.Sizes.IconBtnW, ctx.Sizes.Checkbox + 2*ctx.Sizes.SwitchInset
 }
 
 // Update runs OnChange when the track is clicked; the caller owns the value.
@@ -44,9 +45,9 @@ func (b switchB) Draw(element *El, ctx *core.Ctx, dst render.Canvas) {
 	fill := ctx.Color(trackColor)
 	ctx.FillStyled(dst, track, fill, fill, pill(track.H))
 	ctx.OutlineStyled(dst, track, ctx.Color(edge), pill(track.H))
-	x := track.X + ctx.Sizes.Steps.Hair
+	x := track.X + ctx.Sizes.SwitchInset
 	if b.on {
-		x = track.X + track.W - ctx.Sizes.Steps.Hair - knob
+		x = track.X + track.W - ctx.Sizes.SwitchInset - knob
 	}
 	knobRect := core.Rect{X: x, Y: track.Y + (track.H-knob)/2, W: knob, H: knob}
 	paint := ctx.Color(knobColor)

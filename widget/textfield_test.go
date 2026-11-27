@@ -282,14 +282,14 @@ func TestRevealKeepsTheCursorInView(t *testing.T) {
 		want           int
 	}{
 		{"cursor inside", 0, 50, 100, 0},
-		{"past the right edge", 0, 130, 100, 130 - 100 + revealMargin},
-		{"before the left edge", 200, 150, 100, 150 - revealMargin},
+		{"past the right edge", 0, 130, 100, 130 - 100 + core.DefaultSizes().RevealMargin},
+		{"before the left edge", 200, 150, 100, 150 - core.DefaultSizes().RevealMargin},
 		{"near the start never scrolls negative", 5, 2, 100, 0},
 		{"text shorter than the view resets", 40, 30, 100, 0},
 	}
 	for _, tt := range tests {
 		f := TextField{ScrollX: tt.scroll}
-		f.Reveal(tt.cursor, tt.view)
+		f.Reveal(tt.cursor, tt.view, core.DefaultSizes().RevealMargin)
 		if f.ScrollX != tt.want {
 			t.Errorf("%s: ScrollX = %d, want %d", tt.name, f.ScrollX, tt.want)
 		}

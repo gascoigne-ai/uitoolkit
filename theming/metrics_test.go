@@ -48,6 +48,9 @@ func TestParseThemeMetrics(t *testing.T) {
 		{"step gutter", `{"steps":{"gutter":7}}`, map[string]int{"gutter": 14, "wordBtnW": 47}, 0},
 		{"step dialog", `{"steps":{"dialog":10}}`, map[string]int{"dialogPad": 20, "dialogButtonMinW": 100}, 0},
 		{"named sizes", `{"sizes":{"gutter":14,"rowH":32}}`, map[string]int{"gutter": 14, "rowH": 32, "toolbarH": 40}, 0},
+		{"named widget size", `{"sizes":{"toastW":400}}`, map[string]int{"toastW": 400, "toastH": 36}, 0},
+		{"named control size", `{"sizes":{"sliderThumbW":14}}`, map[string]int{"sliderThumbW": 14, "sliderPad": 9}, 0},
+		{"leading spaces mono lines", `{"leading":3}`, map[string]int{"monoLinePad": 7}, 3},
 		{"null is absent", `null`, map[string]int{"gutter": 12}, 0},
 		{"empty block", `{}`, map[string]int{"gutter": 12, "rowH": 29}, 0},
 	}
@@ -75,6 +78,8 @@ func TestParseThemeMetricsRejectsBadBlocks(t *testing.T) {
 		{"step 0", `{"steps":{"tight":0}}`, `metrics: step "tight" must be within 1 and 16`},
 		{"step 17", `{"steps":{"dialog":17}}`, `metrics: step "dialog" must be within 1 and 16`},
 		{"pin too large", `{"sizes":{"gutter":65}}`, `metrics: size "gutter" must be within 0 and 64`},
+		{"widget pin too large", `{"sizes":{"toastW":5000}}`, `metrics: size "toastW" must be within 80 and 1600`},
+		{"control pin too large", `{"sizes":{"monoLinePad":33}}`, `metrics: size "monoLinePad" must be within 0 and 32`},
 		{"pin negative", `{"sizes":{"rowH":-1}}`, `metrics: size "rowH" must be within 8 and 160`},
 		{"first bad size by name", `{"sizes":{"rowH":-1,"gutter":65}}`, `size "gutter"`},
 		{"null size", `{"sizes":{"gutter":null}}`, `metrics: size "gutter" needs a number`},

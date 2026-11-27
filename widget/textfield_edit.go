@@ -183,16 +183,17 @@ func wordAt(runes []rune, pos int) (lo, hi int) {
 }
 
 // Reveal scrolls the field so a cursor cursorX pixels from the start of
-// the text stays inside a view viewW wide, with a margin. Text that
-// fits is never scrolled.
-func (f *TextField) Reveal(cursorX, viewW int) {
+// the text stays inside a view viewW wide, with margin pixels of context
+// beyond it (Field passes Sizes.RevealMargin). Text that fits is never
+// scrolled.
+func (f *TextField) Reveal(cursorX, viewW, margin int) {
 	switch {
-	case cursorX <= viewW-revealMargin:
+	case cursorX <= viewW-margin:
 		f.ScrollX = 0
-	case cursorX-f.ScrollX > viewW-revealMargin:
-		f.ScrollX = cursorX - viewW + revealMargin
-	case cursorX-f.ScrollX < revealMargin:
-		f.ScrollX = max(cursorX-revealMargin, 0)
+	case cursorX-f.ScrollX > viewW-margin:
+		f.ScrollX = cursorX - viewW + margin
+	case cursorX-f.ScrollX < margin:
+		f.ScrollX = max(cursorX-margin, 0)
 	}
 }
 

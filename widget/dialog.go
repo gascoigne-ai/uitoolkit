@@ -7,12 +7,24 @@ import (
 )
 
 // dialogLook is what makes a panel a dialog: a floating, modal menu-style
-// panel in the middle of the window that owns the keyboard focus.
-var dialogLook = []Item{Bg(core.Bg), Control("menu"), Shadow(), FloatCenter(), FocusScope(), Modal(), KeepOnOutsideClick()}
+// panel in the middle of the window that owns the keyboard focus. It keeps
+// Sizes.DialogMargin off the window's edges, is at most Sizes.DialogMaxH
+// high and clips its content to the panel; a drag that leaves the panel goes
+// on, since its owner reads Ctx.PointerX and PointerY, which no clip hides.
+var dialogLook = []Item{
+	Bg(core.Bg), Control("menu"), Shadow(), FloatCenter(), FocusScope(), Modal(), KeepOnOutsideClick(),
+	MarginOf(core.DialogMarginOf), MaxHOf(core.DialogMaxHOf), Clip(),
+}
 
 // Dialog is a modal panel centered in the window over a dimmed scrim. Give
 // it its size (W, H), layout options and content, and OnDismiss for what
 // an outside click does. Mount it in the window's Stack while it is open.
+//
+// The panel stays dialogMargin off the window's edges, dragged or not, and
+// is at most dialogMaxH high, a height you give it with H included; your own
+// MaxH (MaxH(0) for no limit) or Margin replaces either. Content that does
+// not fit is clipped to the panel and nothing scrolls it: put what may be
+// long in a Scroll with Grow(1), inside containers that have Shrink().
 //
 // Dialogs are floating panels inside the one window, each with a title bar
 // of its own (DialogTitle), because Ebitengine has one OS window per
@@ -22,7 +34,8 @@ func Dialog(items ...Item) *El {
 }
 
 // ResizableDialog is a Dialog the user can resize between the given
-// bounds; state keeps the size across frames.
+// bounds; state keeps the size across frames. It has the limits of a Dialog:
+// state.H also stops at dialogMaxH, or at your own MaxH.
 func ResizableDialog(state *ResizeState, minW, minH, maxW, maxH int, items ...Item) *El {
 	return Frag(Row(Bg(core.Shadow)), Resizable(state, minW, minH, maxW, maxH, append(append([]Item{}, dialogLook...), items...)...))
 }
@@ -74,11 +87,15 @@ type DialogButton struct {
 
 // DialogState is a modal message: a title, a text, an optional input line
 // (a prompt) and buttons. Buttons close the dialog themselves in their
-// Run, so the state needs no knowledge of its owner.
+// Run, so the state needs no knowledge of its owner. Scroll is how far a
+// MessageDialog too tall for the window has scrolled its body; assign a new
+// DialogState to open the next message, which starts at the top, or set
+// Scroll to its zero value when you change the fields of a kept one.
 type DialogState struct {
 	Title, Body string
 	Input       *TextField
 	Buttons     []DialogButton
+	Scroll      ScrollState
 }
 
 // Default runs the primary button, if the dialog has one: what Enter does.
@@ -96,7 +113,9 @@ func (state *DialogState) Default() {
 // the input), the input line and the buttons on the right. Options you give
 // apply to the dialog panel: OnDismiss is what an outside click and the
 // close button do, Moved lets the user drag it. Enter in the input runs the
-// primary button.
+// primary button. When the dialog reaches its height limit (see Dialog), the
+// body text and the content scroll (state.Scroll) while the input and the
+// buttons stay in view; a window too low even for those clips them.
 func MessageDialog(state *DialogState, items ...Item) *El {
 	var options, content []Item
 	for _, item := range items {
@@ -110,10 +129,15 @@ func MessageDialog(state *DialogState, items ...Item) *El {
 	dismiss := func() {
 		frag.Children()[1].Dismiss()
 	}
-	body := Col(append(append([]Item{
-		PadOf(core.DialogPadOf), GapOf(core.GutterOf),
+	scrolled := Scroll(&state.Scroll, append([]Item{
+		GapOf(core.GutterOf),
 		If(state.Body != "", Lines(state.Body, core.Muted)),
-	}, content...),
+	}, content...)...)
+	body := Col(
+		PadOf(core.DialogPadOf), GapOf(core.GutterOf), Shrink(),
+		// An empty scroll would still take a gap, and content may build to
+		// nothing (a false If).
+		If(len(scrolled.Children()) > 0, scrolled),
 		If(state.Input != nil, Field(state.Input, HOf(core.RowOf), Bg(core.Sunken), OnEnter(state.Default), TextMenu(state.Input))),
 		Row(HOf(core.RowOf), GapOf(core.LooseGapOf),
 			Spacer(),
@@ -121,7 +145,7 @@ func MessageDialog(state *DialogState, items ...Item) *El {
 				return SegmentChip(button.Label, button.Primary, MinWOf(core.DialogButtonMinWOf), OnClick(button.Run))
 			}),
 		),
-	)...)
+	)
 	frag = Dialog(append([]Item{WOf(core.DialogWOf), DialogTitle(state.Title, OnDismiss(dismiss)), body}, options...)...)
 	return frag
 }

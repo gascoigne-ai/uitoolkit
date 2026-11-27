@@ -348,18 +348,21 @@ func (v *CodeView) ScrollBy(dy, contentH, viewH int) {
 	v.ScrollY = min(max(v.ScrollY+dy, 0), max(contentH-viewH, 0))
 }
 
-const foldColW = 18
-
 // codeGeometry is the pixel layout of a CodeView in r.
 type codeGeometry struct {
 	monoGrid
-	numW int
+	numW  int
+	foldW int // Sizes.FoldColW, the column of the fold arrows
 }
 
+// foldX is where the fold column starts in a view at rect: a lead after the
+// numbers. A second lead separates it from the text.
+func (g codeGeometry) foldX(rect core.Rect) int { return rect.X + g.gutter + g.numW + g.lead }
+
 func (v *CodeView) geometry(ctx *core.Ctx, rect core.Rect) codeGeometry {
-	g := codeGeometry{monoGrid: newMonoGrid(ctx)}
+	g := codeGeometry{monoGrid: newMonoGrid(ctx), foldW: ctx.Sizes.FoldColW}
 	g.numW = g.charW * v.numberDigits()
-	g.textX = rect.X + g.gutter + g.numW + foldColW + 8
+	g.textX = rect.X + g.gutter + g.numW + g.foldW + 2*g.lead
 	return g
 }
 
@@ -468,11 +471,11 @@ func (v *CodeView) updatePointer(ctx *core.Ctx, rect core.Rect, geometry codeGeo
 	if !in.Click || sizes.vTrack.Contains(in.X, in.Y) || sizes.hTrack.Contains(in.X, in.Y) {
 		return
 	}
-	foldCol := core.Rect{X: rect.X + geometry.gutter + geometry.numW + 4, Y: rect.Y, W: foldColW, H: rect.H}
+	foldCol := core.Rect{X: geometry.foldX(rect), Y: rect.Y, W: geometry.foldW, H: rect.H}
 	switch {
 	case foldCol.Contains(in.X, in.Y):
 		v.ToggleFold(layout.rows[v.rowAt(in.Y, rect, geometry, layout)].line)
-	case in.X >= foldCol.X+foldColW:
+	case in.X >= foldCol.X+foldCol.W:
 		v.pressText(v.posAt(in.X, in.Y, rect, geometry, layout), in.Clicks)
 	}
 }
@@ -523,7 +526,7 @@ func (v *CodeView) Draw(ctx *core.Ctx, dst render.Canvas, rect core.Rect) {
 	b := v.bars(rect, g, contentW, len(rows))
 	v.clampScroll(g, b, contentW, len(rows))
 	muted := ctx.Color(core.Muted)
-	gutter := core.Rect{X: rect.X, Y: rect.Y, W: g.textX - rect.X - 4, H: b.viewH}
+	gutter := core.Rect{X: rect.X, Y: rect.Y, W: g.textX - rect.X - g.lead, H: b.viewH}
 	body := core.Rect{X: gutter.X + gutter.W, Y: rect.Y, W: b.viewW - gutter.W, H: b.viewH}
 	area := ctx.Clip(dst, core.Rect{X: rect.X, Y: rect.Y, W: b.viewW, H: b.viewH})
 	text := ctx.Clip(dst, body)
@@ -559,8 +562,7 @@ func (v *CodeView) Draw(ctx *core.Ctx, dst render.Canvas, rect core.Rect) {
 			if v.Folded[idx] {
 				arrow = "triangle-right"
 			}
-			cx := rect.X + g.gutter + g.numW + 4 + foldColW/2
-			drawIconAt(ctx, area, arrow, core.Rect{X: cx - foldColW/2, Y: y, W: foldColW, H: g.lineH}, core.Muted)
+			drawIconAt(ctx, area, arrow, core.Rect{X: g.foldX(rect), Y: y, W: g.foldW, H: g.lineH}, core.Muted)
 		}
 	}
 	drawBars(ctx, dst, b, v.drag, contentW, len(rows)*g.lineH, v.ScrollX, v.ScrollY)
@@ -576,7 +578,7 @@ func (v *CodeView) contentWidthOf(geometry codeGeometry, rect core.Rect) int {
 }
 
 func (v *CodeView) bars(rect core.Rect, geometry codeGeometry, contentW, visible int) bars {
-	return layoutBars(rect, contentW, visible*geometry.lineH)
+	return layoutBars(rect, contentW, visible*geometry.lineH, geometry.barW)
 }
 
 // Selected reports whether any text is selected.

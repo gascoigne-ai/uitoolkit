@@ -16,6 +16,16 @@ func TestDefaultSizesKeepTodaysValues(t *testing.T) {
 		TightGap: 6, TabGap: 6, RuleInset: 6, EdgeGrab: 6,
 		LooseGap: 8, CellPad: 8, LabelPad: 10, TabSepInset: 10, Gutter: 12, DialogPad: 16,
 		DialogW: 380, DialogButtonMinW: 80, DialogMargin: 40, DialogMaxH: 560,
+		ScrollbarW: 8, MinThumbLen: 24, ThumbInset: 1, HScrollArrowW: 18,
+		MenuMinW: 120, MenuMaxW: 420, MenuSepH: 9, MenuPad: 4, MenuHintH: 16,
+		MenuRowPadX: 10, MenuIconW: 14, MenuShortcutGap: 16,
+		TipPadX: 8, TipPadY: 5, TipOffset: 16,
+		ToastW: 320, ToastH: 36, ToastGap: 6, ToastMargin: 8,
+		ButtonPadX: 10, FieldPadX: 10, SelectionInset: 6, RevealMargin: 12,
+		SliderW: 120, SliderH: 20, SliderTrack: 4, SliderThumbW: 10, SliderThumbH: 16,
+		SliderTick: 10, SliderPad: 7, DividerGrab: 2, EdgeReach: 4,
+		TableActionW: 36, TableGripW: 20, MinColumnW: 56,
+		FoldColW: 18, MonoTextLead: 4, MonoLinePad: 4, SwitchInset: 2,
 	}
 	if got := DefaultSizes(); got != want {
 		t.Fatalf("DefaultSizes() =\n%+v, want\n%+v", got, want)

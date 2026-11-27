@@ -117,11 +117,26 @@ the draw calls are checked against `rendertest.Canvas`.
   only the knobs and the rows above it), so a pin moves what is derived from it, and `Scope` and
   `Metrics.Pin` read their names from it. Chosen for the access pattern (a scan per resolve, a name
   lookup only at parse); rejected a map by name, which loses the order. Revisit past 150 rows.
+  `Sizes` stays flat although it passed the first trigger of about 80 fields: layout reads it by
+  field every frame, it must stay comparable (it is the `SizesScope` memo key), and a size has one
+  flat name in Go, templates and theme files. Rejected nested groups (`Sizes.Menu.MinW`), which
+  break that name and buy nothing at this size. New trigger: more than 150 fields, or sizes per
+  face.
   Pins are a `map` that only `Pin` writes, into a clone, so copies of a `Theme` never share a
   change; revisit if `Metrics` has to be comparable. Knobs out of range are clamped in Go and are
   errors in a theme file (`theming`, the `metrics` block, the wire types in `theming/metrics.go`).
   A child theme inherits the base's metrics. `MinLine`, `MaxLine` and the knob bounds are fixed:
   a theme file is untrusted.
+- **Widgets' own sizes** are rows of the same table, so drawing and hit-testing read one value:
+  scrollbars, `HScroll` arrows, menus, tooltips, toasts, buttons, fields, sliders, split and column
+  dividers, resizable edges, tables, `Code` and `Area` rows, and switches. The theme's leading
+  reaches `Code` and `Area` rows through `monoLinePad`. An element option takes the role
+  (`HOf(core.ToastHOf)`), `Draw`, `Update` and `Measure` code reads `ctx.Sizes`, and a pure helper
+  takes the value as a parameter (`thumb`, `layoutBars`). A behavior's helpers that get no `Ctx`
+  read a field its `Layout` sets (`scrollB.barW`, `hscrollB.arrowW`, `monoGrid.barW`). A pin's
+  bounds hold one size alone and cannot stop two from crossing, so a subtraction of themed sizes
+  is clamped, and `drawScrollbar` is told the track's direction: a themed width can be more than
+  the length of a short track.
 - **Input.** `Sampler.Sample` turns a `render.InputState` into the frame's `Input` and counts
   clicks (a renderer's input, `ebitenrender.ReadInput`, goes in as the `render.InputState`). The pure `inputFrom` derives
   presses, shortcuts and edit keys with their repeat; `modifiedEdit` is the per-platform table that
@@ -193,6 +208,16 @@ state: no diffing and no reactive system. Elements and options are indexed in th
   "reach" a child near the origin). `Behavior.Draw`, `OverDrawer.DrawOver` and the text behavior
   take the same (clipped) canvas, so a behavior draws on a canvas of any renderer and text records
   `DrawText`. No file of `view` imports Ebitengine (`TestViewImportsNoEbiten`).
+- **A floating child keeps its margins.** Its room is the `Stack`'s inner rect less its margins,
+  never negative: it is measured at the room's width, clamped to the room, and center, corner,
+  point and the `Moved` clamp are all measured in it (`floatRoom`).
+- **Dialog limits.** `widget.Dialog`'s panel has `MarginOf(core.DialogMarginOf)`,
+  `MaxHOf(core.DialogMaxHOf)` and `Clip`; they are plain options, so the app's later
+  ones replace them. A drag that leaves the panel goes on, as under any clip (see Clipping hides
+  the pointer). `MessageDialog` puts its body text and content in a `Scroll`
+  (`DialogState.Scroll`) inside a body that has `Shrink`, and leaves the scroll out when they build
+  to nothing, so a dialog that fits lays out as without it. `Resizable` caps `ResizeState.H` at
+  the element's `MaxHeight`, so the state follows whichever height limit is in force.
 - **Layout writes no state** (`view.Layout` doc, `widget/layoutpure_test.go`); `Update` settles it.
 - **Drawing culls** off-image children (`view.Draw` doc, `BenchmarkLongList`), so a `Behavior`
   keeps no state that only its `Draw` writes.
@@ -268,8 +293,9 @@ Each is also said in the doc comment of what breaks the rule; a new exception ad
 - Rule 1: `Round` is not a per-side family but the corner masks a panel needed (`RoundT`, `RoundB`,
   `RoundBL`); a mask is added with the panel that needs it, not ahead.
 - Rules 9 and 10: the options that follow `Ctx.Sizes` (`HOf`, `WOf`, `SeparatorOf`, `PadOf` and
-  its sides, `GapOf`, `MinWOf`, `FloatAtOf`) have no template attribute, since they take a Go func;
-  a template writes the scope name (`pad="{{gutter}}"`).
+  its sides, `GapOf`, `MinWOf`, `FloatAtOf`, `DismissMarginOf`, `MarginOf` and its sides,
+  `MaxHOf`) have no template attribute, since they take a Go func; a template writes the scope name
+  (`pad="{{gutter}}"`, `margin="{{dialogMargin}}"`).
 - Rule 7: state types are values (`NewTextField`, `NewTextArea`, `NewMenu`); `OpenMenu` stores a
   pointer to its own copy.
 - Rule 11: `core.Ctx.Menu` is `any`, because `widget` owns `MenuState` and `core` cannot name it;

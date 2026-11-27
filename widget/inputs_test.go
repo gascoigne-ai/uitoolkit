@@ -111,26 +111,27 @@ func TestComposedTextReachesAMultilineEditor(t *testing.T) {
 }
 
 func TestPressThumbGrabsTheThumbOrPages(t *testing.T) {
-	// content 1000 in a view of 100 on a 100px track: the thumb is 10px.
-	grabbed, off, pos := pressThumb(100, 1000, 100, 0, 5)
+	// content 1000 in a view of 100 on a 100px track with a least thumb of
+	// 10px: the thumb is 10px.
+	grabbed, off, pos := pressThumb(100, 1000, 100, 0, 5, 10)
 	if !grabbed || off != 5 || pos != 0 {
 		t.Fatalf("on the thumb: %v %d %d", grabbed, off, pos)
 	}
-	grabbed, _, pos = pressThumb(100, 1000, 100, 0, 60)
+	grabbed, _, pos = pressThumb(100, 1000, 100, 0, 60, 10)
 	if grabbed || pos != 100 {
 		t.Fatalf("below the thumb pages down: %v %d", grabbed, pos)
 	}
-	grabbed, _, pos = pressThumb(100, 1000, 100, 300, 2)
+	grabbed, _, pos = pressThumb(100, 1000, 100, 300, 2, 10)
 	if grabbed || pos != 200 {
 		t.Fatalf("above the thumb pages up: %v %d", grabbed, pos)
 	}
-	if grabbed, _, pos = pressThumb(100, 50, 100, 0, 5); grabbed || pos != 0 {
+	if grabbed, _, pos = pressThumb(100, 50, 100, 0, 5, 10); grabbed || pos != 0 {
 		t.Fatal("content that fits has nothing to grab")
 	}
 }
 
 // ScrollbarSlack allows for the horizontal scrollbar eating a few pixels.
-const ScrollbarSlack = scrollbarW
+var ScrollbarSlack = core.DefaultSizes().ScrollbarW
 
 func TestTextAreaTypingEnterAndUndo(t *testing.T) {
 	a, c, root, changes := areaBox(t, "")
@@ -360,11 +361,11 @@ func TestFieldDragSelectsAndReleaseEndsTheDrag(t *testing.T) {
 	Layout(c, root, 300, 30)
 
 	// press at the start of the text, drag far past its end, release
-	c.In = core.Input{X: fieldPad, Y: 10, Click: true, Held: true}
+	c.In = core.Input{X: core.DefaultSizes().FieldPadX, Y: 10, Click: true, Held: true}
 	Update(c, root)
-	c.In = core.Input{X: fieldPad + 200, Y: 10, Held: true}
+	c.In = core.Input{X: core.DefaultSizes().FieldPadX + 200, Y: 10, Held: true}
 	Update(c, root)
-	c.In = core.Input{X: fieldPad + 200, Y: 10}
+	c.In = core.Input{X: core.DefaultSizes().FieldPadX + 200, Y: 10}
 	Update(c, root)
 
 	if f.SelectedText() != "hello" || f.Dragging {
@@ -424,7 +425,7 @@ func TestFieldUndoRedoShortcuts(t *testing.T) {
 
 func TestDoubleAndTripleClickSelectWordAndAll(t *testing.T) {
 	f, c, root, _ := focusedField(t, "alpha beta", 300)
-	inWord := fieldPad + c.Width(c.F.UI, "alpha b") // inside "beta"
+	inWord := core.DefaultSizes().FieldPadX + c.Width(c.F.UI, "alpha b") // inside "beta"
 
 	c.In = core.Input{X: inWord, Y: 10, Click: true, Held: true, Clicks: 1}
 	Update(c, root)
@@ -450,7 +451,7 @@ func TestLongTextScrollsToTheCursorAndClicksAccountForIt(t *testing.T) {
 		t.Fatalf("the cursor at the end of long text must scroll the view, ScrollX = %d", f.ScrollX)
 	}
 
-	c.In = core.Input{X: fieldPad, Y: 10, Click: true, Held: true, Clicks: 1}
+	c.In = core.Input{X: core.DefaultSizes().FieldPadX, Y: 10, Click: true, Held: true, Clicks: 1}
 	Update(c, root)
 	if f.Cursor < 40 {
 		t.Fatalf("a click at the left edge of the scrolled view hit position %d; the scroll offset must count", f.Cursor)
@@ -537,7 +538,7 @@ func TestFieldTextInsetDefaultsAndCanBeReduced(t *testing.T) {
 	tight := Field(&f, FieldPad(5))
 	plainInset := plain.Behavior().(*fieldB).textInset(core.DefaultSizes())
 	tightInset := tight.Behavior().(*fieldB).textInset(core.DefaultSizes())
-	if plainInset != fieldPad || tightInset != 5 {
+	if plainInset != core.DefaultSizes().FieldPadX || tightInset != 5 {
 		t.Fatalf("insets %d %d", plainInset, tightInset)
 	}
 }
