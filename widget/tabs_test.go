@@ -73,7 +73,7 @@ func TestClickingInAnEditorFindsTheRuneAfterATab(t *testing.T) {
 			area := NewTextArea("\tb")
 			r := core.Rect{W: 600, H: 200}
 			g := area.geometry(c, r)
-			c.In = core.Input{X: g.textX + int(tt.col*g.adv), Y: r.Y + g.lineH/2, Click: true, Held: true, Clicks: 1}
+			frameInput(c, core.Input{X: g.textX + int(tt.col*g.adv), Y: r.Y + g.lineH/2, Click: true, Held: true, Clicks: 1})
 			area.Update(c, r)
 			if area.Cursor != tt.want {
 				t.Fatalf("cursor = %d, want %d", area.Cursor, tt.want)

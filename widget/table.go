@@ -342,7 +342,7 @@ func (h colHandlesB) Update(element *El, ctx *core.Ctx) {
 		}
 		ctx.Cursor = core.CursorResizeH
 		left, right := cells[st.divider].Rect(), cells[st.divider+1].Rect()
-		st.Weights = resizePair(h.spec.weights(), st.divider, in.X-left.X-st.drag.off, left.W+right.W, MinColumnPx)
+		st.Weights = resizePair(h.spec.weights(), st.divider, ctx.PointerX-left.X-st.drag.off, left.W+right.W, MinColumnPx)
 		ctx.Fired++ // the cells took their widths from Weights when they were built
 		return
 	}

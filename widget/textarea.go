@@ -122,7 +122,8 @@ func (a *TextArea) keepTopLine(geometry areaGeometry, rect core.Rect) {
 }
 
 // Update handles the pointer and, while focused, the keyboard inside r.
-// It reports whether the text changed.
+// It reports whether the text changed. A drag follows ctx.PointerX and
+// PointerY, which a direct caller sets with ctx.In, as view.Update does.
 func (a *TextArea) Update(ctx *core.Ctx, rect core.Rect) (changed bool) {
 	g := a.geometry(ctx, rect)
 	a.keepTopLine(g, rect)
@@ -159,7 +160,7 @@ func (a *TextArea) updatePointer(ctx *core.Ctx, rect core.Rect, geometry areaGeo
 	}
 	if a.Dragging {
 		if in.Held {
-			a.Drag(a.posAtPixel(rect, geometry, in.X, in.Y))
+			a.Drag(a.posAtPixel(rect, geometry, ctx.PointerX, ctx.PointerY))
 		} else {
 			a.Dragging = false
 		}

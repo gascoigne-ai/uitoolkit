@@ -365,7 +365,8 @@ func (v *CodeView) geometry(ctx *core.Ctx, rect core.Rect) codeGeometry {
 
 // Update handles wheel and scrollbar scrolling, fold-arrow clicks, line
 // selection by click or drag, and the keyboard while focused: Ctrl+A,
-// Ctrl+C, PageUp/PageDown, Home and End.
+// Ctrl+C, PageUp/PageDown, Home and End. A drag follows ctx.PointerX and
+// PointerY, which a direct caller sets with ctx.In, as view.Update does.
 func (v *CodeView) Update(ctx *core.Ctx, rect core.Rect) {
 	in := ctx.In
 	over := in.Over(rect)
@@ -448,7 +449,7 @@ func (v *CodeView) updatePointer(ctx *core.Ctx, rect core.Rect, geometry codeGeo
 	rowCount := len(layout.rows)
 	if v.dragging {
 		if in.Held {
-			v.selB = v.posAt(in.X, in.Y, rect, geometry, layout)
+			v.selB = v.posAt(ctx.PointerX, ctx.PointerY, rect, geometry, layout)
 		} else {
 			v.dragging = false
 		}

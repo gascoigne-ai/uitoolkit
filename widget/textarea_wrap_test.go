@@ -51,7 +51,7 @@ func TestClickOnAWrappedRowOfTheAreaPutsTheCursorInThatRow(t *testing.T) {
 	area, c, r := wrappedArea(t)
 	g := area.geometry(c, r)
 	second := area.layout(g, r).rows[1]
-	c.In = core.Input{X: g.textX + g.colX(2), Y: r.Y + g.lineH + g.lineH/2, Click: true, Held: true, Clicks: 1}
+	frameInput(c, core.Input{X: g.textX + g.colX(2), Y: r.Y + g.lineH + g.lineH/2, Click: true, Held: true, Clicks: 1})
 	area.Update(c, r)
 	if want := second.from + 2; area.Cursor != want {
 		t.Fatalf("cursor %d after a click two columns into the second row, want %d", area.Cursor, want)

@@ -62,9 +62,9 @@ func (d *barDrag) update(ctx *core.Ctx, sizes bars, contentW, contentH int, sx, 
 			return
 		}
 		if d.bar == barV {
-			*sy = posFromOffset(sizes.vTrack.H, contentH, sizes.viewH, in.Y-sizes.vTrack.Y-d.grab.off)
+			*sy = posFromOffset(sizes.vTrack.H, contentH, sizes.viewH, ctx.PointerY-sizes.vTrack.Y-d.grab.off)
 		} else {
-			*sx = posFromOffset(sizes.hTrack.W, contentW, sizes.viewW, in.X-sizes.hTrack.X-d.grab.off)
+			*sx = posFromOffset(sizes.hTrack.W, contentW, sizes.viewW, ctx.PointerX-sizes.hTrack.X-d.grab.off)
 		}
 		return
 	}

@@ -434,7 +434,7 @@ func (e *El) dragByHandle(ctx *core.Ctx) {
 			return
 		}
 		ctx.Cursor = core.CursorMove
-		m.X, m.Y = m.fromX+ctx.In.X-m.startX, m.fromY+ctx.In.Y-m.startY
+		m.X, m.Y = m.fromX+ctx.PointerX-m.startX, m.fromY+ctx.PointerY-m.startY
 		return
 	}
 	if !e.rect.Contains(ctx.In.X, ctx.In.Y) || e.onBorder(ctx.In.X, ctx.In.Y, ctx.Sizes.EdgeGrab) || !e.onHandle(ctx.In.X, ctx.In.Y) {

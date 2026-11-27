@@ -117,18 +117,25 @@ func colX(ctx *core.Ctx, code *CodeView, rect core.Rect, col int) int {
 	return g.textX - code.ScrollX + g.colX(col)
 }
 
+// frameInput sets one frame's input for a test that calls a widget's
+// Update directly, with the pointer fields that view.Update sets.
+func frameInput(ctx *core.Ctx, in core.Input) {
+	ctx.In = in
+	ctx.PointerX, ctx.PointerY = in.X, in.Y
+}
+
 func press(code *CodeView, ctx *core.Ctx, rect core.Rect, posX, posY, clicks int) {
-	ctx.In = core.Input{X: posX, Y: posY, Click: true, Held: true, Clicks: clicks}
+	frameInput(ctx, core.Input{X: posX, Y: posY, Click: true, Held: true, Clicks: clicks})
 	code.Update(ctx, rect)
 }
 
 func dragTo(code *CodeView, ctx *core.Ctx, rect core.Rect, posX, posY int) {
-	ctx.In = core.Input{X: posX, Y: posY, Held: true}
+	frameInput(ctx, core.Input{X: posX, Y: posY, Held: true})
 	code.Update(ctx, rect)
 }
 
 func release(code *CodeView, ctx *core.Ctx, rect core.Rect, posX, posY int) {
-	ctx.In = core.Input{X: posX, Y: posY}
+	frameInput(ctx, core.Input{X: posX, Y: posY})
 	code.Update(ctx, rect)
 }
 

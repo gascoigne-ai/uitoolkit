@@ -180,7 +180,9 @@ state: no diffing and no reactive system. Elements and options are indexed in th
   first, up through its ancestors; a right click only the innermost `OnRightClick`; the wheel the
   innermost scroller that uses it.
 - **Clipping hides the pointer.** While the pointer is outside a clipping element (`Clip`,
-  `Scroll`), its children cannot be hit; the click flag still passes, so fields can blur.
+  `Scroll`), its children cannot be hit; the click flag still passes, so fields can blur. The
+  owner of a drag follows `Ctx.PointerX`/`PointerY` while it runs; nothing else is hit through
+  the clip, `OnDragOver` included.
 - **Modal owns the pointer.** While a `Modal` element is visible, nothing under it gets clicks,
   wheel or hover (`Ctx.HoverOff`), and a click outside runs `OnDismiss`, except for a dialog (`KeepOnOutsideClick`, set by `widget.Dialog`): it swallows the click and stays until its close button or Escape runs `Dismiss`, so a stray click on the window behind cannot throw away what the user is doing. Menus and pick lists keep closing on a click elsewhere. Toasts are not modal.
 - **A modal splits the root's children.** `view.ModalLayer(ctx, root)` is the index of the first visible direct child of the root that is a `Modal` (menus included: a context menu alone gives the layer under it), or -1 when the modal is deeper, the root draws after its children (`Border`, a control style border, an `OverDrawer`, an edge) or is itself modal. `view.DrawBelow` paints the root's own part and the children before that index, `view.DrawFrom` the children from it on, both with hover off and the root's clip; one after the other on one image they paint what `Draw` paints, element for element (`El.draw` is `drawSelf`, the children, `drawAfter`). An app keeps the first part in an image (`ui/window` `baseSnapshot`). `Ctx.CaretReads` counts `CaretVisible` calls made while the caret blinks, so a kept drawing knows it shows the blink phase.

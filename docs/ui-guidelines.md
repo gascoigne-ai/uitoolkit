@@ -487,7 +487,7 @@ All of them take `OnChange` (or `OnClick`) and leave the value to the app: the a
 - **Modal.** While a modal layer is visible, nothing under it gets clicks, wheel or hover.
 - **Cursor.** Split dividers and resizable edges show resize cursors; a drag shows `CursorMove` only from press to release; an idle drag handle shows the default cursor, so it reads as a label, not a control.
 - **Resizing.** A resizable box is grabbed within `edgeGrab` (6) inside or 4 outside its border.
-- **Drags** follow the pointer while the button is held. A drag that starts inside a clipping parent and leaves it does not yet follow the pointer outside (see [Known limitations](#known-limitations)).
+- **Drags** follow the pointer while the button is held, also after it leaves a clipping parent. Only the element that took the press follows it there; every other element gets no click, drag or `OnDragOver` through the clip. A `Custom` with its own drag reads `ctx.PointerX`/`PointerY` while it runs.
 
 ## Layers
 
@@ -563,7 +563,6 @@ The same tree can be written as a template (`markup`): attributes are the Go opt
 
 ## Known limitations
 
-- A drag that starts inside a clipping parent (a `Resizable` edge, a `Split` divider in a clipped pane) stops following the pointer once it leaves that parent.
 - A child of a `Row` is measured at the row's whole inner width, and a `Col` child's side margins are not taken off its measured width, so a `Paragraph` with `Grow(1)` in a row, or with `MarginX`, can be too short and draw over what follows.
 - A table's header and its last row (when selected, hovered or zebra-filled) are square fills inside the table's rounded outline.
 - Tooltip delay counts ticks, so it is longer while the app updates at a lower rate.

@@ -15,7 +15,9 @@ type Behavior interface {
 	Measure(element *El, ctx *core.Ctx, maxW int) (w, h int)
 	// Layout runs after the element's rect is set.
 	Layout(element *El, ctx *core.Ctx)
-	// Update handles the frame's input, children first.
+	// Update handles the frame's input, children first. A Custom's own drag
+	// reads ctx.PointerX and PointerY while it runs, since a clipping parent
+	// hides ctx.In's pointer once the pointer leaves it.
 	Update(element *El, ctx *core.Ctx)
 	// Draw paints the element; its children are drawn after it. Draw is
 	// skipped for an element that cannot reach the target image (see Draw),

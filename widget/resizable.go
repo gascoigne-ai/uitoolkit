@@ -72,7 +72,7 @@ func (b *resizableB) Update(element *El, ctx *core.Ctx) {
 			return
 		}
 		ctx.Cursor = cursorFor(st.left, st.right, st.top, st.bottom)
-		dx, dy := in.X-st.startX, in.Y-st.startY
+		dx, dy := ctx.PointerX-st.startX, ctx.PointerY-st.startY
 		if st.left || st.right {
 			grow := 2 * dx
 			if st.left {

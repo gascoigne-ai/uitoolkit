@@ -95,7 +95,11 @@ func (s *splitB) Update(element *El, ctx *core.Ctx) {
 			return
 		}
 		ctx.Cursor = cursor
-		px := float64(pointer - origin - st.drag.off)
+		moved := ctx.PointerX // the drag's owner: a clip around it does not hide the pointer
+		if s.vertical {
+			moved = ctx.PointerY
+		}
+		px := float64(moved - origin - st.drag.off)
 		if s.ratio {
 			px /= float64(avail)
 		}

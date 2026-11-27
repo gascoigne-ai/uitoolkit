@@ -54,16 +54,16 @@ func (b *fieldB) KeepsTab() bool { return b.onTab != nil }
 
 func (b *fieldB) Update(element *El, ctx *core.Ctx) {
 	f, in, r := b.field, ctx.In, element.Rect()
-	at := func() int { return ctx.CursorAt(f.Display(), in.X-(r.X+b.textInset(ctx.Sizes))+f.ScrollX) }
+	at := func(posX int) int { return ctx.CursorAt(f.Display(), posX-(r.X+b.textInset(ctx.Sizes))+f.ScrollX) }
 	if in.Click {
 		f.Focused = r.Contains(in.X, in.Y)
 		if f.Focused {
-			f.PressN(at(), in.Shift, max(in.Clicks, 1))
+			f.PressN(at(in.X), in.Shift, max(in.Clicks, 1))
 		}
 	}
 	if f.Dragging {
 		if in.Held {
-			f.Drag(at())
+			f.Drag(at(ctx.PointerX))
 		} else {
 			f.Dragging = false
 		}

@@ -323,7 +323,7 @@ func TestCodeViewEmptyContentIsHarmless(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	c.In = core.Input{X: 10, Y: 10, Click: true, Held: true, Ctrl: true, Copy: true, SelectAll: true}
+	frameInput(c, core.Input{X: 10, Y: 10, Click: true, Held: true, Ctrl: true, Copy: true, SelectAll: true})
 	v.Update(c, core.Rect{W: 100, H: 100}) // must not panic on zero lines
 	if v.HasSel {
 		t.Fatal("nothing to select")
@@ -444,20 +444,20 @@ func TestCodeViewScrollbarThumbDragScrollsTheContent(t *testing.T) {
 	}
 	grabY := off + length/2
 
-	c.In = core.Input{X: track.X + 2, Y: grabY, Click: true, Held: true}
+	frameInput(c, core.Input{X: track.X + 2, Y: grabY, Click: true, Held: true})
 	v.Update(c, r)
 	if v.ScrollY != 0 || v.Selected() {
 		t.Fatalf("grabbing the thumb must not scroll or select, ScrollY %d", v.ScrollY)
 	}
-	c.In = core.Input{X: track.X + 2, Y: grabY + 50, Held: true}
+	frameInput(c, core.Input{X: track.X + 2, Y: grabY + 50, Held: true})
 	v.Update(c, r)
 	if v.ScrollY <= 0 {
 		t.Fatalf("dragging the thumb down must scroll down, ScrollY = %d", v.ScrollY)
 	}
 	pos := v.ScrollY
-	c.In = core.Input{X: track.X + 2, Y: grabY + 50} // released
+	frameInput(c, core.Input{X: track.X + 2, Y: grabY + 50}) // released
 	v.Update(c, r)
-	c.In = core.Input{X: track.X + 2, Y: grabY + 90, Held: true}
+	frameInput(c, core.Input{X: track.X + 2, Y: grabY + 90, Held: true})
 	v.Update(c, r)
 	if v.ScrollY != pos {
 		t.Fatal("after release, moving the pointer must not scroll")
