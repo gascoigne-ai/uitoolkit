@@ -2,6 +2,7 @@ package ebitenrender_test
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"image/color"
 	"testing"
@@ -76,16 +77,18 @@ func assertSamePixels(t *testing.T, got, want *image.RGBA) {
 }
 
 // assertMatchesEbiten draws once with ebiten itself and once through a canvas
-// and requires the same pixels.
+// and requires the same pixels. Both draw on one image, cleared in between:
+// Ebitengine puts images on shared atlases, and how a draw rounds depends on
+// where on them the image drawn on sits, so two images may get two results.
 func assertMatchesEbiten(t *testing.T, direct func(dst *ebiten.Image), through func(canvas render.Canvas)) {
 	t.Helper()
-	want := ebiten.NewImage(surface, surface)
-	defer want.Deallocate()
-	direct(want)
-	got := ebitenrender.NewDevice().NewOffscreen(surface, surface)
-	defer got.Release()
-	through(got)
-	assertSamePixels(t, got.ReadPixels(), readImage(want))
+	dst := ebiten.NewImage(surface, surface)
+	defer dst.Deallocate()
+	direct(dst)
+	want := readImage(dst)
+	dst.Clear()
+	through(ebitenrender.NewDevice().NewCanvas(dst))
+	assertSamePixels(t, readImage(dst), want)
 }
 
 func vectorPath() *vector.Path {
@@ -156,29 +159,70 @@ func checker() *image.RGBA {
 	return picture
 }
 
-func TestDrawImageScalesWithTheFilter(t *testing.T) {
-	filters := []struct {
-		name   string
-		filter render.Filter
-		direct ebiten.Filter
-	}{
-		{"nearest", render.FilterNearest, ebiten.FilterNearest},
-		{"linear", render.FilterLinear, ebiten.FilterLinear},
+// imageFilters pairs each render filter with ebiten's.
+var imageFilters = []struct {
+	name   string
+	filter render.Filter
+	direct ebiten.Filter
+}{
+	{"nearest", render.FilterNearest, ebiten.FilterNearest},
+	{"linear", render.FilterLinear, ebiten.FilterLinear},
+}
+
+// assertDrawImageMatchesEbiten requires Canvas.DrawImage to draw picture as
+// ebiten does. Both draws read the ebiten image behind picture: a scaled draw
+// also rounds by where on an atlas its source sits, which on a texel edge picks
+// the other texel, so a second image with the same pixels is not enough.
+func assertDrawImageMatchesEbiten(t *testing.T, picture render.Image, filter render.Filter, direct ebiten.Filter) {
+	t.Helper()
+	assertMatchesEbiten(t, func(dst *ebiten.Image) {
+		options := &ebiten.DrawImageOptions{Filter: direct}
+		options.GeoM.Scale(5.5, 5.5)
+		options.GeoM.Translate(3.25, 7)
+		dst.DrawImage(ebitenrender.EbitenImageOf(picture), options)
+	}, func(canvas render.Canvas) { canvas.DrawImage(picture, 3.25, 7, 5.5, filter) })
+}
+
+// The fillers take up atlas space, which moves the images made after them, both
+// those drawn from and those drawn on. A comparison that depends on either place
+// then fails on every run, not only when earlier tests and the garbage collector
+// happen to leave such a place. The sides repeat, and the large ones come first,
+// so that both filters meet places where they round differently.
+func TestDrawImageComparisonIgnoresAtlasPlacement(t *testing.T) {
+	device := ebitenrender.NewDevice()
+	var fillers []*ebiten.Image
+	defer func() {
+		for _, filler := range fillers {
+			filler.Deallocate()
+		}
+	}()
+	for _, side := range []int{13, 31, 63, 0, 1, 2, 3, 5, 7, 13, 31, 63, 0, 1, 2, 3, 5, 7} {
+		if side > 0 {
+			source := ebiten.NewImageFromImage(image.NewRGBA(image.Rect(0, 0, side, side)))
+			// Filling an image makes it one that is drawn on.
+			target := ebiten.NewImage(surface, surface)
+			target.Fill(red)
+			fillers = append(fillers, source, target)
+		}
+		picture := device.NewImage(checker())
+		for _, testCase := range imageFilters {
+			t.Run(fmt.Sprintf("%s after fillers of side %d", testCase.name, side), func(t *testing.T) {
+				assertDrawImageMatchesEbiten(t, picture, testCase.filter, testCase.direct)
+			})
+		}
 	}
+}
+
+func TestDrawImageScalesWithTheFilter(t *testing.T) {
 	device := ebitenrender.NewDevice()
 	drawn := map[string][]byte{}
-	for _, testCase := range filters {
+	for _, testCase := range imageFilters {
 		t.Run(testCase.name, func(t *testing.T) {
 			picture := device.NewImage(checker())
 			if got, want := picture.Bounds(), image.Rect(0, 0, 4, 4); got != want {
 				t.Fatalf("Bounds = %v, want %v", got, want)
 			}
-			assertMatchesEbiten(t, func(dst *ebiten.Image) {
-				options := &ebiten.DrawImageOptions{Filter: testCase.direct}
-				options.GeoM.Scale(5.5, 5.5)
-				options.GeoM.Translate(3.25, 7)
-				dst.DrawImage(ebiten.NewImageFromImage(checker()), options)
-			}, func(canvas render.Canvas) { canvas.DrawImage(picture, 3.25, 7, 5.5, testCase.filter) })
+			assertDrawImageMatchesEbiten(t, picture, testCase.filter, testCase.direct)
 			off := device.NewOffscreen(surface, surface)
 			defer off.Release()
 			off.DrawImage(picture, 3.25, 7, 5.5, testCase.filter)
@@ -212,7 +256,7 @@ func TestDrawMaskTintsTheAlpha(t *testing.T) {
 		options := &ebiten.DrawImageOptions{Filter: ebiten.FilterNearest}
 		options.GeoM.Translate(2, 3)
 		options.ColorScale.ScaleWithColor(glass)
-		dst.DrawImage(ebiten.NewImageFromImage(alphas), options)
+		dst.DrawImage(ebitenrender.EbitenImageOf(mask), options)
 	}, func(canvas render.Canvas) { canvas.DrawMask(mask, 2, 3, glass) })
 	off := device.NewOffscreen(8, 8)
 	defer off.Release()

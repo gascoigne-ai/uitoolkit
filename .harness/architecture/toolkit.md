@@ -79,6 +79,7 @@ the tick as a `render.InputState` and drops a key with no render name; what it m
 - **Run-loop `TestMain`.** Ebitengine reads pixels only inside its run loop, so `main_test.go` runs
   the whole test binary inside the first `Update` (no `t.Parallel`), after it points `HOME` and the
   `XDG_*` dirs at a temp dir.
+- **Pixel tests.** A byte comparison draws both sides from one source onto one destination: rounding follows atlas places.
 - **Skip-clear.** `Run` turns off the clearing of the screen before each frame, so a frame the host
   does not draw (`Host.Draw` false) keeps the previous one. A program with its own `ebiten.Game`
   uses `Device.NewCanvas` and handles this itself.
