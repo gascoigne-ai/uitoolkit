@@ -6,10 +6,6 @@ import (
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
-// tipDelayTicks is how long the pointer rests on an element before its
-// tooltip shows (half a second at 60 ticks per second).
-const tipDelayTicks = 30
-
 // TooltipState is the delay bookkeeping of the tooltip layer. The window
 // owns it, so it can keep frames coming while a tooltip waits to show.
 type TooltipState struct {
@@ -50,7 +46,8 @@ func (s *TooltipState) draw(ctx *core.Ctx, dst render.Canvas, screen core.Rect) 
 	if ctx.TipText != s.text || ctx.In.Click {
 		s.text, s.since = ctx.TipText, ctx.Tick // a new element, or a click: wait again
 	}
-	if ctx.Tick-s.since < tipDelayTicks {
+	// The delay is read each frame: a new theme moves a waiting tip too.
+	if ctx.Tick-s.since < ctx.In.Ticks(ctx.Feel().TooltipDelay) {
 		s.waiting = true
 		return
 	}

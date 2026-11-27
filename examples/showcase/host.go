@@ -48,7 +48,7 @@ func (h *host) Update() error {
 		return h.scaleErr
 	}
 	h.ctx.Tick++
-	h.ctx.In = h.sampler.Sample(h.readInput()).Scaled(h.ctx.Scale)
+	h.ctx.In = h.sampler.Sample(h.readInput(), h.ctx.Feel()).Scaled(h.ctx.Scale)
 	return h.showcase.Update(h.ctx, h.width, h.height)
 }
 

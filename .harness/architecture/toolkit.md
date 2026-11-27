@@ -137,10 +137,22 @@ the draw calls are checked against `rendertest.Canvas`.
   bounds hold one size alone and cannot stop two from crossing, so a subtraction of themed sizes
   is clamped, and `drawScrollbar` is told the track's direction: a themed width can be more than
   the length of a short track.
+- **Feel.** `Theme.Feel` (`core.Feel`) holds the timings and pointer distances, a sibling of
+  `Metrics`: not sizes, so not in `Sizes`, its memo key or the template scope. A zero field is the
+  built-in. `feelRules` (`core/feel.go`) is the one table of names, built-ins and bounds, read by
+  `Resolved` (a scan; Go values are clamped) and `Feel.Set` (name lookup at parse only; out of range
+  is an error); `theming/feel.go` is the wire type (the `feel` block, merged key by key over a base).
+  Revisit past about 40 rows, or if a name is looked up every frame. `Ctx.Feel()` resolves `Th` on
+  each call rather than keeping a field that a plain `ctx.Th =` would leave stale; code with no
+  `Ctx` (`Sampler.Sample`, `Click`, `ToastStack.Show`) takes it as an argument. Delays counted in
+  ticks go through `Input.TPS` (`Input.Ticks`, `Repeat.Due`), not the clock, so a run of ticks with
+  a frozen clock stays deterministic. The caret, multi-click and toasts use a clock. The bounds
+  are fixed, as a theme file is untrusted.
 - **Input.** `Sampler.Sample` turns a `render.InputState` into the frame's `Input` and counts
   clicks (a renderer's input, `ebitenrender.ReadInput`, goes in as the `render.InputState`). The pure `inputFrom` derives
   presses, shortcuts and edit keys with their repeat; `modifiedEdit` is the per-platform table that
-  turns modifiers into word and line edits. `Input.Keys` holds `render.Key`.
+  turns modifiers into word and line edits. `Input.Keys` holds `render.Key`. Key repeat: the
+  desktop's (`Sampler.Repeat`, both values above zero) wins, else the theme's pair, never a mix.
 - **Clipboard.** `SystemClipboard` runs the platform's clipboard tools: Ebitengine has no clipboard
   API, and no dependency is added for it.
 - **Text editors live in `widget`** (`doc.go`): `TextField` (one line, undo), `TextArea` (a

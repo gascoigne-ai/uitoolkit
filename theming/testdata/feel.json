@@ -1,0 +1,19 @@
+{
+  "name": "feel",
+  "extends": "dark",
+  "feel": {
+    "caretHalfPeriod": 700,
+    "keyRepeatDelay": 600,
+    "keyRepeatInterval": 40,
+    "holdDelay": 450,
+    "holdInterval": 90,
+    "multiClickTime": 650,
+    "multiClickDistance": 8,
+    "tooltipDelay": 250,
+    "toastTime": 8000,
+    "panSlop": 12,
+    "wheelStep": 80,
+    "wheelLines": 5,
+    "wheelColumns": 9
+  }
+}

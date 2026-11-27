@@ -17,7 +17,7 @@ const (
 type Caret struct {
 	Shape CaretShape
 	// Steady keeps the caret shown. Otherwise it hides and shows every
-	// CaretHalfPeriod from the last RestartCaret; until the first
+	// Feel.CaretHalfPeriod of the theme from the last RestartCaret; until the first
 	// RestartCaret it stays shown. Call RestartCaret when Input.RestartsCaret
 	// and when Steady is turned off.
 	Steady bool

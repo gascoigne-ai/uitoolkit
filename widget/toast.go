@@ -7,12 +7,8 @@ import (
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
-const (
-	// ToastMax is how many toasts are shown; older ones are dropped beyond it.
-	ToastMax = 5
-	// ToastInfoFor is how long an info toast stays.
-	ToastInfoFor = 3 * time.Second
-)
+// ToastMax is how many toasts are shown; older ones are dropped beyond it.
+const ToastMax = 5
 
 // ToastKind says how a toast behaves and looks: an info toast fades, an
 // error toast stays until clicked. The zero value is ToastInfo.
@@ -34,11 +30,13 @@ type Toast struct {
 // ToastStack is the toasts shown, oldest first.
 type ToastStack []Toast
 
-// Show adds a toast: an info one fades after ToastInfoFor, an error stays
+// Show adds a toast: an info one fades after feel's ToastTime (pass
+// ctx.Feel(); the zero value is the built-in), fixed now so that a later theme
+// does not change it, and an error stays
 // until it is dismissed. It reports whether anything was added; an error
 // with the text of one already shown is not, since the same failure on
 // every frame or send is one message.
-func (stack *ToastStack) Show(text string, kind ToastKind, now time.Time) bool {
+func (stack *ToastStack) Show(text string, kind ToastKind, now time.Time, feel core.Feel) bool {
 	toast := Toast{Text: text, Kind: kind}
 	if kind == ToastError {
 		for _, shown := range *stack {
@@ -47,7 +45,7 @@ func (stack *ToastStack) Show(text string, kind ToastKind, now time.Time) bool {
 			}
 		}
 	} else {
-		toast.Expires = now.Add(ToastInfoFor)
+		toast.Expires = now.Add(feel.Resolved().ToastTime)
 	}
 	*stack = append(*stack, toast)
 	if len(*stack) > ToastMax {

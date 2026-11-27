@@ -20,8 +20,8 @@ func pageDump(showcase *Showcase, ctx *core.Ctx) string {
 }
 
 func postBothToasts(showcase *Showcase) {
-	showcase.widgets.toasts.Show("Settings saved", widget.ToastInfo, showcase.now())
-	showcase.widgets.toasts.Show("Export failed", widget.ToastError, showcase.now())
+	showcase.widgets.toasts.Show("Settings saved", widget.ToastInfo, showcase.now(), core.Feel{})
+	showcase.widgets.toasts.Show("Export failed", widget.ToastError, showcase.now(), core.Feel{})
 }
 
 func TestSectionsShowTheWidgets(t *testing.T) {
@@ -216,7 +216,7 @@ func TestToastLifetime(t *testing.T) {
 	}
 	open(t, showcase, ctx, "buttons")
 	input(t, showcase, ctx, core.Input{Escape: true})
-	clock.at = clock.at.Add(widget.ToastInfoFor - time.Millisecond)
+	clock.at = clock.at.Add(ctx.Feel().ToastTime - time.Millisecond)
 	frame(t, showcase, ctx)
 	if len(showcase.widgets.toasts) != 2 {
 		t.Fatalf("a section switch or Escape or an early prune lost a toast: %+v", showcase.widgets.toasts)

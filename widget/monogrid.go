@@ -5,13 +5,6 @@ import (
 	"github.com/gascoigne-ai/uitoolkit/render"
 )
 
-// Mouse wheel steps of the monospace widgets: one notch scrolls this many
-// lines, or with Shift this many columns.
-const (
-	wheelLines = 3
-	wheelCols  = 6
-)
-
 // monoGrid is the pixel geometry that CodeView and TextArea share: rows of
 // lineH pixels with text at textX in a monospace font. They embed it so the
 // column math, wrapping width, wheel steps and span drawing are written
@@ -53,9 +46,14 @@ func (g monoGrid) wrapWidth(wrap bool, rect core.Rect) float64 {
 }
 
 // wheelDX and wheelDY are the pixels a wheel reading scrolls sideways and
-// down.
-func (g monoGrid) wheelDX(wheel float64) int { return int(-wheel * float64(g.charW) * wheelCols) }
-func (g monoGrid) wheelDY(wheel float64) int { return int(-wheel * float64(g.lineH) * wheelLines) }
+// down, at columns or lines to a notch (core.Feel).
+func (g monoGrid) wheelDX(wheel float64, columns int) int {
+	return int(-wheel * float64(g.charW) * float64(columns))
+}
+
+func (g monoGrid) wheelDY(wheel float64, lines int) int {
+	return int(-wheel * float64(g.lineH) * float64(lines))
+}
 
 // keepTop is the ScrollY that shows, in the layout after, the line that was
 // at the top in the layout before; a switch of Wrap would otherwise jump.

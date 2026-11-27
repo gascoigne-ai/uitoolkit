@@ -2,7 +2,9 @@
 // program repeats at the same speed. Sources are tried in order and the
 // first that knows both the delay and the rate wins: the compositor or the
 // desktop's own setting for the running system (Hyprland, GNOME, X11,
-// macOS, Windows). Where none answers the caller keeps its built-in timing.
+// macOS, Windows). A caller that puts the answer in core.Sampler.Repeat makes
+// it win over the theme's key repeat; where no source answers, the theme's (by
+// default the built-in timing) is used.
 package keyrepeat
 
 import (

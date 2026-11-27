@@ -180,8 +180,8 @@ func sizedDialogMarkup(s *Showcase, ctx *core.Ctx) Node {
 }
 
 // postToast shows a message in the corner of the window.
-func (s *Showcase) postToast(text string, kind ToastKind) {
-	s.widgets.toasts.Show(text, kind, s.now())
+func (s *Showcase) postToast(ctx *core.Ctx, text string, kind ToastKind) {
+	s.widgets.toasts.Show(text, kind, s.now(), ctx.Feel())
 }
 
 func (s *Showcase) toastCount() string { return fmt.Sprintf("%d shown", len(s.widgets.toasts)) }

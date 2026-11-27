@@ -8,7 +8,8 @@
 // To see it in a window: go run ./examples/showcase.
 //
 // Themes are data: colors, per-control radii, gradients and outlines, and
-// optionally the size rules (core.Metrics). They live in JSON theme files
+// optionally the size rules (core.Metrics) and the timings and pointer
+// distances (core.Feel). They live in JSON theme files
 // (the built-in ones embedded, themes/*.json), and an element names a control
 // style (core.ControlStyle) rather than a gradient, so the look changes
 // without touching a widget. The format is our own small JSON, because it

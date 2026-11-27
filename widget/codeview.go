@@ -462,9 +462,9 @@ func (v *CodeView) updatePointer(ctx *core.Ctx, rect core.Rect, geometry codeGeo
 	}
 	if in.Wheel != 0 {
 		if in.Shift {
-			v.ScrollX = clampScroll(v.ScrollX+geometry.wheelDX(in.Wheel), contentW, sizes.viewW)
+			v.ScrollX = clampScroll(v.ScrollX+geometry.wheelDX(in.Wheel, ctx.Feel().WheelColumns), contentW, sizes.viewW)
 		} else {
-			v.ScrollBy(geometry.wheelDY(in.Wheel), rowCount*geometry.lineH, sizes.viewH)
+			v.ScrollBy(geometry.wheelDY(in.Wheel, ctx.Feel().WheelLines), rowCount*geometry.lineH, sizes.viewH)
 		}
 		ctx.In.Wheel = 0 // consumed, so an enclosing scroller does not move too
 	}

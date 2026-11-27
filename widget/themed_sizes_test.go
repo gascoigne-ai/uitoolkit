@@ -286,7 +286,7 @@ func TestWidgetsFollowThemedSizes(t *testing.T) {
 		}, []int{5, 17}},
 		{"toast gutter at the window edge and inside", func(ctx *core.Ctx) []int {
 			stack := &ToastStack{}
-			stack.Show("saved", ToastInfo, time.Unix(0, 0))
+			stack.Show("saved", ToastInfo, time.Unix(0, 0), core.Feel{})
 			toasts := laidOut(ctx, Stack(Toasts(stack, 800, 600, 0))).Children()[0]
 			toast := toasts.Children()[0]
 			return []int{800 - toasts.Rect().X - toasts.Rect().W, leftOf(toast, toast.Children()[0])}
@@ -404,7 +404,7 @@ func TestWidgetsFollowThemedSizes(t *testing.T) {
 			for _, pointerY := range []int{100, 590} {
 				// A state whose delay for the tip has passed.
 				root := laidOut(ctx, Stack(Col(Tooltip("tip")), TooltipLayer(&TooltipState{text: "tip"})))
-				ctx.In, ctx.Tick = core.Input{X: 100, Y: pointerY}, tipDelayTicks
+				ctx.In, ctx.Tick = core.Input{X: 100, Y: pointerY}, builtInTipTicks
 				Update(ctx, root)
 				canvas := rendertest.NewCanvas(800, 600)
 				Draw(ctx, root, canvas)
@@ -425,8 +425,8 @@ func TestWidgetsFollowThemedSizes(t *testing.T) {
 		}, []int{143, 143, 78, 82, 39, 43}},
 		{"toastW, toastH, toastGap, toastMargin", func(ctx *core.Ctx) []int {
 			stack := &ToastStack{}
-			stack.Show("a", ToastInfo, time.Unix(0, 0))
-			stack.Show("b", ToastError, time.Unix(0, 0))
+			stack.Show("a", ToastInfo, time.Unix(0, 0), core.Feel{})
+			stack.Show("b", ToastError, time.Unix(0, 0), core.Feel{})
 			root := laidOut(ctx, Stack(Toasts(stack, 800, 600, 10)))
 			toasts := root.Children()[0]
 			first, second := toasts.Children()[0].Rect(), toasts.Children()[1].Rect()

@@ -33,6 +33,10 @@ type Input struct {
 
 	// Keys went down this frame, for application shortcuts.
 	Keys []render.Key
+
+	// TPS is the number of ticks a second the window reported, 0 when it
+	// reported none. Ticks converts a duration by it.
+	TPS int
 }
 
 // Scaled converts the pointer position from device to logical pixels.
@@ -118,39 +122,66 @@ var editKeys = []struct {
 	{render.KeyPageDown, EditPageDown},
 }
 
-// KeyRepeat is how a held key repeats: it fires once when pressed, again
-// after Delay, then every Interval. The zero value is the built-in timing
-// (25 ticks, then every 3), for when the system's own is unknown.
-type KeyRepeat struct {
+// Repeat is how something held repeats, a key or a button: it acts when
+// pressed, again after Delay, then every Interval. It is known only when both
+// are above zero. The zero value, like any not known, stands for "no timing":
+// Sampler.Repeat then leaves keys to the theme (Feel.KeyRepeat), and Fires and
+// Due use the built-in key repeat.
+type Repeat struct {
 	Delay, Interval time.Duration
 }
 
-const (
-	defaultRepeatDelayTicks    = 25
-	defaultRepeatIntervalTicks = 3
-)
+func (repeat Repeat) known() bool { return repeat.Delay > 0 && repeat.Interval > 0 }
 
 // Fires reports whether a key held for the given number of ticks acts on
-// this tick, at tps ticks a second. The timing is rounded to whole ticks
-// and an interval is at least one tick.
-func (repeat KeyRepeat) Fires(held, tps int) bool {
-	delay, interval := defaultRepeatDelayTicks, defaultRepeatIntervalTicks
-	if repeat.Delay > 0 && repeat.Interval > 0 {
-		delay = max(ticks(repeat.Delay, tps), 1)
-		interval = max(ticks(repeat.Interval, tps), 1)
+// this tick, at tps ticks a second (0 or less means 60): on the press, and
+// then whenever it is Due.
+func (repeat Repeat) Fires(held, tps int) bool { return held == 1 || repeat.Due(held, tps) }
+
+// Due is Fires without the press: whether a hold of held ticks repeats on
+// this tick. The timing is rounded to whole ticks, and the delay and the
+// interval are at least one tick, so nothing repeats twice in a tick.
+func (repeat Repeat) Due(held, tps int) bool {
+	if !repeat.known() {
+		repeat = Feel{}.Resolved().KeyRepeat
 	}
-	return held == 1 || (held >= delay && (held-delay)%interval == 0)
+	delay := max(ticks(repeat.Delay, tps), 1)
+	interval := max(ticks(repeat.Interval, tps), 1)
+	return held >= delay && (held-delay)%interval == 0
 }
 
+const (
+	// nominalTPS is the tick rate assumed when a window reports none.
+	nominalTPS = 60
+	// maxTicks is the longest count ticks gives, over a year at nominalTPS.
+	maxTicks = math.MaxInt32
+)
+
+// ticks is duration rounded to whole ticks at tps ticks a second (0 or less
+// means nominalTPS): 0 for a duration of 0 or less, and at most maxTicks.
 func ticks(duration time.Duration, tps int) int {
-	return int((duration*time.Duration(tps) + time.Second/2) / time.Second)
+	if tps <= 0 {
+		tps = nominalTPS
+	}
+	if duration <= 0 {
+		return 0
+	}
+	if duration > (math.MaxInt64-time.Second/2)/time.Duration(tps) {
+		return maxTicks
+	}
+	return int(min((duration*time.Duration(tps)+time.Second/2)/time.Second, maxTicks))
 }
+
+// Ticks is duration in the ticks of this input, rounded to whole ones.
+// Widgets count a delay in ticks (see Ctx.Tick) so that a run of ticks gives
+// the same result whatever the clock does.
+func (in Input) Ticks(duration time.Duration) int { return ticks(duration, in.TPS) }
 
 // inputFrom is what a window's report of one tick means on the platform goos
 // with the key repeat timing repeat. A key went down this tick when it has been
 // down for one; an aggregate (KeyShift...) never has, so Keys names physical
 // keys only. Clicks are counted by the Sampler.
-func inputFrom(state render.InputState, goos string, repeat KeyRepeat) Input {
+func inputFrom(state render.InputState, goos string, repeat Repeat) Input {
 	held := make(map[render.Key]int, len(state.Down))
 	var keys []render.Key
 	for _, down := range state.Down {
@@ -178,6 +209,7 @@ func inputFrom(state render.InputState, goos string, repeat KeyRepeat) Input {
 		MiddleHeld:  state.Buttons&render.MouseMiddle != 0,
 		RightClick:  state.ButtonsPressed&render.MouseRight != 0,
 		Keys:        keys,
+		TPS:         state.TPS,
 		Shift:       isDown(render.KeyShift),
 		Alt:         isDown(render.KeyAlt),
 		Ctrl:        PrimaryDown(goos, isDown(render.KeyControl), isDown(render.KeyMeta)),
@@ -252,19 +284,14 @@ func modifiedEdit(goos string, edit Edit, primary, alt bool) Edit {
 	return edit
 }
 
-// Multi-click detection: a click within this time and distance of the
-// previous one extends the count (double, triple).
-const (
-	multiClickGap  = 400 * time.Millisecond
-	multiClickDist = 4
-)
-
 // Sampler reads input each frame and counts rapid clicks.
 type Sampler struct {
 	// Now is the clock clicks are timed by; nil is time.Now.
 	Now func() time.Time
-	// Repeat is how held keys repeat; the zero value is the built-in timing.
-	Repeat KeyRepeat
+	// Repeat is the system's own key repeat, as desktop/keyrepeat reads it.
+	// When both of its fields are above zero it wins over the theme;
+	// otherwise held keys repeat by the Feel passed to Sample.
+	Repeat Repeat
 	// HostOS is the operating system the shortcut modifier follows; empty is
 	// runtime.GOOS.
 	HostOS string
@@ -275,10 +302,13 @@ type Sampler struct {
 }
 
 // Click registers a click at x, y at time now and returns its count
-// (1, 2 or 3; a fourth quick click starts over at 1).
-func (s *Sampler) Click(now time.Time, posX, posY int) int {
-	near := abs(posX-s.x) <= multiClickDist && abs(posY-s.y) <= multiClickDist
-	if s.count > 0 && now.Sub(s.last) <= multiClickGap && near && s.count < 3 {
+// (1, 2 or 3; a fourth quick click starts over at 1). A click counts on when
+// it is within feel's MultiClickTime and, on each axis, MultiClickDistance of
+// the one before; feel's zero value is the built-in.
+func (s *Sampler) Click(now time.Time, posX, posY int, feel Feel) int {
+	feel = feel.Resolved()
+	near := abs(posX-s.x) <= feel.MultiClickDistance && abs(posY-s.y) <= feel.MultiClickDistance
+	if s.count > 0 && now.Sub(s.last) <= feel.MultiClickTime && near && s.count < 3 {
 		s.count++
 	} else {
 		s.count = 1
@@ -302,11 +332,17 @@ func (s *Sampler) now() time.Time {
 }
 
 // Sample is the input of the tick a window reported in state, including the
-// click count. Call it once a tick, from Update.
-func (s *Sampler) Sample(state render.InputState) Input {
-	in := inputFrom(state, s.hostOS(), s.Repeat)
+// click count. feel is the theme's, normally ctx.Feel(): it times clicks, and
+// held keys when Repeat is not known. Call it once a tick, from Update.
+func (s *Sampler) Sample(state render.InputState, feel Feel) Input {
+	feel = feel.Resolved()
+	repeat := s.Repeat
+	if !repeat.known() {
+		repeat = feel.KeyRepeat
+	}
+	in := inputFrom(state, s.hostOS(), repeat)
 	if in.Click {
-		in.Clicks = s.Click(s.now(), in.X, in.Y)
+		in.Clicks = s.Click(s.now(), in.X, in.Y, feel)
 	}
 	return in
 }

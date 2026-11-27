@@ -241,15 +241,16 @@ func (c *Ctx) SizesScope() map[string]any {
 	return c.sizeScope.names
 }
 
-// CaretHalfPeriod is how long the caret is shown, and then hidden.
-const CaretHalfPeriod = 500 * time.Millisecond
-
 func (c *Ctx) now() time.Time {
 	if c.Now != nil {
 		return c.Now()
 	}
 	return time.Now()
 }
+
+// Feel is the current theme's timings and distances, resolved: no field is
+// zero or out of bounds. It reads Th each time, so it follows SetTheme.
+func (c *Ctx) Feel() Feel { return c.Th.Feel.Resolved() }
 
 // RestartCaret makes a blinking caret visible now and starts its blink over,
 // as an edit or a click does.
@@ -266,7 +267,7 @@ func (c *Ctx) CaretVisible() bool {
 	if c.CaretSince.IsZero() {
 		return true
 	}
-	return (c.now().Sub(c.CaretSince)/CaretHalfPeriod)%2 == 0
+	return (c.now().Sub(c.CaretSince)/c.Feel().CaretHalfPeriod)%2 == 0
 }
 
 // SetScale resizes the faces when the device scale factor changes, for

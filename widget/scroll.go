@@ -6,9 +6,6 @@ import (
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
-// wheelStep is how many pixels one wheel notch scrolls.
-const wheelStep = 48
-
 // ScrollState is the scroll position of a Scroll container. The app
 // owns it, so the position survives the view being rebuilt every frame.
 type ScrollState struct {
@@ -75,7 +72,7 @@ func (s *scrollB) Update(element *El, ctx *core.Ctx) {
 		return
 	}
 	if in.Wheel != 0 && in.Over(r) && s.content > r.H {
-		st.Y = clampScroll(st.Y+int(-in.Wheel*wheelStep), s.content, r.H)
+		st.Y = clampScroll(st.Y+int(-in.Wheel*float64(ctx.Feel().WheelStep)), s.content, r.H)
 		ctx.In.Wheel = 0 // consumed, so an enclosing scroller does not move too
 	}
 }

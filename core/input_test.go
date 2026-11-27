@@ -91,7 +91,7 @@ func TestInputRestartsCaret(t *testing.T) {
 
 func TestKeyRepeatFiresAfterTheDelayThenEveryInterval(t *testing.T) {
 	// At 60 ticks a second, 600 ms is 36 ticks and 25 ms is 1.5, rounded to 2.
-	repeat := KeyRepeat{Delay: 600 * time.Millisecond, Interval: 25 * time.Millisecond}
+	repeat := Repeat{Delay: 600 * time.Millisecond, Interval: 25 * time.Millisecond}
 	tests := []struct {
 		name string
 		held int
@@ -114,10 +114,10 @@ func TestKeyRepeatFiresAfterTheDelayThenEveryInterval(t *testing.T) {
 }
 
 func TestKeyRepeatLeftUnsetKeepsTheBuiltInTiming(t *testing.T) {
-	var unset KeyRepeat
+	var unset Repeat
 	// The built-in timing: after 25 ticks, then every 3.
 	if !unset.Fires(25, 60) || unset.Fires(26, 60) || !unset.Fires(28, 60) {
-		t.Fatal("an unset KeyRepeat must repeat after 25 ticks and then every 3")
+		t.Fatal("an unset Repeat must repeat after 25 ticks and then every 3")
 	}
 }
 

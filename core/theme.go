@@ -52,7 +52,8 @@ const (
 	HeroMuted    Token = "hero-muted" // icons on the banner
 )
 
-// Theme holds the colors and font sizes the widgets draw with.
+// Theme holds the colors, font sizes, size rules and input feel the widgets
+// work with.
 type Theme struct {
 	Colors                        map[Token]color.RGBA
 	FontSize, SmallSize, MonoSize float64
@@ -77,6 +78,10 @@ type Theme struct {
 	// Metrics are the theme's size rules; the zero value is the default
 	// sizes.
 	Metrics Metrics
+
+	// Feel are the theme's timings and pointer distances; the zero value is
+	// the built-in ones.
+	Feel Feel
 }
 
 // Color returns the color of tok, or the text color for unknown tokens

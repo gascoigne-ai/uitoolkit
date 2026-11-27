@@ -46,9 +46,9 @@ var overlaysPoses = []Pose{
 		s.openSized()
 		return OffCanvas
 	}},
-	{Name: "toasts", Apply: func(s *Showcase, _ *core.Ctx) image.Point {
-		s.postToast(infoToast, ToastInfo)
-		s.postToast(errorToast, ToastError)
+	{Name: "toasts", Apply: func(s *Showcase, ctx *core.Ctx) image.Point {
+		s.postToast(ctx, infoToast, ToastInfo)
+		s.postToast(ctx, errorToast, ToastError)
 		return OffCanvas
 	}},
 }
@@ -116,8 +116,8 @@ func overlaysGo(s *Showcase, ctx *core.Ctx) Node {
 		),
 		Caption("Toasts"),
 		Row(HOf(core.RowOf), GapOf(core.LooseGapOf),
-			Button("Info toast", W(overlayBtnW), OnClick(func() { s.postToast(infoToast, ToastInfo) })),
-			Button("Error toast", W(overlayBtnW), OnClick(func() { s.postToast(errorToast, ToastError) })),
+			Button("Info toast", W(overlayBtnW), OnClick(func() { s.postToast(ctx, infoToast, ToastInfo) })),
+			Button("Error toast", W(overlayBtnW), OnClick(func() { s.postToast(ctx, errorToast, ToastError) })),
 			Text(s.toastCount(), Muted()),
 		),
 	)
@@ -131,8 +131,8 @@ func overlaysMarkup(s *Showcase, ctx *core.Ctx) Node {
 		"lastPick": state.lastPick, "lastAnswer": state.lastAnswer, "openDialog": s.openDialog,
 		"dropHint": dropHint, "hoverTip": hoverTip, "settingsTip": settingsTip,
 		"openPanel": s.openPanel, "openSized": s.openSized, "sizedText": s.sizedText(), "toastCount": s.toastCount(),
-		"postInfo":  func() { s.postToast(infoToast, ToastInfo) },
-		"postError": func() { s.postToast(errorToast, ToastError) },
+		"postInfo":  func() { s.postToast(ctx, infoToast, ToastInfo) },
+		"postError": func() { s.postToast(ctx, errorToast, ToastError) },
 	})
 }
 

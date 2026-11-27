@@ -446,8 +446,8 @@ func TestMenuElementClickPicksThroughTheScopeHandler(t *testing.T) {
 
 func toastStack() *widget.ToastStack {
 	stack := &widget.ToastStack{}
-	stack.Show("saved", widget.ToastInfo, time.Unix(0, 0))
-	stack.Show("boom", widget.ToastError, time.Unix(0, 0))
+	stack.Show("saved", widget.ToastInfo, time.Unix(0, 0), core.Feel{})
+	stack.Show("boom", widget.ToastError, time.Unix(0, 0), core.Feel{})
 	return stack
 }
 

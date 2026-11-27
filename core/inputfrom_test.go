@@ -24,11 +24,11 @@ func TestInputFromReadsAWindowsReport(t *testing.T) {
 		return state
 	}
 	one := func(key render.Key, ticks int) []render.KeyDown { return []render.KeyDown{down(key, ticks)} }
-	custom := KeyRepeat{Delay: 500 * time.Millisecond, Interval: 100 * time.Millisecond}
+	custom := Repeat{Delay: 500 * time.Millisecond, Interval: 100 * time.Millisecond}
 	tests := []struct {
 		name   string
 		goos   string
-		repeat KeyRepeat
+		repeat Repeat
 		state  render.InputState
 		want   Input
 	}{
@@ -120,6 +120,7 @@ func TestInputFromReadsAWindowsReport(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			test.want.TPS = test.state.TPS // always passed on
 			if got := inputFrom(test.state, test.goos, test.repeat); !reflect.DeepEqual(got, test.want) {
 				t.Errorf("inputFrom = %+v, want %+v", got, test.want)
 			}
@@ -132,11 +133,11 @@ func TestSampleCountsTheClicksOfWhatItIsGiven(t *testing.T) {
 	sampler := &Sampler{Now: func() time.Time { return now }, HostOS: "linux"}
 	click := render.InputState{X: 5, Y: 5, Buttons: render.MouseLeft, ButtonsPressed: render.MouseLeft}
 	for want := 1; want <= 2; want++ {
-		if got := sampler.Sample(click); got.Clicks != want || !got.Click {
+		if got := sampler.Sample(click, Feel{}); got.Clicks != want || !got.Click {
 			t.Fatalf("click %d: Sample = %+v", want, got)
 		}
 	}
-	if got := sampler.Sample(render.InputState{X: 5, Y: 5}); got.Clicks != 0 {
+	if got := sampler.Sample(render.InputState{X: 5, Y: 5}, Feel{}); got.Clicks != 0 {
 		t.Fatalf("no click: Sample = %+v, want no click count", got)
 	}
 }

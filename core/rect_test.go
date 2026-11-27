@@ -148,7 +148,7 @@ func TestClickCountingNeedsSpeedAndPlace(t *testing.T) {
 	now := t0
 	for i, st := range steps {
 		now = now.Add(st.after)
-		if got := s.Click(now, st.x, st.y); got != st.want {
+		if got := s.Click(now, st.x, st.y, Feel{}); got != st.want {
 			t.Errorf("click %d = %d, want %d", i, got, st.want)
 		}
 	}

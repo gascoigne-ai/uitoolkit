@@ -102,7 +102,7 @@ func (a *app) Layout(width, height int, device float64) (int, int) {
 func (a *app) Update() error {
 	ctx := a.ctx
 	ctx.Tick++
-	ctx.In = a.sampler.Sample(ebitenrender.ReadInput()).Scaled(ctx.Scale)
+	ctx.In = a.sampler.Sample(ebitenrender.ReadInput(), ctx.Feel()).Scaled(ctx.Scale)
 	ctx.Cursor = core.CursorDefault
 	if ctx.In.RestartsCaret() {
 		ctx.RestartCaret() // without this the caret never blinks
@@ -170,7 +170,7 @@ func (a *app) content() Node {
 }
 
 func (a *app) greet() {
-	a.toasts.Show("Hello, "+a.name.Text, ToastInfo, time.Now())
+	a.toasts.Show("Hello, "+a.name.Text, ToastInfo, time.Now(), a.ctx.Feel())
 }
 
 func (a *app) ask() {
@@ -200,7 +200,7 @@ func (a *app) themeMenu(posX, posY int) {
 What each part is for:
 
 - **Frame loop.** `ebitenrender.Run` calls the `render.Host` methods: `Layout` on resize and scale change, `Update` once a tick (60 a second by default), `Draw` once a frame. Every `Update` and every `Draw` builds the tree again, lays it out and then updates or paints it. The tree is a pure function of the app state: there is no diffing and no retained widget object.
-- **Input.** `core.Sampler.Sample` turns the renderer's report into `core.Input` and counts double and triple clicks. `Scaled` brings the pointer into logical pixels. Set `Sampler.Repeat` from `desktop/keyrepeat` to repeat held keys at the desktop's speed.
+- **Input.** `core.Sampler.Sample` turns the renderer's report into `core.Input` and counts double and triple clicks, by the theme's [feel](#feel) (`ctx.Feel()`). `Scaled` brings the pointer into logical pixels. Set `Sampler.Repeat` (a `core.Repeat`) from `desktop/keyrepeat` to repeat held keys at the desktop's speed, which then wins over the theme's.
 - **Caret.** The zero `ctx.Caret` is a blinking block, but it blinks only after the first `ctx.RestartCaret()`. Call it when `ctx.In.RestartsCaret()` is true, and again when you turn `Caret.Steady` off.
 - **Cursor.** Widgets ask for a cursor shape in `ctx.Cursor` during `Update`. Reset it to `core.CursorDefault` at the start of each tick; `Run` shows what `Host.Cursor` returns.
 - **Layers.** The root is a `Stack`: content first, then the dialog, the toasts, the popup menu and the tooltip layer last. See [Layers](#layers).
@@ -495,7 +495,7 @@ All of them take `OnChange` (or `OnClick`) and leave the value to the app: the a
 
 | Widget | Use |
 |---|---|
-| `Scroll` | content taller than its box; a track `scrollbarW` (8) wide, a thumb at least `minThumbLen` (24) long, drawn only when the content overflows; one wheel notch is 48 px |
+| `Scroll` | content taller than its box; a track `scrollbarW` (8) wide, a thumb at least `minThumbLen` (24) long, drawn only when the content overflows; one wheel notch is 48 px (`wheelStep`, see [Feel](#feel)) |
 | `HScroll` | a row wider than its box (tab strips, toolbars in a narrow window): arrows only at an end that can still scroll, wheel, sideways touchpad swipe, drag to pan |
 | `Split` | two panes with a draggable `Border` divider (resize cursor); `Vertical`, `AsRatio`, `MinFirst`, `MinSecond` |
 | `Resizable` | a box the user resizes by its edges |
@@ -511,9 +511,9 @@ All of them take `OnChange` (or `OnClick`) and leave the value to the app: the a
 - **Closing.** The close button runs `OnDismiss`. A click outside a dialog is swallowed and leaves it open (`KeepOnOutsideClick`), so a stray click cannot throw away the user's work. Escape is the app's to wire (see [What the app owns](#what-the-app-owns)); make it do what the close button does.
 - **Moving.** Pass `Moved(&state)` to let the user drag the dialog by its title bar; a double click on the bar centers it again. Without `Moved` the bar does not drag.
 
-**Toasts.** `Toasts(&stack, width, height, bottomInset)` shows a `ToastStack` in the bottom right corner, above `bottomInset` (a status bar's height, or 0): `toastW`×`toastH` (320×36) each, `toastGap` (6) apart and `toastMargin` (8) above the inset, a `gutter` off the right edge, at most 5 (`ToastMax`), the oldest on top, on `Panel` with a shadow. Info toasts have a `Border` outline and go after 3 s (`ToastInfoFor`; call `Prune` each tick). Error toasts have `Error` text and outline, stay until clicked, and the same error is not shown twice. A click dismisses any toast. Use a toast to confirm something done or report an error the user did not wait for; use a dialog when the user must decide.
+**Toasts.** `Toasts(&stack, width, height, bottomInset)` shows a `ToastStack` in the bottom right corner, above `bottomInset` (a status bar's height, or 0): `toastW`×`toastH` (320×36) each, `toastGap` (6) apart and `toastMargin` (8) above the inset, a `gutter` off the right edge, at most 5 (`ToastMax`), the oldest on top, on `Panel` with a shadow. Info toasts have a `Border` outline and go after 3 s (the theme's `toastTime`: pass `ctx.Feel()` to `Show`, which fixes the toast's time then; call `Prune` each tick). Error toasts have `Error` text and outline, stay until clicked, and the same error is not shown twice. A click dismisses any toast. Use a toast to confirm something done or report an error the user did not wait for; use a dialog when the user must decide.
 
-**Tooltips.** `view.Tooltip(text)` on any element; `TooltipLayer` shows the innermost one after the pointer rests 30 ticks (half a second at 60 ticks a second). The box is `Frame` with the `tooltip` outline and small `Text`, `tipOffset` (16) below and right of the pointer, its text inset `tipPadX` (8) by `tipPadY` (5), kept inside the window, and above the pointer when there is no room below.
+**Tooltips.** `view.Tooltip(text)` on any element; `TooltipLayer` shows the innermost one after the pointer rests 500 ms (the theme's `tooltipDelay`), counted in ticks at the rate the window reports (`Input.TPS`: 30 ticks at 60 a second). The box is `Frame` with the `tooltip` outline and small `Text`, `tipOffset` (16) below and right of the pointer, its text inset `tipPadX` (8) by `tipPadY` (5), kept inside the window, and above the pointer when there is no room below.
 
 **Menus.** `OpenMenu(ctx, x, y, items)` opens the popup menu; mount `PopupMenuLayer(ctx)` once and call `PopupMenuKeys` each tick. The menu is a `Bg` panel with the `menu` style and a shadow, inset `menuPad` (4), as wide as its widest row within `menuMinW` (120) and `menuMaxW` (420), kept inside the window. Rows are `compactH` high, padded `menuRowPadX` (10); the keyboard's row is `Selected`, others `Hover` under the pointer. `MenuItem` has `Shortcut` (shown small and muted, "Ctrl" written "Cmd" on macOS), `Hint` (muted lines under the label), `Icon`, `Disabled` and `Separator` (`menuSepH`, 9 high). A pick or a click outside closes it.
 
@@ -527,12 +527,12 @@ All of them take `OnChange` (or `OnClick`) and leave the value to the app: the a
 - **Escape.** A `Field` or `Code` clears its selection and keeps focus; an `Area` gives up focus. Closing menus and dialogs is the app's.
 - **Enter** runs a field's `OnEnter` (not with Ctrl, which is left to app shortcuts) and picks the highlighted menu row through `PopupMenuKeys`. Up and Down move the menu highlight, skipping separators and disabled rows.
 - **Editing keys** follow each platform: Ctrl+arrows and Ctrl+Backspace act on words (Option on macOS), Command+arrows act on the line on macOS, Ctrl+Home and Ctrl+End go to the document's ends. Ctrl (Command on macOS) with A, C, X, V, Z, Y (or Shift+Z) is select all, copy, cut, paste, undo and redo.
-- **Key repeat.** A held editing key fires at the press, again after 25 ticks, then every 3, unless `Sampler.Repeat` holds the desktop's timing (`desktop/keyrepeat`).
+- **Key repeat.** A held editing key fires at the press, again after a delay, then at an interval, both rounded to whole ticks (the interval at least one). The timing is the desktop's when `Sampler.Repeat` holds it (`desktop/keyrepeat`; both values above zero), else the theme's `keyRepeatDelay` and `keyRepeatInterval`, which are 417 and 50 ms (25 and 3 ticks at 60 a second) unless a theme says otherwise.
 - **App shortcuts.** `engine.ParseBinding("Ctrl+Shift+K")`, `Binding.Matches(ctx.In, key)` and `Binding.String()` handle combinations. Stored shortcut names come from `render.Key.String()` and stay stable. Show the shortcut in the tooltip or menu item of the action.
 
 ## Pointer
 
-- **Clicks.** A left click reaches every `OnClick` under the pointer, innermost first, then its ancestors. A right click reaches only the innermost `OnRightClick`, so one right click opens one menu. `OnDoubleClick` runs on the second click within 400 ms and 4 px; a third makes a triple click (a field selects its line).
+- **Clicks.** A left click reaches every `OnClick` under the pointer, innermost first, then its ancestors. A right click reaches only the innermost `OnRightClick`, so one right click opens one menu. `OnDoubleClick` runs on the second click within 400 ms and 4 device px on each axis (the theme's `multiClickTime` and `multiClickDistance`); a third makes a triple click (a field selects its line).
 - **Clipping hides the pointer.** While the pointer is outside a `Clip` or `Scroll` element, its children are not hovered or clicked; the click still reaches fields inside so they can blur.
 - **Wheel.** The innermost scroller under the pointer whose content overflows takes the wheel; an enclosing one does not move too.
 - **Modal.** While a modal layer is visible, nothing under it gets clicks, wheel or hover.
@@ -568,7 +568,7 @@ The window's root is a `Stack`; children later in it are drawn over earlier ones
 
 A `theming.Catalog` holds the built-in themes (`theming.Builtins()`) and the user's theme files; `Catalog.Theme(prefs)` builds the `core.Theme` for the preferences, and `ctx.SetTheme` applies it.
 
-- **Theme files** are JSON: `name`, `extends` (`dark` or `light`), `variables` (colors referred to as `"$name"`), a flat `colors` table of token to `#rrggbb` or `#rrggbbaa`, `iconStroke`, `metrics` (see below), and `controls` (per control: `radius`, `gradient` as a strength 0..0.5 or `[top, bottom]`, `border` token). `theming.ParseTheme` merges a file over a base; unknown fields and variables, trailing data, a negative radius and a border token with no color are errors.
+- **Theme files** are JSON: `name`, `extends` (`dark` or `light`), `variables` (colors referred to as `"$name"`), a flat `colors` table of token to `#rrggbb` or `#rrggbbaa`, `iconStroke`, `metrics` and `feel` (see below), and `controls` (per control: `radius`, `gradient` as a strength 0..0.5 or `[top, bottom]`, `border` token). `theming.ParseTheme` merges a file over a base; unknown fields and variables, trailing data, a negative radius and a border token with no color are errors.
 - **Sizes.** The optional `metrics` block sets the knobs and pins named sizes; the names, defaults and ranges are in [Sizes](#sizes). Font sizes stay the user's.
 
   ```json
@@ -584,6 +584,34 @@ A `theming.Catalog` holds the built-in themes (`theming.Builtins()`) and the use
   ```
 
   Every key is optional. The knobs feed the rules; a size under `sizes` is fixed at those pixels whatever the knobs and the text size say, and the sizes derived from it follow it (a pinned `rowH` moves `toolbarH` and the other bars). Over a base theme, a knob the file states replaces the base's and pins merge by name, the file's winning; a base pin survives a change of a knob, and no syntax removes it. A key out of range (an explicit 0 unit or step included), an unknown key or size name, a `null` size and a number that is not an integer are errors. In Go the same is `core.Theme.Metrics` and `Metrics.Pin`.
+- <a id="feel"></a>**Feel.** The optional `feel` block sets timings and pointer distances. Durations are whole milliseconds. All bounds are inclusive.
+
+  | Key | Default | Range | What it sets |
+  |---|---|---|---|
+  | `caretHalfPeriod` | 500 ms | 200 to 2000 | how long a blinking caret is shown, and then hidden; `ctx.Caret.Steady` turns the blink off |
+  | `keyRepeatDelay` | 417 ms | 150 to 1000 | wait before a held editing key repeats; the desktop's wins (see [Keyboard and focus](#keyboard-and-focus)) |
+  | `keyRepeatInterval` | 50 ms | 10 to 1000 | time between those repeats; the desktop's wins |
+  | `holdDelay` | 333 ms | 100 to 1000 | wait before a held `HScroll` arrow repeats |
+  | `holdInterval` | 50 ms | 10 to 1000 | time between those repeats |
+  | `multiClickTime` | 400 ms | 200 to 1000 | longest pause between the clicks of a double or triple click |
+  | `multiClickDistance` | 4 device px | 1 to 16 | farthest apart those clicks may be, on each axis |
+  | `tooltipDelay` | 500 ms | 100 to 1000 | rest before a tooltip shows |
+  | `toastTime` | 3000 ms | 1000 to 60000 | how long an info toast stays; a shown toast keeps its time |
+  | `panSlop` | 4 px | 1 to 32 | how far a press on an `HScroll` moves before it pans |
+  | `wheelStep` | 48 px | 8 to 400 | one wheel notch in `Scroll` and `HScroll` |
+  | `wheelLines` | 3 | 1 to 20 | rows to a notch in `Code` and `Area` |
+  | `wheelColumns` | 6 | 1 to 40 | characters to a notch sideways (with Shift) in `Code` and `Area` |
+
+  ```json
+  {
+    "extends": "dark",
+    "feel": { "tooltipDelay": 300, "toastTime": 6000, "wheelStep": 64 }
+  }
+  ```
+
+  Millisecond values are real time, converted at the tick rate the window reports. Earlier versions counted a fixed number of ticks for the tooltip, key repeat and held arrows, so below 60 ticks a second the tooltip, the built-in key repeat and held-arrow repeat are now faster than they were; at 60 they are the same.
+
+  Every key is optional. Over a base theme the keys merge one by one, the file's winning; the built-in themes state none. A value out of range (0 and negative ones included), an unknown key, a `null` and a number that is not an integer are errors. In Go the same is `core.Theme.Feel` (`core.Feel`, `Feel.Set`); there a zero field is the default and any other value out of range is brought to the nearest bound. Widgets read `ctx.Feel()`, so `ctx.SetTheme` applies a new theme from the next tick. Pass `ctx.Feel()` to `Sampler.Sample` and `ToastStack.Show`, which have no `Ctx`.
 - **User themes.** `Catalog.LoadUser(dir)` reads every `*.json` in a folder: the file name is the id, `name` the label. A file that does not parse is skipped and reported; a missing folder is no problem. `Catalog.SetUser` lists them after the built-ins.
 - **Preferences** (`theming.Prefs`), applied in this order by `Catalog.Theme`: the theme (an unknown id falls back to the first built-in) and the three font sizes; the corner factor and Flat; with `Contrast: "high"`, the four customizable colors moved to 7:1 against their text, and text, muted text, `Error`, `OK`, the accent line, borders, rules and row fills moved in their own hue until each reaches its ratio on the surfaces it is drawn on (`Bg`, `Sunken` and `Frame` for text and lines, `Sunken` for `Selected` and `Hover`, `Bg` for `Chip`): text 17:1, muted 12:1, `Error` and `OK` 8:1, accent line 6:1, `Border` and `Rule` 7:1, `BorderSoft` 3:1; surfaces unchanged; then the user's color overrides for that theme (Selection, Find match, Active match, Accent), each ignored unless it parses and reaches `RequiredRatio` against its text (4.5, or 7 with high contrast).
 - **Controls draw from their style**, so a theme restyles any control without code.
@@ -617,6 +645,6 @@ The same tree can be written as a template (`markup`): attributes are the Go opt
 
 - A child of a `Row` is measured at the row's whole inner width, and a `Col` child's side margins are not taken off its measured width, so a `Paragraph` with `Grow(1)` in a row, or with `MarginX`, can be too short and draw over what follows.
 - A table's header and its last row (when selected, hovered or zebra-filled) are square fills inside the table's rounded outline.
-- Tooltip delay counts ticks, so it is longer while the app updates at a lower rate.
+- The tooltip delay, key repeat and held arrows count ticks, converted at the rate the window reports for the current tick. They run late while updates are slower than that rate, and a wait during which the app changes its rate is off by the difference.
 - `core.SystemClipboard` knows no tool on Windows: copy and paste fail there unless the app sets its own `ctx.Clipboard`.
 - Menu hint lines are `menuHintH` (16 by default) high each. That size follows the theme's `unit` or its own pin, not the small text size.

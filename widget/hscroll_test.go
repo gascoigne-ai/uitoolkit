@@ -200,7 +200,7 @@ func TestHoldingAnArrowKeepsScrolling(t *testing.T) {
 		t.Fatal("the press scrolls once")
 	}
 	held := core.Input{X: press.X, Y: 10, Held: true}
-	for range hscrollHoldDelay - 2 { // not yet repeating
+	for range 20 - 2 { // not yet repeating
 		c.In = held
 		Update(c, root)
 	}

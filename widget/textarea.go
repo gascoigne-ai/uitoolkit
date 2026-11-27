@@ -167,9 +167,9 @@ func (a *TextArea) updatePointer(ctx *core.Ctx, rect core.Rect, geometry areaGeo
 	}
 	if over && in.Wheel != 0 {
 		if in.Shift {
-			a.ScrollX = clampScroll(a.ScrollX+geometry.wheelDX(in.Wheel), geometry.contentW(core.Rect{W: sizes.viewW}), sizes.viewW)
+			a.ScrollX = clampScroll(a.ScrollX+geometry.wheelDX(in.Wheel, ctx.Feel().WheelColumns), geometry.contentW(core.Rect{W: sizes.viewW}), sizes.viewW)
 		} else {
-			a.ScrollY = clampScroll(a.ScrollY+geometry.wheelDY(in.Wheel), geometry.contentH(), sizes.viewH)
+			a.ScrollY = clampScroll(a.ScrollY+geometry.wheelDY(in.Wheel, ctx.Feel().WheelLines), geometry.contentH(), sizes.viewH)
 		}
 		ctx.In.Wheel = 0 // consumed, so an enclosing scroller does not move too
 	}

@@ -6,14 +6,6 @@ import (
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
-// Holding an arrow scrolls once at the press, then repeats every
-// hscrollHoldEvery frames after hscrollHoldDelay frames.
-const (
-	hscrollHoldDelay = 20
-	hscrollHoldEvery = 3
-	hscrollPanSlop   = 4 // pixels the pointer must move before a press on the strip pans it
-)
-
 // hscrollB lays its children out in a row at their natural width, wider
 // than the box when they do not fit, and shows the part at ScrollState.X.
 // When it overflows, an arrow at each end that can still move scrolls by
@@ -153,7 +145,7 @@ func (s *hscrollB) pressArrows(element *El, ctx *core.Ctx) {
 func (s *hscrollB) pan(element *El, ctx *core.Ctx) {
 	st := s.state
 	dx := ctx.PointerX - st.panFrom
-	if st.panning || dx >= hscrollPanSlop || dx <= -hscrollPanSlop {
+	if slop := ctx.Feel().PanSlop; st.panning || dx >= slop || dx <= -slop {
 		st.panning = true
 		st.X = s.clamp(element, st.panX0-dx)
 	}
@@ -172,7 +164,7 @@ func (s *hscrollB) hold(element *El, ctx *core.Ctx) {
 		return
 	}
 	st.holdN++
-	if st.holdN >= hscrollHoldDelay && (st.holdN-hscrollHoldDelay)%hscrollHoldEvery == 0 {
+	if ctx.Feel().HoldRepeat.Due(st.holdN, ctx.In.TPS) {
 		s.step(element, st.holdDir*max(element.Rect().W/8, 1))
 	}
 }
@@ -189,7 +181,7 @@ func (s *hscrollB) Update(element *El, ctx *core.Ctx) {
 	if *wheel == 0 {
 		return
 	}
-	s.step(element, int(-*wheel*wheelStep))
+	s.step(element, int(-*wheel*float64(ctx.Feel().WheelStep)))
 	*wheel = 0
 }
 

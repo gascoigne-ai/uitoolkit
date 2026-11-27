@@ -7,6 +7,9 @@ import (
 	. "github.com/gascoigne-ai/uitoolkit/view"
 )
 
+// builtInTipTicks is the built-in tooltip delay at 60 ticks a second.
+const builtInTipTicks = 30
+
 func TestTooltipAppearsAfterTheHoverDelayAndOnlyThenIsShown(t *testing.T) {
 	a := Row(W(100), Tooltip("Copy the body"))
 	b := Row(W(100), Tooltip("Other"))
@@ -19,12 +22,12 @@ func TestTooltipAppearsAfterTheHoverDelayAndOnlyThenIsShown(t *testing.T) {
 	if state.Shown() || !state.Waiting() || c.TipText != "Copy the body" {
 		t.Fatalf("first frame: shown %v waiting %v text %q", state.Shown(), state.Waiting(), c.TipText)
 	}
-	c.Tick = 100 + tipDelayTicks - 1
+	c.Tick = 100 + builtInTipTicks - 1
 	drawn(t, c, root, 200, 50)
 	if state.Shown() {
 		t.Fatal("shown before the delay")
 	}
-	c.Tick = 100 + tipDelayTicks
+	c.Tick = 100 + builtInTipTicks
 	drawn(t, c, root, 200, 50)
 	if !state.Shown() || state.Waiting() {
 		t.Fatalf("after the delay: shown %v waiting %v", state.Shown(), state.Waiting())
@@ -46,7 +49,7 @@ func TestTooltipGoesAwayOffTheElementAndOnClick(t *testing.T) {
 	c.In = core.Input{X: 50, Y: 10}
 	c.Tick = 10
 	drawn(t, c, root, 200, 50)
-	c.Tick = 10 + tipDelayTicks
+	c.Tick = 10 + builtInTipTicks
 	drawn(t, c, root, 200, 50)
 	if !state.Shown() {
 		t.Fatal("setup: the tip must be shown")

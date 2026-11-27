@@ -59,6 +59,9 @@ type themeFile struct {
 	Controls   map[string]controlFile `json:"controls"`
 	// Metrics are the size rules, see core.Metrics. The block is optional.
 	Metrics *metricsFile `json:"metrics"`
+	// Feel are the timings and pointer distances, see core.Feel. The block is
+	// optional.
+	Feel feelFile `json:"feel"`
 }
 
 // themeExtends is the name of the built-in theme a file says it builds on
@@ -78,7 +81,9 @@ func themeExtends(data []byte) (string, error) {
 // JSON object, with nothing but white space around it: another top-level
 // value, null included, and any data after the object are errors. Unknown
 // fields are errors, so a typo in a theme file is not silently ignored. An
-// iconStroke outside 0 and maxIconStroke is an error.
+// iconStroke outside 0 and maxIconStroke is an error, as is a value of the
+// metrics or feel blocks outside its bounds. Over a base, the keys of those
+// blocks merge one by one and the file wins.
 //
 // A base keeps its RadiusScale, 0 included: it is the user's corner choice,
 // and 0 is square corners, so reading an edit must not round them again.
@@ -128,6 +133,11 @@ func ParseTheme(data []byte, base *core.Theme) (core.Theme, error) {
 		}
 		th.Metrics = metrics
 	}
+	feel, err := f.Feel.apply(th.Feel)
+	if err != nil {
+		return core.Theme{}, fmt.Errorf("theme file: feel: %w", err)
+	}
+	th.Feel = feel
 
 	vars := map[string]color.RGBA{}
 	for _, name := range sortedKeys(f.Variables) {
